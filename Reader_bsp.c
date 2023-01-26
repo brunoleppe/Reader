@@ -20,7 +20,15 @@ void PORTS_Initialize()
     GPIO_PinWrite(LCD_SS, GPIO_HIGH);
 
     SYS_Lock();
-    RPD3R = 0b0101;
+
+    GPIO_PinOutputMap(LCD_SDO, LCD_SDO_AF);
+
+//#ifdef __READER_V2__
+//    RPG7R = 0b0110;
+//#else
+//    RPD3R = 0b0101;
+//#endif
+
     SYS_Unlock();
 
 }

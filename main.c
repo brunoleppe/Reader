@@ -35,16 +35,43 @@ int main(void){
 
 void lcd_init(void *params)
 {
-    SPI_Handler spi = &(struct _SPI_HANDLER){};
-    SPI_Setup setup={
+    static uint8_t config_buffer[]={
+    0x2a,0x27,0xc2,0xa1,0xd0,0xd5,0xc8,0x10,0xeb,0xa6,0xa4,0x81,0x35,0xd8,0xf1,
+    0x7f,0xf2,0x00,0xf3,0x7f,0x85,0xad,0xf4,0,0xf5,0,0xf6,79,0xf7,127,0xf8,0x00,
+    0x10,0x60,0x70
+    };
+
+    SPI_Handler __spi = &(struct _SPI_Handler){};
+    SPI_Setup setup = {
             .baudrate = 20000000,
             .mastermode = SPI_MASTER,
             .mode = SPI_MODE_3,
-            .mode = SPI_SAMPLE_MID
+            .sample = SPI_SAMPLE_MID,
     };
-    SPI_Init(spi, LCD_SPI_CHANNEL, &setup);
+    SPI_Init(__spi, LCD_SPI_CHANNEL, &setup);
+    GPIO_PinWrite(LCD_RST, GPIO_LOW);
+    vTaskDelay(10);
+    GPIO_PinWrite(LCD_RST, GPIO_HIGH);
+    vTaskDelay(100);
     GPIO_PinWrite(LCD_BLA, GPIO_LOW);
-    vTaskDelay(portMAX_DELAY);
+    vTaskDelay(10);
+
+    GPIO_PinWrite(LCD_DC, GPIO_LOW);
+    GPIO_PinWrite(LCD_SS, GPIO_LOW);
+    SPI_Transfer(__spi,config_buffer,NULL,sizeof(config_buffer));
+    GPIO_PinWrite(LCD_SS, GPIO_HIGH);
+
+    vTaskDelay(10);
+
+    GPIO_PinWrite(LCD_DC, GPIO_HIGH);
+    GPIO_PinWrite(LCD_SS, GPIO_LOW);
+    int i;
+    for(i = 0; i < 3840; i++){
+        uint8_t buffer[4] = {0x0f,0x0f,0x0f,0x0f};
+        SPI_Transfer(__spi,buffer,NULL,4);
+    }
+    GPIO_PinWrite(LCD_SS, GPIO_HIGH);
+    while(1);
 }
 
 void blink(void *params)

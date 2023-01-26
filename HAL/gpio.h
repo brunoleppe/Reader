@@ -47,6 +47,8 @@ void GPIO_Init(const GPIO_Config* config);
 
 void GPIO_PortDirectionSet(GPIO_PORT port, WORD mask, GPIO_DIRECTION direction);
 void GPIO_PortWrite(GPIO_PORT port, WORD mask, WORD value);
+void GPIO_PinOutputMap(GPIO_PIN pin, GPIO_ALTERNATE_FUNCTION alternate_unction);
+
 WORD GPIO_PortRead(GPIO_PORT port, WORD mask);
 
 /**

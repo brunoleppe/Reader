@@ -57,7 +57,7 @@
  * @brief Struct that defines the data structure for SPI transfers.
  *
  */
-typedef struct _SPI_HANDLER *SPI_Handler;
+typedef struct _SPI_Handler *SPI_Handler;
 /**
  * @brief SPI callback functions definition
  *
@@ -130,7 +130,7 @@ typedef struct{
  * @brief Struct that defines the data structure for SPI transfers.
  *
  */
-struct _SPI_HANDLER{
+struct _SPI_Handler{
     SPI_CHANNEL         channel;
     SPI_Setup           setup; ///<Configuration table of current SPI peripheral.
 

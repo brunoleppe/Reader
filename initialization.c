@@ -73,9 +73,6 @@ void Initialize(void)
 
     INTCONSET = _INTCON_MVEC_MASK;
 
-//    TRISBCLR = 0xF << 6;
-//    LATBCLR = 0xF << 6;
-
     PORTS_Initialize();
 
     __builtin_enable_interrupts();

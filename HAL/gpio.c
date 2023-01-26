@@ -24,8 +24,9 @@
 /**********************************************************************
 * Module Variable Definitions
 **********************************************************************/
+static volatile uint32_t * const ppsinit = &RPA14R - 14;
 
-GPIO_Descriptor ports[NUMBER_OF_PORTS] = {
+static GPIO_Descriptor ports[NUMBER_OF_PORTS] = {
         (GPIO_Descriptor)&ANSELA,
         (GPIO_Descriptor)&ANSELB,
         (GPIO_Descriptor)&ANSELC,
@@ -54,6 +55,12 @@ static void _interrupt_handler(int portNumber);
 /**********************************************************************
 * Function Definitions
 **********************************************************************/
+void GPIO_PinOutputMap(GPIO_PIN pin, GPIO_ALTERNATE_FUNCTION alternate_function)
+{
+    int portNumber = pin >> 4;
+    volatile uint32_t *reg = ppsinit + (16 * portNumber) + (pin & 0x0f);
+    *reg = alternate_function;
+}
 
 void GPIO_Init(const GPIO_Config* config)
 {

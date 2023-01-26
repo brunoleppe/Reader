@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.24.2)
 #Compiler
 set(CMAKE_C_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-gcc")
 #Device Family Pack
-set(DFP /opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-EF_DFP/1.3.58)
+set(DFP /opt/microchip/mplabx/v6.05/packs/Microchip/PIC32MZ-EF_DFP/1.3.58)
 
 #Device
 set(PIC  32MZ1024EFM100)
@@ -13,6 +13,7 @@ set(USER_FLAGS -Wall)
 set(USER_DEFINITIONS )
 set(HEAP 0)
 
+set(READER_TYPE     __DesktopReaderV2__)
 
 # set(CMAKE_VERBOSE_MAKEFILE True)
 
@@ -34,8 +35,11 @@ add_subdirectory(FreeRTOS)
 add_subdirectory(HAL)
 
 add_executable(${PROJECT_NAME}.elf ${SOURCES})
+
+
 target_link_libraries(${PROJECT_NAME}.elf   FreeRTOS)
 target_link_libraries(${PROJECT_NAME}.elf   HAL)
+
 #Assembly options
 set(CMAKE_ASM_FLAGS "${CFLAGS} -Wa,--defsym=__MPLAB_BUILD=1,--gdwarf-2")
 #Compiler flags and options
@@ -63,8 +67,12 @@ add_custom_target(${PROJECT_NAME}_hex ALL
         DEPENDS ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex
         )
 
-
 target_compile_options(${PROJECT_NAME}.elf PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP})
 target_compile_definitions(${PROJECT_NAME}.elf PUBLIC XPRJ_default=default ${DEFINES})
 target_link_options(${PROJECT_NAME}.elf PUBLIC ${MPROCESSOR} ${MOPTIMIZATION} )
 target_link_libraries(${PROJECT_NAME}.elf "-Wl,${XC32_LINK_FLAGS}")
+
+option(READERV2 "Version 2 del lector de escritorio" OFF)
+IF(READERV2)
+    add_compile_definitions(__READER_V2__)
+ENDIF(READERV2)

@@ -364,22 +364,22 @@ typedef enum{
  *
  */
 typedef enum{
-    AF_0 = 0,
-    AF_1,
-    AF_2,
-    AF_3,
-    AF_4,
-    AF_5,
-    AF_6,
-    AF_7,
-    AF_8,
-    AF_9,
-    AF_10,
-    AF_11,
-    AF_12,
-    AF_13,
-    AF_14,
-    AF_15,
+    GPIO_AF_0 = 0,
+    GPIO_AF_1,
+    GPIO_AF_2,
+    GPIO_AF_3,
+    GPIO_AF_4,
+    GPIO_AF_5,
+    GPIO_AF_6,
+    GPIO_AF_7,
+    GPIO_AF_8,
+    GPIO_AF_9,
+    GPIO_AF_10,
+    GPIO_AF_11,
+    GPIO_AF_12,
+    GPIO_AF_13,
+    GPIO_AF_14,
+    GPIO_AF_15,
 }GPIO_ALTERNATE_FUNCTION;
 
 /**
