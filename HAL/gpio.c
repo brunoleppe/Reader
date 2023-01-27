@@ -125,6 +125,8 @@ void GPIO_PortDirectionSet(GPIO_PORT port, WORD mask, GPIO_DIRECTION direction)
         ports[port]->tris.clr = mask;
     else
         ports[port]->tris.set = mask;
+    if(direction != GPIO_ANALOG)
+        ports[port]->ansel.clr = mask;
 }
 void GPIO_PortWrite(GPIO_PORT port, WORD mask, WORD value)
 {
@@ -203,6 +205,8 @@ void GPIO_PinDirectionSet(GPIO_PIN pin, GPIO_DIRECTION direction)
         ports[portNumber]->tris.set = bitNum;
     else
         ports[portNumber]->tris.clr = bitNum;
+    if(direction != GPIO_ANALOG)
+        ports[portNumber]->ansel.clr = bitNum;
 }
 
 void GPIO_RegisterWrite(uintptr_t address, WORD val)
