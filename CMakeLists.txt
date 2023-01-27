@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.24.2)
 #Compiler
 set(CMAKE_C_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-gcc")
 #Device Family Pack
-set(DFP /opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-EF_DFP/1.3.58)
+#set(DFP /opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-EF_DFP/1.3.58)
 
 #Device
 set(PIC  32MZ1024EFM100)
@@ -20,7 +20,7 @@ set(READER_TYPE     __DesktopReaderV2__)
 set(SOURCES
         main.c
         FreeRTOSConfig.h
-        initialization.c initialization.h Reader_bsp.h Reader_bsp.c)
+        initialization.c initialization.h Reader_bsp.h Reader_bsp.c bitmap.c bitmap.h)
 
 project(Reader C ASM)
 
