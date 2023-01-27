@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.24.2)
 #Compiler
 set(CMAKE_C_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-gcc")
 #Device Family Pack
-set(DFP /opt/microchip/mplabx/v6.05/packs/Microchip/PIC32MZ-EF_DFP/1.3.58)
+set(DFP /opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-EF_DFP/1.3.58)
 
 #Device
 set(PIC  32MZ1024EFM100)
@@ -28,18 +28,19 @@ project(Reader C ASM)
 include_directories(FreeRTOS/Source/include)
 include_directories(FreeRTOS/Source/portable/MPLAB/PIC32MZ)
 include_directories(HAL/)
+include_directories(LCD/)
 # FreeRTOSConfig.h is located here
 include_directories(.)
 
 add_subdirectory(FreeRTOS)
 add_subdirectory(HAL)
-
+add_subdirectory(LCD)
 add_executable(${PROJECT_NAME}.elf ${SOURCES})
 
 
 target_link_libraries(${PROJECT_NAME}.elf   FreeRTOS)
 target_link_libraries(${PROJECT_NAME}.elf   HAL)
-
+target_link_libraries(${PROJECT_NAME}.elf   LCD)
 #Assembly options
 set(CMAKE_ASM_FLAGS "${CFLAGS} -Wa,--defsym=__MPLAB_BUILD=1,--gdwarf-2")
 #Compiler flags and options
