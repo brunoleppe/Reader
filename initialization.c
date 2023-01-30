@@ -72,8 +72,8 @@ void Initialize(void)
     CFGCONbits.ECCCON = 3;
 
     INTCONSET = _INTCON_MVEC_MASK;
-
-    PORTS_Initialize();
+    interrupts_initialize();
+    gpio_initialize();
 
     __builtin_enable_interrupts();
 }

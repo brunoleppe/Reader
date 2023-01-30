@@ -43,7 +43,7 @@ typedef struct{
 * Module Variable Definitions
 **********************************************************************/
 
-struct LCD lcd = {
+static struct LCD lcd = {
     .lcd_size = LCD_BUFFER_SIZE
 };
 // <editor-fold defaultstate="collapsed" desc="fonts">
@@ -387,7 +387,7 @@ const LCD_Font ultra_small={
     .special = NULL,
 };
 // </editor-fold>
-const LCD_Font *fonts[]={
+static const LCD_Font *fonts[]={
         [LCD_FONT_EXTRA_SMALL]  = &ultra_small,
         [LCD_FONT_SMALL]        = &small,
         [LCD_FONT_MEDIUM]       = &medium
@@ -415,17 +415,17 @@ int     LCD_init        (SPI_Handler handler, GPIO_PIN cs, GPIO_PIN bla, GPIO_PI
         0x10,0x60,0x70
     };
 
-    GPIO_PinWrite(lcd.rst_pin, GPIO_LOW);
+    GPIO_pin_write(lcd.rst_pin, GPIO_LOW);
     vTaskDelay(10);
-    GPIO_PinWrite(lcd.rst_pin, GPIO_HIGH);
+    GPIO_pin_write(lcd.rst_pin, GPIO_HIGH);
     vTaskDelay(100);
-    GPIO_PinWrite(lcd.bla_pin, GPIO_LOW);
+    GPIO_pin_write(lcd.bla_pin, GPIO_LOW);
     vTaskDelay(10);
 
-    GPIO_PinWrite(lcd.dc_pin, GPIO_LOW);
-    GPIO_PinWrite(lcd.cs_pin, GPIO_LOW);
+    GPIO_pin_write(lcd.dc_pin, GPIO_LOW);
+    GPIO_pin_write(lcd.cs_pin, GPIO_LOW);
     SPI_Transfer(lcd.handler,config_buffer,NULL,sizeof(config_buffer));
-    GPIO_PinWrite(lcd.cs_pin, GPIO_HIGH);
+    GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
 
     vTaskDelay(10);
     return 0;
@@ -498,7 +498,7 @@ void    LCD_draw_string (int x, int y, char *str, LCD_Fonts f, LCD_COLOR color)
         x+=space+font->cols;
     }
 }
-void    LCD_draw_bitmap (int x, int y, uint8_t *bitmap, size_t bitmap_size)
+void    LCD_draw_bitmap (int x, int y, const uint8_t *bitmap, size_t bitmap_size)
 {
 
     memcpy(lcd.lcd_buffer, bitmap, bitmap_size);
@@ -508,10 +508,10 @@ void    LCD_draw_bitmap (int x, int y, uint8_t *bitmap, size_t bitmap_size)
 void    LCD_print       ( void )
 {
 
-    GPIO_PinWrite(lcd.dc_pin, GPIO_HIGH);
-    GPIO_PinWrite(lcd.cs_pin, GPIO_LOW);
+    GPIO_pin_write(lcd.dc_pin, GPIO_HIGH);
+    GPIO_pin_write(lcd.cs_pin, GPIO_LOW);
     SPI_Transfer(lcd.handler, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
-    GPIO_PinWrite(lcd.cs_pin, GPIO_HIGH);
+    GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
 }
 
 static unsigned char* LCD_get_char(unsigned char c, const LCD_Font *font){

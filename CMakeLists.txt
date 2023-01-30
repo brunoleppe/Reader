@@ -20,7 +20,12 @@ set(READER_TYPE     __DesktopReaderV2__)
 set(SOURCES
         main.c
         FreeRTOSConfig.h
-        initialization.c initialization.h Reader_bsp.h Reader_bsp.c bitmap.c bitmap.h)
+        initialization.c initialization.h
+        Reader_bsp.h Reader_bsp.c
+        bitmap.c bitmap.h
+        interrupts.c
+        interrupts_as.S
+)
 
 project(Reader C ASM)
 
@@ -52,9 +57,9 @@ set(SYM_BUILD --defsym=__MPLAB_BUILD=1)
 set(LINKER_OPTS --gc-sections,--no-code-in-dinit,--no-dinit-in-serial-mem)
 set(LINKER_MAP -Map=${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.map)
 set(MEMORY_FILE --memorysummary,${CMAKE_CURRENT_BINARY_DIR}/memoryfile.xml)
-
+set(LINKER_SCRIPT --script=/home/bruno/CLionProjects/Reader/Linker/p32MZ1024EFM100.ld)
 set(XC32_LINK_FLAGS
-        ${SYM_HEAP},${SYM_BUILD},${LINKER_OPTS},${LINKER_MAP},${MEMORY_FILE}
+        ${SYM_HEAP},${LINKER_SCRIPT},${SYM_BUILD},${LINKER_OPTS},${LINKER_MAP},${MEMORY_FILE}
         )
 
 
@@ -73,7 +78,10 @@ target_compile_definitions(${PROJECT_NAME}.elf PUBLIC XPRJ_default=default ${DEF
 target_link_options(${PROJECT_NAME}.elf PUBLIC ${MPROCESSOR} ${MOPTIMIZATION} )
 target_link_libraries(${PROJECT_NAME}.elf "-Wl,${XC32_LINK_FLAGS}")
 
+
 option(READERV2 "Version 2 del lector de escritorio" OFF)
 IF(READERV2)
     add_compile_definitions(__READER_V2__)
+ELSE()
+    add_compile_definitions(__READER_V1__)
 ENDIF(READERV2)

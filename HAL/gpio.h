@@ -39,17 +39,17 @@ extern "C"{
  * @code
  * const GPIO_Config *config = GPIO_GetConfig();
  *
- * GPIO_Init(config);
+ * GPIO_init(config);
  * @endcode
  * @see GPIO_GetConfig
  */
-void GPIO_Init(const GPIO_Config* config);
+void GPIO_init(const GPIO_Config* config);
 
-void GPIO_PortDirectionSet(GPIO_PORT port, WORD mask, GPIO_DIRECTION direction);
-void GPIO_PortWrite(GPIO_PORT port, WORD mask, WORD value);
-void GPIO_PinOutputMap(GPIO_PIN pin, GPIO_ALTERNATE_FUNCTION alternate_unction);
+void GPIO_port_direction_set(GPIO_PORT port, WORD mask, GPIO_DIRECTION direction);
+void GPIO_port_write(GPIO_PORT port, WORD mask, WORD value);
+void GPIO_output_mapping(GPIO_PIN pin, GPIO_ALTERNATE_FUNCTION alternate_unction);
 
-WORD GPIO_PortRead(GPIO_PORT port, WORD mask);
+WORD GPIO_port_read(GPIO_PORT port, WORD mask);
 
 /**
  * @brief Function used to enable or disable internal pull-up resistors on current pin.
@@ -58,7 +58,7 @@ WORD GPIO_PortRead(GPIO_PORT port, WORD mask);
  * @param pin Current pin.
  * @param state PULLUP_ENABLE or PULLUP_DISABLE to enable or disable internal pull-up resistors.
  */
-void GPIO_PinPullupSet(GPIO_PIN pin, GPIO_PULLUP state);
+void GPIO_pin_pullup_set(GPIO_PIN pin, GPIO_PULLUP state);
 /**
  * @brief Function used to enable or disable internal pull-down resistors on current pin.
  * Pull-down resistors can only be used when pin is configured as igital input.
@@ -66,7 +66,7 @@ void GPIO_PinPullupSet(GPIO_PIN pin, GPIO_PULLUP state);
  * @param pin Current pin.
  * @param state PULLDOWN_ENABLE or PULLDOWN_DISABLE to enable or disable internal pull-up resistors.
  */
-void GPIO_PinSetPullDown(GPIO_PIN pin, GPIO_PULLDOWN state);
+void GPIO_pin_pulldown_set(GPIO_PIN pin, GPIO_PULLDOWN state);
 /**
  * @brief Function used to enable or disable state change interrupt on current pin.
  * This function configures GPIO peripheral IRQ registers only, aditional configuration
@@ -75,7 +75,7 @@ void GPIO_PinSetPullDown(GPIO_PIN pin, GPIO_PULLDOWN state);
  * @param pin Current pin.
  * @param state GPIO_IRQ_ENABLE or GPIO_IRQ_DISABLE to modify interrupt registers
  */
-void GPIO_PinIrqSet(GPIO_PIN pin, GPIO_INTERRUPT state);
+void GPIO_pin_irq_set(GPIO_PIN pin, GPIO_INTERRUPT state);
 /**
  * @brief Funtion used to read the current pin state.
  * This function can be used to read a pin configured as digital input or digital output.
@@ -83,7 +83,7 @@ void GPIO_PinIrqSet(GPIO_PIN pin, GPIO_INTERRUPT state);
  * @param Current pin.
  * @return GPIO_HIGH on high level, GPIO_LOW on low level.
  */
-GPIO_STATE GPIO_PinRead(GPIO_PIN pin);
+GPIO_STATE GPIO_pin_read(GPIO_PIN pin);
 /**
  * @brief Function used to write a desired level on the current pin.
  * This function only affects pins configured as digital outputs. Input pins are silently ingonred.
@@ -91,13 +91,13 @@ GPIO_STATE GPIO_PinRead(GPIO_PIN pin);
  * @param pin  Current pin
  * @param state GPIO_HIGH or GPIO_LOW to modify pin level.
  */
-void GPIO_PinWrite(GPIO_PIN pin, GPIO_STATE state);
+void GPIO_pin_write(GPIO_PIN pin, GPIO_STATE state);
 /**
  * @brief Function used to toggle pin state.
  * This function only affects pins configured as digital outputs. Input pins are silently ingonred.
  *
  */
-void GPIO_PinToggle(GPIO_PIN pin);
+void GPIO_pin_toggle(GPIO_PIN pin);
 /**
  * @brief Function used to set pin direction.
  *
@@ -105,7 +105,7 @@ void GPIO_PinToggle(GPIO_PIN pin);
  * @param direction GPIO_INPUT, GPIO_OUTPUT or GPIO_ANALOG to modify pin as digital input, digital output or
  * analog input.
  */
-void GPIO_PinDirectionSet(GPIO_PIN pin, GPIO_DIRECTION direction);
+void GPIO_pin_direction_set(GPIO_PIN pin, GPIO_DIRECTION direction);
 /**
  * @brief Function used to write to specific GPIO registers.
  * Use this function to modify special registers that aren't managed by the HAL.
@@ -113,7 +113,7 @@ void GPIO_PinDirectionSet(GPIO_PIN pin, GPIO_DIRECTION direction);
  * @param address Memory address of register to be modified.
  * @param val Value to be written to the register.
  */
-void GPIO_RegisterWrite(uintptr_t address, WORD val);
+void GPIO_register_write(uintptr_t address, WORD val);
 /**
  * @brief Function used to read a specific GPIO register state.
  * Use this function to read special registers that aren't managed by the HAL.

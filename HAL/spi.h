@@ -38,9 +38,7 @@
 **********************************************************************/
 
 #include "hal.h"
-#include <stdint.h>
-#include <stddef.h>
-#include <stdbool.h>
+#include "gpio.h"
 
 /**********************************************************************
 * Preprocessor Constants
@@ -167,6 +165,7 @@ int SPI_Init(SPI_Handler config, SPI_CHANNEL channel, SPI_Setup *setup);
 int SPI_Transfer(const SPI_Handler handler, void *txBuffer, void *rxBuffer, size_t size);
 uint8_t SPI_TransferByte(const SPI_Handler handler, uint8_t data);
 bool SPI_TransferSetup(const SPI_Handler handler, SPI_Setup *setup);
+int SPI_InputMapping(SPI_CHANNEL channel, GPIO_ALTERNATE_FUNCTION alternate_function);
 
 static inline int SPI_Write(const SPI_Handler handler, void *txBuffer, size_t size){
     return SPI_Transfer(handler,txBuffer,NULL,size);

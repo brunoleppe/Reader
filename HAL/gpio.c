@@ -50,19 +50,18 @@ static GPIO_InterruptCallback callbackArray[NUMBER_OF_INTERRUPTS];
 **********************************************************************/
 
 static void _register_config(MemRegister reg, uint32_t val, uint32_t compare, uint32_t bitNum);
-static void _interrupt_handler(int portNumber);
 
 /**********************************************************************
 * Function Definitions
 **********************************************************************/
-void GPIO_PinOutputMap(GPIO_PIN pin, GPIO_ALTERNATE_FUNCTION alternate_function)
+void GPIO_output_mapping(GPIO_PIN pin, GPIO_ALTERNATE_FUNCTION alternate_unction)
 {
     int portNumber = pin >> 4;
     volatile uint32_t *reg = ppsinit + (16 * portNumber) + (pin & 0x0f);
-    *reg = alternate_function;
+    *reg = alternate_unction;
 }
 
-void GPIO_Init(const GPIO_Config* config)
+void GPIO_init(const GPIO_Config* config)
 {
 //    int i;
 //    /* Unlock system for PPS configuration */
@@ -119,7 +118,7 @@ void GPIO_Init(const GPIO_Config* config)
 //    CFGCONbits.IOLOCK = 1;
 //    SYSKEY = 0x00000000;
 }
-void GPIO_PortDirectionSet(GPIO_PORT port, WORD mask, GPIO_DIRECTION direction)
+void GPIO_port_direction_set(GPIO_PORT port, WORD mask, GPIO_DIRECTION direction)
 {
     if(direction == GPIO_OUTPUT)
         ports[port]->tris.clr = mask;
@@ -128,20 +127,19 @@ void GPIO_PortDirectionSet(GPIO_PORT port, WORD mask, GPIO_DIRECTION direction)
     if(direction != GPIO_ANALOG)
         ports[port]->ansel.clr = mask;
 }
-void GPIO_PortWrite(GPIO_PORT port, WORD mask, WORD value)
+void GPIO_port_write(GPIO_PORT port, WORD mask, WORD value)
 {
     ports[port]->lat.reg = mask & value;
 }
-WORD GPIO_PortRead(GPIO_PORT port, WORD mask)
+WORD GPIO_port_read(GPIO_PORT port, WORD mask)
 {
     return ports[port]->port.reg & mask;
 }
-void GPIO_PinPullupSet(GPIO_PIN pin, GPIO_PULLUP state)
+void GPIO_pin_pullup_set(GPIO_PIN pin, GPIO_PULLUP state)
 {
     int portNumber = pin >> 4;
-    int bitNum = 1 << ( pin & 0xf );
-    _register_config((MemRegister)&ports[portNumber]->cnpu,state,true,bitNum);
-}
+    int bitNum = state << ( pin & 0xf );
+    ports[portNumber]->cnpu.set = bitNum;}
 
 void GPIO_PinPulldownSet(GPIO_PIN pin, GPIO_PULLDOWN state)
 {
@@ -150,38 +148,44 @@ void GPIO_PinPulldownSet(GPIO_PIN pin, GPIO_PULLDOWN state)
     _register_config((MemRegister)&ports[portNumber]->cnpd,state,true,bitNum);
 }
 
-void GPIO_PinIrqSet(GPIO_PIN pin, GPIO_INTERRUPT state)
+void GPIO_pin_irq_set(GPIO_PIN pin, GPIO_INTERRUPT state)
 {
     int portNumber = pin >> 4;
     int bitnum = 1 << ( pin & 0xf );
     /*Enable or disable interrupt for desired pin*/
-    _register_config((MemRegister)&ports[portNumber]->cnen,state,true,bitnum);
 
-    if(!state){
-        if(ports[portNumber]->cnen.reg == 0){
-            /*Clear cncon register only if no interrupts are enabled for anymore pins*/
-            ports[portNumber]->cncon.clr = _CNCONA_ON_MASK;
-        }
-    }
-    else{
-        /*Enable interrupt*/
-        ports[portNumber]->cncon.set = _CNCONA_ON_MASK;
-    }
+    ports[portNumber]->cncon.set = _CNCONA_ON_MASK;
+    ports[portNumber]->cnen.set = bitnum;
+
+
+////    _register_config((MemRegister)&ports[portNumber]->cnen,state,true,bitnum);
+//
+//    if(!state){
+//        if(ports[portNumber]->cnen.reg == 0){
+//            /*Clear cncon register only if no interrupts are enabled for anymore pins*/
+//            ports[portNumber]->cncon.clr = _CNCONA_ON_MASK;
+//        }
+//    }
+//    else{
+//        /*Enable interrupt*/
+//        ports[portNumber]->cncon.set = _CNCONA_ON_MASK;
+//    }
     ports[portNumber]->port.reg;
 }
 
-GPIO_STATE GPIO_PinRead(GPIO_PIN pin)
+GPIO_STATE GPIO_pin_read(GPIO_PIN pin)
 {
     int portNumber = pin >> 4;
     int bitNum = 1 << ( pin & 0xf );
     WORD status = ports[portNumber]->port.reg;
+//    return (status & bitNum) >> bitNum:
     if(status & bitNum)
         return GPIO_HIGH;
     else
         return GPIO_LOW;
 }
 
-void GPIO_PinWrite(GPIO_PIN pin, GPIO_STATE state){
+void GPIO_pin_write(GPIO_PIN pin, GPIO_STATE state){
     int portNumber = pin >> 4;
     int bitNum = 1 << ( pin & 0xf );
     if(state == GPIO_HIGH)
@@ -190,14 +194,14 @@ void GPIO_PinWrite(GPIO_PIN pin, GPIO_STATE state){
         ports[portNumber]->lat.clr = bitNum;
 }
 
-void GPIO_PinToggle(GPIO_PIN pin)
+void GPIO_pin_toggle(GPIO_PIN pin)
 {
     int portNumber = pin >> 4;
     int bitNum = 1 << ( pin & 0xf );
     ports[portNumber]->lat.inv = bitNum;
 }
 
-void GPIO_PinDirectionSet(GPIO_PIN pin, GPIO_DIRECTION direction)
+void GPIO_pin_direction_set(GPIO_PIN pin, GPIO_DIRECTION direction)
 {
     int portNumber = pin >> 4;
     int bitNum = 1 << ( pin & 0xf );
@@ -209,7 +213,7 @@ void GPIO_PinDirectionSet(GPIO_PIN pin, GPIO_DIRECTION direction)
         ports[portNumber]->ansel.clr = bitNum;
 }
 
-void GPIO_RegisterWrite(uintptr_t address, WORD val)
+void GPIO_register_write(uintptr_t address, WORD val)
 {
     volatile WORD *reg = (volatile WORD*)address;
     *reg = val;
@@ -244,42 +248,4 @@ void _register_config(MemRegister reg, uint32_t val, uint32_t compare, uint32_t 
         reg->set = bitNum;
     else
         reg->clr = bitNum;
-}
-
-void _interrupt_handler(int portNumber)
-{
-    WORD status = ports[portNumber]->cnstat.reg;
-    status &= ports[portNumber]->cnen.reg;
-    ports[portNumber]->port.reg;
-
-    int i;
-    for(i=0;i<NUMBER_OF_INTERRUPTS;i++){
-        int portNum = callbackArray[i].pin >> 4;
-        int bitNum = 1 << (callbackArray[i].pin & 0xf);
-        if(portNum != portNumber)
-            continue;
-        if((status & bitNum) && (callbackArray[i].callback != NULL)){
-            callbackArray[i].callback(callbackArray[i].pin,callbackArray[i].context);
-        }
-    }
-}
-
-/**********************************************************************
-* Interrupt Handlers
-**********************************************************************/
-void CHANGE_NOTICE_E_InterruptHandler(void);
-
-void
-#ifndef INC_FREERTOS_H
-__ISR(_CHANGE_NOTICE_E_VECTOR, ipl1SRS)
-#endif
-CHANGE_NOTICE_E_Handler (void)
-{
-    CHANGE_NOTICE_E_InterruptHandler();
-}
-
-void CHANGE_NOTICE_E_InterruptHandler(void)
-{
-    _interrupt_handler(GPIO_PORTE);
-    IFS3CLR = _IFS3_CNEIF_MASK;
 }

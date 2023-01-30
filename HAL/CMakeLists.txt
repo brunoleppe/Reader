@@ -5,6 +5,13 @@ set(MPROCESSOR -mprocessor=${PIC})
 set(MOPTIMIZATION -O${OPTIMIZATION})
 
 
-add_library(HAL hal.h pic32mz_registers.h gpio.h gpio_config.h gpio.c spi.c spi.h system.c system.h)
+add_library(HAL
+        hal.h
+        pic32mz_registers.h
+        gpio.h gpio_config.h gpio.c
+        spi.c spi.h
+        system.c system.h
+        evic.h evic.c
+        hal_delay.c hal_delay.h)
 set_target_properties(HAL PROPERTIES LINKER_LANGUAGE C)
 target_compile_options(HAL PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc)

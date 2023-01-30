@@ -15,6 +15,7 @@
 #include "spi.h"
 #include "pic32mz_registers.h"
 #include <xc.h>
+#include "hal_delay.h"
 
 /**********************************************************************
 * Module Preprocessor Constants
@@ -34,6 +35,9 @@
 SPI_Descriptor spiDescriptors[] = {
         (SPI_Descriptor)&SPI1CON, (SPI_Descriptor)&SPI2CON, (SPI_Descriptor)&SPI3CON,
         (SPI_Descriptor)&SPI4CON, (SPI_Descriptor)&SPI5CON, (SPI_Descriptor)&SPI6CON
+};
+volatile uint32_t * const sdir[] = {
+        &SDI1R, &SDI2R, &SDI3R, &SDI4R, &SDI5R, &SDI6R
 };
 /**********************************************************************
 * Function Prototypes
@@ -165,9 +169,9 @@ int SPI_Transfer(SPI_Handler handler, void *txBuffer, void *rxBuffer, size_t siz
         }
 
         /*Byte transmit delay, useful for QTouch comms*/
-//        if(handler->usDelay != 0){
-//            _delay_us(handler->usDelay);
-//        }
+        if(handler->usDelay >= 0){
+            HAL_delay_us(handler->usDelay);
+        }
 
     }
 
@@ -205,6 +209,12 @@ uint8_t SPI_TransferByte(SPI_Handler handler, uint8_t data)
     receivedData = instance->spibuf.reg;
 
     return receivedData;
+}
+
+int SPI_InputMapping(SPI_CHANNEL channel, GPIO_ALTERNATE_FUNCTION alternate_function)
+{
+    *sdir[channel] = 0xf & alternate_function;
+    return 0;
 }
 
 static uint32_t _SPI_Baudrate_Get(uint32_t baudrate){

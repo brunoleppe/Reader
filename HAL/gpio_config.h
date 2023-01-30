@@ -77,8 +77,8 @@ typedef enum{
  *
  */
  typedef enum{
-     PULLUP_ENABLE,///<Internal pull-up resistors enabled.
-     PULLUP_DISABLE,///<Internal pull-up resistors disabled.
+     GPIO_PULLUP_DISABLE = 0,///<Internal pull-up resistors disabled.
+     GPIO_PULLUP_ENABLE = 1,///<Internal pull-up resistors enabled.
  }GPIO_PULLUP;
 //typedef bool GPIO_PULLUP;
 
@@ -87,8 +87,8 @@ typedef enum{
  *
  */
  typedef enum{
-     PULLDOWN_ENABLE,///<Internal pull-down resistors enabled.
-     PULLDOWN_DISABLE,///<Internal pull-down resistors disabled.
+     PULLDOWN_DISABLE = 0,///<Internal pull-down resistors disabled.
+     PULLDOWN_ENABLE = 1,///<Internal pull-down resistors enabled.
  }GPIO_PULLDOWN;
 //typedef bool GPIO_PULLDOWN;
 
@@ -118,8 +118,8 @@ typedef enum{
  *
  */
  typedef enum{
-     GPIO_IRQ_ENABLE,///<Enable state changed pin interrupt
      GPIO_IRQ_DISABLE,///<Disable state changed pin interrupt
+     GPIO_IRQ_ENABLE,///<Enable state changed pin interrupt
  }GPIO_INTERRUPT;
 //typedef bool GPIO_INTERRUPT;
 
@@ -423,7 +423,7 @@ typedef struct{
 }GPIO_ConfigTable;
 /**
  * @brief GPIO peripheral configuration struct.
- * This struct is passed to the @ref GPIO_Init function for pin initialization
+ * This struct is passed to the @ref GPIO_init function for pin initialization
  * and peripheral configuration.
  *
  */
