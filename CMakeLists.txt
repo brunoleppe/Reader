@@ -57,7 +57,7 @@ set(SYM_BUILD --defsym=__MPLAB_BUILD=1)
 set(LINKER_OPTS --gc-sections,--no-code-in-dinit,--no-dinit-in-serial-mem)
 set(LINKER_MAP -Map=${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.map)
 set(MEMORY_FILE --memorysummary,${CMAKE_CURRENT_BINARY_DIR}/memoryfile.xml)
-set(LINKER_SCRIPT --script=/home/bruno/CLionProjects/Reader/Linker/p32MZ1024EFM100.ld)
+set(LINKER_SCRIPT --script=${CMAKE_SOURCE_DIR}/Linker/p32MZ1024EFM100.ld)
 set(XC32_LINK_FLAGS
         ${SYM_HEAP},${LINKER_SCRIPT},${SYM_BUILD},${LINKER_OPTS},${LINKER_MAP},${MEMORY_FILE}
         )
