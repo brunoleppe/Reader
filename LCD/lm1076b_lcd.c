@@ -24,7 +24,7 @@
 **********************************************************************/
 struct LCD{
     SPI_Handler handler;
-    uint8_t lcd_buffer[LCD_BUFFER_SIZE];
+    uint8_t *lcd_buffer;
     int lcd_size;
     GPIO_PIN cs_pin;
     GPIO_PIN bla_pin;
@@ -42,9 +42,10 @@ typedef struct{
 /**********************************************************************
 * Module Variable Definitions
 **********************************************************************/
-
+static uint8_t __attribute__ ((coherent, aligned(16))) lcd_buffer[LCD_BUFFER_SIZE];
 static struct LCD lcd = {
-    .lcd_size = LCD_BUFFER_SIZE
+    .lcd_size = LCD_BUFFER_SIZE,
+    .lcd_buffer = lcd_buffer
 };
 // <editor-fold defaultstate="collapsed" desc="fonts">
 // <editor-fold defaultstate="collapsed" desc="Normal">
@@ -510,8 +511,10 @@ void    LCD_print       ( void )
 
     GPIO_pin_write(lcd.dc_pin, GPIO_HIGH);
     GPIO_pin_write(lcd.cs_pin, GPIO_LOW);
-    SPI_Transfer(lcd.handler, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
-    GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
+//    SPI_Transfer(lcd.handler, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
+    SPI_dma_transfer(lcd.handler, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
+//    GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
+
 }
 
 static unsigned char* LCD_get_char(unsigned char c, const LCD_Font *font){

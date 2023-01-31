@@ -6,6 +6,7 @@
 #include "gpio.h"
 #include <xc.h>
 #include "Reader_bsp.h"
+#include "dma.h"
 
 // <editor-fold defaultstate="collapsed" desc="Configuration Bits">
 #pragma config DEBUG =      OFF
@@ -73,6 +74,7 @@ void Initialize(void)
 
     INTCONSET = _INTCON_MVEC_MASK;
     interrupts_initialize();
+    DMA_init();
     gpio_initialize();
 
     __builtin_enable_interrupts();

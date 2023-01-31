@@ -14,9 +14,10 @@
 **********************************************************************/
 #include "spi.h"
 #include "pic32mz_registers.h"
-#include <xc.h>
 #include "hal_delay.h"
-
+#include "dma.h"
+#include <xc.h>
+#include <sys/kmem.h>
 /**********************************************************************
 * Module Preprocessor Constants
 **********************************************************************/
@@ -106,7 +107,8 @@ int SPI_Init(SPI_Handler handler, SPI_CHANNEL channel, SPI_Setup *setup) {
     /*Encender SPI*/
     spiDescriptors[channel]->spicon1.set = _SPI1CON_ON_MASK;
 
-
+    DMA_CHANNEL _dma_channel = DMA_CHANNEL_0;
+    DMA_channel_init(_dma_channel);
     return 0;
 }
 
@@ -214,6 +216,22 @@ uint8_t SPI_TransferByte(SPI_Handler handler, uint8_t data)
 int SPI_InputMapping(SPI_CHANNEL channel, GPIO_ALTERNATE_FUNCTION alternate_function)
 {
     *sdir[channel] = 0xf & alternate_function;
+    return 0;
+}
+
+int SPI_dma_transfer(const SPI_Handler handler, void *txBuffer, void *rxBuffer, size_t size)
+{
+
+    DMA_CHANNEL channel = DMA_CHANNEL_0;
+    DMA_CHANNEL_Config config = {
+            .src_phy_address = KVA_TO_PA(txBuffer),
+            .dst_phy_address = KVA_TO_PA(&spiDescriptors[handler->channel]->spibuf.reg),
+            .src_size = size,
+            .transfer_size = size,
+            .dst_size = 1,
+    };
+    DMA_channel_config(channel, &config);
+    DMA_channel_transfer(channel);
     return 0;
 }
 

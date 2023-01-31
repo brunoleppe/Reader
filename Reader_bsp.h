@@ -5,6 +5,11 @@
 #ifndef READER_BSP_H
 #define READER_BSP_H
 
+#define STRGIZE(x)              #x
+#define STR(x)                  STRGIZE(x)
+#define STR_CONCAT(x,y)         x##y
+#define CONCAT(x,y)             STR_CONCAT(x,y)
+
 /*LEDs*/
 #ifdef __READER_V2__
 #define LED1                GPIO_PORTB_6
@@ -31,6 +36,9 @@
 #define QT_SDI_AF           GPIO_AF_8
 #define QT_SPI_CHANNEL      SPI_CHANNEL_3
 #define QT_INTERRUPT_VECTOR EVIC_CHANNEL_CHANGE_NOTICE_E
+
+/*Interrupts*/
+#define PORT_VECTOR 122
 
 #else
 /*LEDs*/
@@ -59,11 +67,16 @@
 #define QT_SPI_CHANNEL      SPI_CHANNEL_3
 #define QT_INTERRUPT_VECTOR EVIC_CHANNEL_CHANGE_NOTICE_E
 
+/*Interrupts*/
 
 #endif /*__READER_V2__*/
 
+#define QTOUCH_VECTOR   .vector_122
+#define QTOUCH_VECTOR_DISPATCH   __vector_dispatch_122
 
+
+#if defined (__LANGUAGE_C__) || defined (__LANGUAGE_C_PLUS_PLUS)
 void gpio_initialize( void );
 void interrupts_initialize( void );
-
+#endif
 #endif //READER_BSP_H

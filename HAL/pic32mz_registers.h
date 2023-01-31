@@ -54,6 +54,20 @@ typedef struct{
     struct MemRegister spicon2;
 }volatile * const SPI_Descriptor;
 
+typedef struct{
+    struct MemRegister dchcon;
+    struct MemRegister dchecon;
+    struct MemRegister dchint;
+    struct MemRegister dchssa;
+    struct MemRegister dchdsa;
+    struct MemRegister dchssiz;
+    struct MemRegister dchdsiz;
+    struct MemRegister dchsptr;
+    struct MemRegister dchdptr;
+    struct MemRegister dchcsiz;
+    struct MemRegister dchcptr;
+    struct MemRegister dchdat;
+}volatile * const DMA_Descriptor;
 #ifdef	__cplusplus
 }
 #endif

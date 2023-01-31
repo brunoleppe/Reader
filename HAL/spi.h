@@ -193,6 +193,7 @@ void SPI_HalfCpltcallbackRegister(SPI_Handler handler,SPI_Callback callback)
     handler->halfCallback = callback;
 }
 
+int SPI_dma_transfer(const SPI_Handler handler, void *txBuffer, void *rxBuffer, size_t size);
 
 #ifdef __cplusplus
 }

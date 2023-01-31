@@ -23,7 +23,7 @@ int main(void){
     Initialize();
     /*Create a FreeRTOS Task*/
     xTaskCreate(blink,"blink_task",256,&(PinParams){.pin_number = LED1, .delay_ms = 500},1,NULL);
-    xTaskCreate(blink,"blink_task",256,&(PinParams){.pin_number = LED2, .delay_ms = 400},1,NULL);
+    xTaskCreate(blink,"blink_task",256,&(PinParams){.pin_number = LED2, .delay_ms = 500},1,NULL);
 //    xTaskCreate(blink,"blink_task",256,&(PinParams){.pin_number = LED3, .delay_ms = 300},1,NULL);
 
     xTaskCreate(lcd_task, "lcd_task", 1024, NULL, 3, NULL);
@@ -81,11 +81,28 @@ static void lcd_task(void *params)
     LCD_init(__spi, LCD_SS, LCD_BLA, LCD_DC, LCD_RST);
 
     LCD_draw_bitmap(0,0,bitmap,sizeof(bitmap));
-    int i=0,j=0;
-    while(1) {
-        vTaskDelay(33);
+    LCD_draw_string(10,10,"Hola Mundo",LCD_FONT_MEDIUM,0xf);
+
+    int x=0,y=0;
+    while(1){
         LCD_print();
+        vTaskDelay(17);
+        GPIO_pin_toggle(LCD_SS);
+        LCD_draw_point(x++,y,0xf);
+        if(x>=240){
+            x=0;
+            if(y++>=128)
+                y=0;
+        }
     }
+//        LCD_print();
+//        vTaskDelay(500);
+//        GPIO_pin_toggle(LCD_SS);
+//        LCD_print();
+//        vTaskDelay(500);
+//        GPIO_pin_toggle(LCD_SS);
+//        vTaskDelay(portMAX_DELAY);
+
 }
 
 static void blink(void *params)
