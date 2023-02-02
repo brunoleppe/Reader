@@ -50,6 +50,8 @@ static GPIO_InterruptCallback callbackArray[NUMBER_OF_INTERRUPTS];
 **********************************************************************/
 
 static void _register_config(MemRegister reg, uint32_t val, uint32_t compare, uint32_t bitNum);
+static inline void _GPIO_port_clear(GPIO_Descriptor port, uint32_t pins);
+static inline void _GPIO_port_set(GPIO_Descriptor port, uint32_t pins);
 
 /**********************************************************************
 * Function Definitions
@@ -61,168 +63,72 @@ void GPIO_output_mapping(GPIO_PIN pin, GPIO_ALTERNATE_FUNCTION alternate_unction
     *reg = alternate_unction;
 }
 
-void GPIO_init(const GPIO_Config* config)
+void GPIO_initialize(GPIO_Descriptor port, uint16_t pins, int flags)
 {
-//    int i;
-//    /* Unlock system for PPS configuration */
-//
-//    for(i=0;i<config->tableSize;i++){
-//        /*Obtener el puerto desde el valor del pin*/
-//        int portNumber = config->table[i].pin >> 4;
-//        int bitNum = 1<<(config->table[i].pin&0xf);
-//
-//        GPIO_Descriptor portx = ports[portNumber];
-//
-//        /*Configuraci�n de modo anal�gico-digital*/
-//        _register_config((MemRegister)&portx->ansel,config->table[i].direction,GPIO_ANALOG,bitNum);
-//
-//        /*Configuraci�n de direcci�n del pin*/
-//        _register_config((MemRegister)&portx->tris,config->table[i].direction,GPIO_INPUT,bitNum);
-//
-//        /*Valor inicial del pin*/
-//        _register_config((MemRegister)&portx->lat,config->table[i].state,GPIO_HIGH,bitNum);
-//
-//        /*pullup condifuration*/
-//        _register_config((MemRegister)&portx->cnpu,config->table[i].pullup,true,bitNum);
-//
-//        /*pulldown configuration*/
-//        _register_config((MemRegister)&portx->cnpd,config->table[i].pulldown,true,bitNum);
-//
-//        /*irq configuration*/
-//        _register_config((MemRegister)&portx->cnen,config->table[i].irqState,true,bitNum);
-//        if(config->table[i].irqState){
-//            if( (portx->cncon.reg & _CNCONA_ON_MASK) == 0 ){
-//                portx->cncon.set = _CNCONA_ON_MASK;
-//            }
-//        }
+    if(flags & _GPIO_ANALOG) {
+        port->ansel.set = pins;
+        return;
+    }
 
+    port->ansel.clr = pins;
+    if(flags & _GPIO_OUTPUT){
+        port->tris.clr = pins;
+        if(flags & _GPIO_OPENDRAIN)
+            port->odc.set = pins;
+        if(flags & _GPIO_SLOWEST) {
+            port->srcon0.set = pins;
+            port->srcon1.set = pins;
+        }
+        else if(flags & _GPIO_SLOW) {
+            port->srcon0.clr = pins;
+            port->srcon1.set = 1;
+        }
+        else if(flags & _GPIO_FAST) {
+            port->srcon0.set = pins;
+            port->srcon1.clr = pins;
+        }
+        return;
+    }
 
-//    }
+    if(flags & _GPIO_PULLUP)
+        port->cnpu.set = pins;
+    else if(flags & _GPIO_PULLDOWN)
+        port->cnpd.set = pins;
 
-//    /*Remapeo de pines*/
-//
-//    /*Desbloquear sistema para remapeo*/
-//    SYSKEY = 0x00000000;
-//    SYSKEY = 0xAA996655;
-//    SYSKEY = 0x556699AA;
-//    CFGCONbits.IOLOCK = 0;
-//
-//    /*Configurar registros*/
-//    for(i=0;i<config->tableSize;i++){
-//        if(config->table[i].mode.function != AF_NONE)
-//            *(volatile uint32_t*)(0xBF800000+(config->table[i].mode.reg&0xFFFF)) =
-//                    config->table[i].mode.function;
-//    }
-//
-//    /*Bloquear sistema*/
-//    CFGCONbits.IOLOCK = 1;
-//    SYSKEY = 0x00000000;
+    if(flags & _GPIO_IRQ)
+        port->cnen.set = pins;
 }
-void GPIO_port_direction_set(GPIO_PORT port, WORD mask, GPIO_DIRECTION direction)
+void GPIO_deinitialize(GPIO_Descriptor port, uint16_t pins)
 {
-    if(direction == GPIO_OUTPUT)
-        ports[port]->tris.clr = mask;
+    port->ansel.set = pins;
+    port->tris.set = pins;
+    port->lat.clr = pins;
+    port->port.clr = pins;
+    port->srcon1.clr = pins;
+    port->srcon0.clr = pins;
+    port->cnpd.clr = pins;
+    port->cnpu.clr = pins;
+    port->odc.clr = pins;
+}
+void GPIO_port_write(GPIO_Descriptor port, WORD value, int pins)
+{
+    _GPIO_port_clear(port,(~value) & pins);
+    _GPIO_port_set(port,value & pins);
+}
+WORD GPIO_port_read(GPIO_Descriptor port, int pins)
+{
+    return port->port.reg & pins;
+}
+void GPIO_port_toggle(GPIO_Descriptor port, int pins)
+{
+    port->lat.inv = pins;
+}
+void GPIO_port_interrupt_set(GPIO_Descriptor port, GPIO_INTERRUPT state)
+{
+    if(state == GPIO_IRQ_ENABLE)
+        port->cncon.set = _CNCONA_ON_MASK;
     else
-        ports[port]->tris.set = mask;
-    if(direction != GPIO_ANALOG)
-        ports[port]->ansel.clr = mask;
-}
-void GPIO_port_write(GPIO_PORT port, WORD mask, WORD value)
-{
-    ports[port]->lat.reg = mask & value;
-}
-WORD GPIO_port_read(GPIO_PORT port, WORD mask)
-{
-    return ports[port]->port.reg & mask;
-}
-void GPIO_pin_pullup_set(GPIO_PIN pin, GPIO_PULLUP state)
-{
-    int portNumber = pin >> 4;
-    int bitNum = state << ( pin & 0xf );
-    ports[portNumber]->cnpu.set = bitNum;}
-
-void GPIO_PinPulldownSet(GPIO_PIN pin, GPIO_PULLDOWN state)
-{
-    int portNumber = pin >> 4;
-    int bitNum = 1 << ( pin & 0xf );
-    _register_config((MemRegister)&ports[portNumber]->cnpd,state,true,bitNum);
-}
-
-void GPIO_pin_irq_set(GPIO_PIN pin, GPIO_INTERRUPT state)
-{
-    int portNumber = pin >> 4;
-    int bitnum = 1 << ( pin & 0xf );
-    /*Enable or disable interrupt for desired pin*/
-
-    ports[portNumber]->cncon.set = _CNCONA_ON_MASK;
-    ports[portNumber]->cnen.set = bitnum;
-
-
-////    _register_config((MemRegister)&ports[portNumber]->cnen,state,true,bitnum);
-//
-//    if(!state){
-//        if(ports[portNumber]->cnen.reg == 0){
-//            /*Clear cncon register only if no interrupts are enabled for anymore pins*/
-//            ports[portNumber]->cncon.clr = _CNCONA_ON_MASK;
-//        }
-//    }
-//    else{
-//        /*Enable interrupt*/
-//        ports[portNumber]->cncon.set = _CNCONA_ON_MASK;
-//    }
-    ports[portNumber]->port.reg;
-}
-
-GPIO_STATE GPIO_pin_read(GPIO_PIN pin)
-{
-    int portNumber = pin >> 4;
-    int bitNum = 1 << ( pin & 0xf );
-    WORD status = ports[portNumber]->port.reg;
-//    return (status & bitNum) >> bitNum:
-    if(status & bitNum)
-        return GPIO_HIGH;
-    else
-        return GPIO_LOW;
-}
-
-void GPIO_pin_write(GPIO_PIN pin, GPIO_STATE state){
-    int portNumber = pin >> 4;
-    int bitNum = 1 << ( pin & 0xf );
-    if(state == GPIO_HIGH)
-        ports[portNumber]->lat.set = bitNum;
-    else
-        ports[portNumber]->lat.clr = bitNum;
-}
-
-void GPIO_pin_toggle(GPIO_PIN pin)
-{
-    int portNumber = pin >> 4;
-    int bitNum = 1 << ( pin & 0xf );
-    ports[portNumber]->lat.inv = bitNum;
-}
-
-void GPIO_pin_direction_set(GPIO_PIN pin, GPIO_DIRECTION direction)
-{
-    int portNumber = pin >> 4;
-    int bitNum = 1 << ( pin & 0xf );
-    if(direction == GPIO_INPUT)
-        ports[portNumber]->tris.set = bitNum;
-    else
-        ports[portNumber]->tris.clr = bitNum;
-    if(direction != GPIO_ANALOG)
-        ports[portNumber]->ansel.clr = bitNum;
-}
-
-void GPIO_register_write(uintptr_t address, WORD val)
-{
-    volatile WORD *reg = (volatile WORD*)address;
-    *reg = val;
-}
-
-WORD GPIO_RegisterRead(uintptr_t address)
-{
-    volatile WORD *reg = (volatile WORD*)address;
-    return *reg;
+        port->cncon.clr = _CNCONA_ON_MASK;
 }
 
 void GPIO_CallbackRegister(
@@ -242,6 +148,14 @@ void GPIO_CallbackRegister(
     counter++;
 }
 
+static inline void _GPIO_port_clear(GPIO_Descriptor port, uint32_t pins)
+{
+    port->lat.clr = pins;
+}
+static inline void _GPIO_port_set(GPIO_Descriptor port, uint32_t pins)
+{
+    port->lat.set = pins;
+}
 
 void _register_config(MemRegister reg, uint32_t val, uint32_t compare, uint32_t bitNum){
     if(val == compare)

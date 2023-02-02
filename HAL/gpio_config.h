@@ -423,7 +423,7 @@ typedef struct{
 }GPIO_ConfigTable;
 /**
  * @brief GPIO peripheral configuration struct.
- * This struct is passed to the @ref GPIO_init function for pin initialization
+ * This struct is passed to the @ref GPIO_initialize function for pin initialization
  * and peripheral configuration.
  *
  */
