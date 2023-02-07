@@ -14,62 +14,72 @@
 /**********************************************************************
 * Includes
 **********************************************************************/
-#include "hal.h"
-#include "gpio_config.h"
-#include "pic32mz_registers.h"
+#include "hal_defs.h"
 /**********************************************************************
 * Preprocessor Constants
 **********************************************************************/
-#define _GPIO_PA         (GPIO_Descriptor)(&ANSELA)
-#define _GPIO_PB         (GPIO_Descriptor)(&ANSELB)
-#define _GPIO_PC         (GPIO_Descriptor)(&ANSELC)
-#define _GPIO_PD         (GPIO_Descriptor)(&ANSELD)
-#define _GPIO_PE         (GPIO_Descriptor)(&ANSELE)
-#define _GPIO_PF         (GPIO_Descriptor)(&ANSELF)
-#define _GPIO_PG         (GPIO_Descriptor)(&ANSELG)
-#define _GPIO_PH         (GPIO_Descriptor)(&ANSELH)
-#define _GPIO_PJ         (GPIO_Descriptor)(&ANSELJ)
-#define _GPIO_PK         (GPIO_Descriptor)(&ANSELK)
+#define GPIO_PORT_SHIFT             (4)
+#define GPIO_PORT_MASK              (0xF0000)
 
-#define _GPIO_INPUT      0x0000
-#define _GPIO_OUTPUT     0x0001
-#define _GPIO_ANALOG     0x0002
-#define _GPIO_PULLUP     0x0004
-#define _GPIO_PULLDOWN   0x0008
-#define _GPIO_OPENDRAIN  0x0010
-#define _GPIO_SLOWEST    0x0020
-#define _GPIO_SLOW       0x0040
-#define _GPIO_FAST       0x0080
-#define _GPIO_FASTEST    0x0100
-#define _GPIO_IRQ        0x0200
+#define GPIO_PORT_A                  (0x0)
+#define GPIO_PORT_B                  (0x1)
+#define GPIO_PORT_C                  (0x2)
+#define GPIO_PORT_D                  (0x3)
+#define GPIO_PORT_E                  (0x4)
+#define GPIO_PORT_F                  (0x5)
+#define GPIO_PORT_G                  (0x6)
+#define GPIO_PORT_H                  (0x7)
+#define GPIO_PORT_J                  (0x8)
+#define GPIO_PORT_K                  (0x9)
 
-#define _GPIO_INPUT_PULLUP       (_GPIO_PULLUP)
-#define _GPIO_INPUT_PULLDOWN     (_GPIO_PULLDOWN)
-#define _GPIO_OUTPUT_OD          (_GPIO_OUTPUT | _GPIO_OPENDRAIN)
+#define GPIO_INPUT                  0x0000
+#define GPIO_OUTPUT                 0x0001
+#define GPIO_ANALOG                 0x0002
+#define GPIO_PULLUP                 0x0004
+#define GPIO_PULLDOWN               0x0008
+#define GPIO_OPENDRAIN              0x0010
+#define GPIO_SLOWEST                0x0020
+#define GPIO_SLOW                   0x0040
+#define GPIO_FAST                   0x0080
+#define GPIO_FASTEST                0x0100
+#define GPIO_IRQ                    0x0200
+
+#define GPIO_INPUT_PULLUP          (GPIO_PULLUP)
+#define GPIO_INPUT_PULLDOWN        (GPIO_PULLDOWN)
+#define GPIO_OUTPUT_OD             (GPIO_OUTPUT | GPIO_OPENDRAIN)
 
 
-#define _GPIO_PIN_0                 ((uint16_t)0x0001)  /* Pin 0 selected    */
-#define _GPIO_PIN_1                 ((uint16_t)0x0002)  /* Pin 1 selected    */
-#define _GPIO_PIN_2                 ((uint16_t)0x0004)  /* Pin 2 selected    */
-#define _GPIO_PIN_3                 ((uint16_t)0x0008)  /* Pin 3 selected    */
-#define _GPIO_PIN_4                 ((uint16_t)0x0010)  /* Pin 4 selected    */
-#define _GPIO_PIN_5                 ((uint16_t)0x0020)  /* Pin 5 selected    */
-#define _GPIO_PIN_6                 ((uint16_t)0x0040)  /* Pin 6 selected    */
-#define _GPIO_PIN_7                 ((uint16_t)0x0080)  /* Pin 7 selected    */
-#define _GPIO_PIN_8                 ((uint16_t)0x0100)  /* Pin 8 selected    */
-#define _GPIO_PIN_9                 ((uint16_t)0x0200)  /* Pin 9 selected    */
-#define _GPIO_PIN_10                ((uint16_t)0x0400)  /* Pin 10 selected   */
-#define _GPIO_PIN_11                ((uint16_t)0x0800)  /* Pin 11 selected   */
-#define _GPIO_PIN_12                ((uint16_t)0x1000)  /* Pin 12 selected   */
-#define _GPIO_PIN_13                ((uint16_t)0x2000)  /* Pin 13 selected   */
-#define _GPIO_PIN_14                ((uint16_t)0x4000)  /* Pin 14 selected   */
-#define _GPIO_PIN_15                ((uint16_t)0x8000)  /* Pin 15 selected   */
-#define _GPIO_PIN_All               ((uint16_t)0xFFFF)  /* All pins selected */
+#define GPIO_PIN_MASK               (0xFFFF)
+#define GPIO_PIN_0                  (0x0)  /* Pin 0 selected    */
+#define GPIO_PIN_1                  (0x1)  /* Pin 1 selected    */
+#define GPIO_PIN_2                  (0x2)  /* Pin 2 selected    */
+#define GPIO_PIN_3                  (0x3)  /* Pin 3 selected    */
+#define GPIO_PIN_4                  (0x4)  /* Pin 4 selected    */
+#define GPIO_PIN_5                  (0x5)  /* Pin 5 selected    */
+#define GPIO_PIN_6                  (0x6)  /* Pin 6 selected    */
+#define GPIO_PIN_7                  (0x7)  /* Pin 7 selected    */
+#define GPIO_PIN_8                  (0x8)  /* Pin 8 selected    */
+#define GPIO_PIN_9                  (0x9)  /* Pin 9 selected    */
+#define GPIO_PIN_10                 (0xa)  /* Pin 10 selected   */
+#define GPIO_PIN_11                 (0xb)  /* Pin 11 selected   */
+#define GPIO_PIN_12                 (0xc)  /* Pin 12 selected   */
+#define GPIO_PIN_13                 (0xd)  /* Pin 13 selected   */
+#define GPIO_PIN_14                 (0xe)  /* Pin 14 selected   */
+#define GPIO_PIN_15                 (0xf)  /* Pin 15 selected   */
 
+#define GPIO_LOW                    (0)
+#define GPIO_HIGH                   (1)
+/*********************************************************************
+* Preprocessor Macros
+**********************************************************************/
+#define GPIO_PIN_MAP(port, pin)     ((port << GPIO_PORT_SHIFT) | pin)
 /**********************************************************************
 * Typedefs
 **********************************************************************/
-
+typedef bool GPIO_STATE;
+typedef bool GPIO_IRQ_STATE;
+typedef uint32_t GPIO_PIN;
+typedef uint32_t GPIO_ALTERNATE_FUNCTION;
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
@@ -77,38 +87,18 @@
 extern "C"{
 #endif
     
-void GPIO_initialize(GPIO_Descriptor port, uint16_t pins, int flags);
-void GPIO_deinitialize(GPIO_Descriptor port, uint16_t pins);
+void    GPIO_pin_initialize             (uint32_t pin, int flags);
+void    GPIO_pin_deinitialize           (uint32_t pin);
+bool    GPIO_pin_read                   (uint32_t pin);
+void    GPIO_pin_write                  (uint32_t pin, bool value);
+void    GPIO_pin_toggle                 (uint32_t pin);
+void    GPIO_pin_interrupt_set          (uint32_t pin, bool state);
 
-WORD GPIO_port_read(GPIO_Descriptor port, int pins);
-void GPIO_port_write(GPIO_Descriptor port, WORD value, int pins);
-void GPIO_port_toggle(GPIO_Descriptor port, int pins);
-void GPIO_port_interrupt_set(GPIO_Descriptor port, GPIO_INTERRUPT state);
-
-void GPIO_output_mapping(GPIO_PIN pin, GPIO_ALTERNATE_FUNCTION alternate_unction);
-void GPIO_CallbackRegister(
-        GPIO_PIN pin,
-        GPIO_CallbackFunction callback,
-        uintptr_t context
-);
-
-static inline
-GPIO_STATE GPIO_pin_read(GPIO_Descriptor port, uint16_t pin)
-{
-    return GPIO_port_read(port, pin) == pin;
-}
-static inline
-void GPIO_pin_write(GPIO_Descriptor port, GPIO_STATE state, uint16_t pin)
-{
-    GPIO_port_write(port, (state)<<pin, pin);
-}
-static inline
-void GPIO_pin_toggle(GPIO_Descriptor port, uint16_t pin)
-{
-    GPIO_port_toggle(port, pin);
-}
 #ifdef __cplusplus
 }
 #endif
+
+
+
 
 #endif

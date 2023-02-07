@@ -3,26 +3,32 @@
 #include "spi.h"
 #include "system.h"
 #include "evic.h"
+#include "pps.h"
 #include <xc.h>
+
 
 void gpio_initialize( void )
 {
-    GPIO_port_direction_set(GPIO_PORTB, 0xf << 6, GPIO_OUTPUT);
-    GPIO_port_write(GPIO_PORTB, 0xf << 6, 0);
+    GPIO_pin_initialize(LED1, GPIO_OUTPUT);
+    GPIO_pin_initialize(LED2, GPIO_OUTPUT);
+    GPIO_pin_initialize(LED3, GPIO_OUTPUT);
+    GPIO_pin_initialize(LED4, GPIO_OUTPUT);
 
-    GPIO_pin_direction_set(LCD_DC, GPIO_OUTPUT);
-    GPIO_pin_direction_set(LCD_BLA, GPIO_OUTPUT);
-    GPIO_pin_direction_set(LCD_RST, GPIO_OUTPUT);
-    GPIO_pin_direction_set(LCD_SS, GPIO_OUTPUT);
+    GPIO_pin_write(LED1, 1);
+    GPIO_pin_write(LED2, 1);
+    GPIO_pin_write(LED3, 1);
+    GPIO_pin_write(LED4, 1);
 
-    GPIO_pin_direction_set(QT_CHANGE, GPIO_INPUT);
-    GPIO_pin_pullup_set(QT_CHANGE, GPIO_PULLUP_ENABLE);
-    GPIO_pin_irq_set(QT_CHANGE, GPIO_IRQ_ENABLE);
-    GPIO_pin_direction_set(QT_RST, GPIO_OUTPUT);
-    GPIO_pin_direction_set(QT_SS, GPIO_OUTPUT);
-    GPIO_pin_direction_set(QT_SDO, GPIO_OUTPUT);
-    GPIO_pin_direction_set(QT_SDI, GPIO_INPUT);
+    GPIO_pin_initialize(LCD_DC, GPIO_OUTPUT);
+    GPIO_pin_initialize(LCD_BLA, GPIO_OUTPUT);
+    GPIO_pin_initialize(LCD_RST, GPIO_OUTPUT);
+    GPIO_pin_initialize(LCD_SS, GPIO_OUTPUT);
 
+    GPIO_pin_initialize(QT_CHANGE, GPIO_INPUT_PULLUP | GPIO_IRQ);
+    GPIO_pin_initialize(QT_RST, GPIO_OUTPUT);
+    GPIO_pin_initialize(QT_SS, GPIO_OUTPUT);
+    GPIO_pin_initialize(QT_SDO, GPIO_OUTPUT);
+    GPIO_pin_initialize(QT_SDI, GPIO_INPUT);
 
     GPIO_pin_write(LCD_DC, GPIO_LOW);
     GPIO_pin_write(LCD_BLA, GPIO_LOW);
@@ -34,10 +40,11 @@ void gpio_initialize( void )
 
     SYS_Unlock();
     /* LCD SPI */
-    GPIO_output_mapping(LCD_SDO, LCD_SDO_AF);
+    PPS_pin_mapping(LCD_SPI_OUTPUT_REG, LCD_SPI_OUTPUT_MAP);
     /* QTOUCH SPI */
-    GPIO_output_mapping(QT_SDO, QT_SDO_AF);
-    SPI_InputMapping(QT_SPI_CHANNEL, QT_SDI_AF);
+    PPS_pin_mapping(QT_SPI_OUTPUT_REG, QT_SPI_OUTPUT_MAP);
+    PPS_pin_mapping(QT_SPI_INPUT_REG, QT_SPI_INPUT_MAP);
+
 
     SYS_Lock();
 

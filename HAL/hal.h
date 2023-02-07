@@ -30,7 +30,7 @@
 #define HAL_GPIO_PERIPHERAL_CLOCK           (HAL_SYSTEM_CLOCK/2)
 #define HAL_PWM_PERIPHERAL_CLOCK            (HAL_SYSTEM_CLOCK/2)
 
-typedef uint32_t WORD;
+
 /**********************************************************************
 * Typedefs
 **********************************************************************/

@@ -24,7 +24,7 @@ int main(void){
     /*Create a FreeRTOS Task*/
     xTaskCreate(blink,"blink_task",256,&(PinParams){.pin_number = LED1, .delay_ms = 500},1,NULL);
     xTaskCreate(blink,"blink_task",256,&(PinParams){.pin_number = LED2, .delay_ms = 500},1,NULL);
-//    xTaskCreate(blink,"blink_task",256,&(PinParams){.pin_number = LED3, .delay_ms = 300},1,NULL);
+
 
     xTaskCreate(lcd_task, "lcd_task", 1024, NULL, 3, NULL);
     xTaskCreate(qt_task, "qt_task", 2048, NULL, 1, NULL);
