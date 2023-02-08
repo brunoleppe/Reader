@@ -6,6 +6,11 @@
 #include "pps.h"
 #include <xc.h>
 
+static void qt_change_callback(uint32_t pin);
+
+GPIO_CALLBACK_OBJECT pinCallbackObj[] = {
+        {.pin = QT_CHANGE, .callback = qt_change_callback}
+};
 
 void gpio_initialize( void )
 {
@@ -60,16 +65,19 @@ void interrupts_initialize( void )
 
 }
 
-void qtouch_change_interrupt_handler( void )
+void    GPIO_pin_interrupt_callback     (uint32_t pin)
 {
-    uint32_t status;
+    for(int i=0; i<sizeof(pinCallbackObj)/sizeof(GPIO_CALLBACK_OBJECT); i++){
+        if(((1 << pinCallbackObj[i].pin) & pin) && (pinCallbackObj[i].callback != NULL) ){
+            pinCallbackObj[i].callback(pinCallbackObj[i].pin);
+        }
+    }
+}
 
-    status  = CNSTATE;
-    status &= CNENE;
-
-    PORTE;
-    EVIC_channel_pending_clear(EVIC_CHANNEL_CHANGE_NOTICE_E);
+static void qt_change_callback(uint32_t pin)
+{
+    uint32_t array[pin];
+    array[pin-1] = LED4;
     if(GPIO_pin_read(QT_CHANGE) == GPIO_LOW)
-        GPIO_pin_toggle(LED4);
-
+        GPIO_pin_toggle(array[pin-1]);
 }
