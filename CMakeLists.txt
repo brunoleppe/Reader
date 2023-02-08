@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.24.2)
 
 #Compiler
 set(CMAKE_C_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-gcc")
+set(CMAKE_CXX_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-g++")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti -Wno-write-strings")
 #Device Family Pack
 #set(DFP /opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-EF_DFP/1.3.58)
 
@@ -18,16 +20,16 @@ set(READER_TYPE     __DesktopReaderV2__)
 # set(CMAKE_VERBOSE_MAKEFILE True)
 
 set(SOURCES
-        main.c
+#        main.c
         FreeRTOSConfig.h
         initialization.c initialization.h
         Reader_bsp.h Reader_bsp.c
         bitmap.c bitmap.h
         interrupts.c
         interrupts_as.S
-)
+        main.cpp TestClass.cpp TestClass.h)
 
-project(Reader C ASM)
+project(Reader CXX C ASM)
 
 # FreeRTOS Directories
 include_directories(FreeRTOS/Source/include)
