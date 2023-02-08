@@ -49,7 +49,7 @@
 #define GPIO_OUTPUT_OD             (GPIO_OUTPUT | GPIO_OPENDRAIN)
 
 
-#define GPIO_PIN_MASK               (0xFFFF)
+#define GPIO_PIN_MASK               (0xF)
 #define GPIO_PIN_0                  (0x0)  /* Pin 0 selected    */
 #define GPIO_PIN_1                  (0x1)  /* Pin 1 selected    */
 #define GPIO_PIN_2                  (0x2)  /* Pin 2 selected    */
@@ -80,6 +80,13 @@ typedef bool GPIO_STATE;
 typedef bool GPIO_IRQ_STATE;
 typedef uint32_t GPIO_PIN;
 typedef uint32_t GPIO_ALTERNATE_FUNCTION;
+typedef void (*GPIO_CALLBACK)(GPIO_PIN);
+
+typedef struct{
+    uint8_t pin;
+    GPIO_CALLBACK  callback;
+}GPIO_CALLBACK_OBJECT;
+
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
@@ -93,6 +100,10 @@ bool    GPIO_pin_read                   (uint32_t pin);
 void    GPIO_pin_write                  (uint32_t pin, bool value);
 void    GPIO_pin_toggle                 (uint32_t pin);
 void    GPIO_pin_interrupt_set          (uint32_t pin, bool state);
+
+void    GPIO_pin_interrupt_callback     (uint32_t pin);
+void    GPIO_interrupt_handler          (uint32_t port);
+
 
 #ifdef __cplusplus
 }
