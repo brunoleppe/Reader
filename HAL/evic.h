@@ -242,7 +242,9 @@ typedef enum{
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
-
+#ifdef __cplusplus
+extern "C"{
+#endif
 int     EVIC_init(void *data);
 int     EVIC_channel_state_Set(
             EVIC_CHANNEL channel,
@@ -255,5 +257,7 @@ void    EVIC_channel_pending_clear(EVIC_CHANNEL);
 uint32_t    EVIC_enable_interrupts( void );
 uint32_t    EVIC_disable_interrupts( void );
 void    EVIC_restore_interrupts( uint32_t status );
-
+#ifdef __cplusplus
+}
+#endif
 #endif //READER_EVIC_H

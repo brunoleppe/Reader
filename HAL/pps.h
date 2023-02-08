@@ -121,10 +121,15 @@ typedef uint32_t PPS_AlternateFunction;
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 void PPS_pin_mapping(PPS_Register reg, PPS_AlternateFunction af);
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #define PPS_GROUP_1_INPUT_MAPPING_RPD2              0x0
 #define PPS_GROUP_1_INPUT_MAPPING_RPG8              0x1

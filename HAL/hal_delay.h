@@ -18,9 +18,16 @@
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 void HAL_delay_ms(uint32_t ms);
 void HAL_delay_us(uint32_t us);
 void HAL_delay_cy(uint32_t cy);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif //HAL_DELAY_H

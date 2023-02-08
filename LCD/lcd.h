@@ -25,7 +25,9 @@ typedef enum{
     LCD_COLOR_GRAY  = 7,
     LCD_COLOR_WHITE = 0,
 }LCD_COLOR;
-
+#ifdef __cplusplus
+extern "C"{
+#endif
 int     LCD_init        (SPI_Handler handler, GPIO_PIN cs, GPIO_PIN bla, GPIO_PIN dc, GPIO_PIN rst);
 void    LCD_draw_point  (int x, int y, LCD_COLOR color);
 void    LCD_draw_hline  (int x, int y, int length, LCD_COLOR color);
@@ -36,5 +38,7 @@ void    LCD_draw_char   (int x, int y, char c, LCD_Fonts font, LCD_COLOR color);
 void    LCD_draw_string (int x, int y, char *str, LCD_Fonts font, LCD_COLOR color);
 void    LCD_draw_bitmap (int x, int y, const uint8_t *bitmap, size_t bitmap_size);
 void    LCD_print       ( void );
-
+#ifdef __cplusplus
+}
+#endif
 #endif //LCD_H

@@ -40,9 +40,15 @@ typedef struct{
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
+#ifdef __cplusplus
+extern "C"{
+#endif
 int DMA_init();
 DMA_CHANNEL DMA_free_channel_get();
 int DMA_channel_init(DMA_CHANNEL channel);
 int DMA_channel_config(DMA_CHANNEL channel, DMA_CHANNEL_Config *config);
 int DMA_channel_transfer(DMA_CHANNEL channel);
+#ifdef __cplusplus
+}
+#endif
 #endif //DMA_H
