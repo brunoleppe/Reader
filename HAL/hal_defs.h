@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "hal_defs.h"
 
 typedef uint32_t WORD;
 
