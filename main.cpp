@@ -83,7 +83,7 @@ static void lcd_task(void *params)
     int x=0,y=0;
     while(1){
         LCD_print();
-        vTaskDelay(100);
+        vTaskDelay(17);
         GPIO_pin_toggle(LCD_SS);
         LCD_draw_point(x++,y,LCD_COLOR_BLACK);
         if(x>=240){
