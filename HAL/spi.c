@@ -15,13 +15,12 @@
 #include "spi.h"
 #include "pic32mz_registers.h"
 #include "hal_delay.h"
-#include "dma.h"
 #include <xc.h>
-#include <sys/kmem.h>
 /**********************************************************************
 * Module Preprocessor Constants
 **********************************************************************/
-
+#define SPI_BASE                        _SPI1_BASE_ADDRESS
+#define SPI_DESCRIPTOR(channel)         ((SPI_Descriptor)(((uint8_t*)(&SPI1CON)) + 0x200*(channel)))
 /**********************************************************************
 * Module Preprocessor Macros
 **********************************************************************/
@@ -33,209 +32,159 @@
 /*********************************************************************
 * Module Variable Definitions
 **********************************************************************/
-SPI_Descriptor spiDescriptors[] = {
-        (SPI_Descriptor)&SPI1CON, (SPI_Descriptor)&SPI2CON, (SPI_Descriptor)&SPI3CON,
-        (SPI_Descriptor)&SPI4CON, (SPI_Descriptor)&SPI5CON, (SPI_Descriptor)&SPI6CON
-};
-volatile uint32_t * const sdir[] = {
-        &SDI1R, &SDI2R, &SDI3R, &SDI4R, &SDI5R, &SDI6R
-};
+
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
-static uint32_t _SPI_Baudrate_Get(uint32_t baudrate);
+static uint32_t SPI_Baudrate_Get_(uint32_t baudrate);
 /**********************************************************************
 * Function Definitions
 **********************************************************************/
 
-int SPI_Init(SPI_Handler handler, SPI_CHANNEL channel, SPI_Setup *setup) {
-    if (handler == NULL)
-        return -1;
-    if (setup == NULL)
-        return -1;
-    handler->setup = *setup;
-    handler->channel = channel;
+int SPI_initialize(uint32_t spiChannel, uint32_t configFlags, uint32_t baudrate)
+{
 
-    /*Apagar SPI y resetear registro*/
-    spiDescriptors[channel]->spicon1.reg = 0;
-
-    /*Vaciar el buffer de recepción*/
-    uint32_t data = spiDescriptors[channel]->spibuf.reg;
-    data = data;
-
-    /*Establecer el generador de baudios*/
-    uint32_t brg = _SPI_Baudrate_Get(handler->setup.baudrate);
-    if (brg > 0x1FF) {
-        /*ERROR*/
-        handler->error = SPI_ERROR_BAUDRATE_TOO_LOW;
-        return -1;
-    }
-    spiDescriptors[channel]->spibrg.reg = brg;
-
-    /*Limpiar la bandera de overflow*/
-    spiDescriptors[channel]->spistat.clr = _SPI1STAT_SPIROV_MASK;
-
-    /*Configurar registros de control*/
-    if (handler->setup.mastermode == SPI_MASTER)
-        spiDescriptors[channel]->spicon1.set = _SPI1CON_MSTEN_MASK;
-    if (handler->setup.sample == SPI_SAMPLE_END)
-        spiDescriptors[channel]->spicon1.set = _SPI1CON_SMP_MASK;
+    /*Clear Control register*/
+    SPI_DESCRIPTOR(spiChannel)->spicon1.reg = 0;
+    /*Clear RX FIFO*/
+    uint32_t data = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
+    (void)data;
+    /*Configure Baudrate Generator*/
+    uint32_t brg = SPI_Baudrate_Get_(baudrate);
+//    if (brg > 0x1FF) {
+//        /*ERROR*/
+//        return -1;
+//    }
+    SPI_DESCRIPTOR(spiChannel)->spibrg.reg = brg;
+    SPI_DESCRIPTOR(spiChannel)->spistat.clr = _SPI1STAT_SPIROV_MASK;
+    /*Configure SPI as master*/
+    if((configFlags & SPI_MASTER))//master
+        SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_MSTEN_MASK;
+    /*Configure input sample phase bit*/
+    if(configFlags & SPI_SAMPLE_END)
+        SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_SMP_MASK;
 
     /*SPI MODE Configuration*/
     uint32_t cke = 1, ckp = 0;/*SPI_MODE_0*/
-    switch (handler->setup.mode) {
-        case SPI_MODE_0:
-            cke = 1;
-            ckp = 0;
-            break;
-        case SPI_MODE_1:
-            cke = ckp = 0;
-            break;
-        case SPI_MODE_2:
-            cke = ckp = 1;
-            break;
-        case SPI_MODE_3:
-            cke = 0;
-            ckp = 1;
-            break;
+    if(configFlags & SPI_MODE_1) {
+        cke = ckp = 0;
     }
-    spiDescriptors[channel]->spicon1.clr = _SPI1CON_CKP_MASK | _SPI1CON_CKE_MASK;
-    spiDescriptors[channel]->spicon1.set = (cke << _SPI1CON_CKE_POSITION) |
-                                           (ckp << _SPI1CON_CKP_POSITION);
-
-
-    /*Encender SPI*/
-    spiDescriptors[channel]->spicon1.set = _SPI1CON_ON_MASK;
-
-    DMA_CHANNEL _dma_channel = DMA_CHANNEL_0;
-    DMA_channel_init(_dma_channel);
+    else if(configFlags & SPI_MODE_2){
+        cke = ckp = 1;
+    }
+    else if(configFlags & SPI_MODE_3){
+        cke = 0;
+        ckp = 1;
+    }
+    SPI_DESCRIPTOR(spiChannel)->spicon1.clr = _SPI1CON_CKP_MASK | _SPI1CON_CKE_MASK;
+    SPI_DESCRIPTOR(spiChannel)->spicon1.set = (cke << _SPI1CON_CKE_POSITION) | (ckp << _SPI1CON_CKP_POSITION);
+    /*SPI data bits configuration*/
+    if(configFlags & SPI_DATA_BITS_16)
+        SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_MODE16_MASK;
+    else if(configFlags & SPI_DATA_BITS_32)
+        SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_MODE32_MASK;
+//    /*SPI SDO disable configuration*/
+//    if(configFlags & SPI_SDO_DISABLE)
+//        SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_DISSDO_MASK;
+//    /*SPI SDI disable configuration*/
+//    if(configFlags & SPI_SDI_DISABLE)
+//        SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_DISSDI_MASK;
+    /*SPI SS enable configuration*/
+    if(configFlags & SPI_SS_ENABLE)
+        SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_SSEN_MASK;
+    /*Turn on SPI peripheral*/
+    SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_ON_MASK;
     return 0;
 }
 
-int SPI_Transfer(SPI_Handler handler, void *txBuffer, void *rxBuffer, size_t size)
+size_t SPI_transfer(uint32_t spiChannel, const SPI_TransferSetup *setup, void *txBuffer, void *rxBuffer, size_t size)
 {
     size_t txCount = 0;
     size_t rxCount = 0;
     uint8_t receivedData;
-
-//    spiDescriptors[handler->setup.channel];
-
-    /*Error handling*/
-    if(handler == NULL)
-        return -1;
     if(txBuffer == NULL && rxBuffer == NULL){
-        /*ERROR NULL buffers*/
-        handler->error = SPI_ERROR_NULL_BUFFERS;
-        if(handler->errorCallback != NULL){
-            handler->errorCallback(handler);
-        }
         return -1;
     }
     if(size == 0){
-        /*ERROR size is 0*/
         return 0;
     }
 
-    /*Transferencia*/
+    /*Transfer*/
 
-    /*Limpiar bandera de overflow*/
-    spiDescriptors[handler->channel]->spistat.clr = _SPI1STAT_SPIROV_MASK;
+    /*Overflow-bit clear*/
+    SPI_DESCRIPTOR(spiChannel)->spistat.clr = _SPI1STAT_SPIROV_MASK;
 
-    /*Vaciar FIFO de recepción*/
-    while ((bool)(spiDescriptors[handler->channel]->spistat.reg & _SPI1STAT_SPIRBE_MASK) == false)
-        receivedData = spiDescriptors[handler->channel]->spibuf.reg;
+    /*Empty RX FIFO*/
+    while ((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK) == false) {
+        receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
+    }
 
 
-    /*Esperar que el FIFO de transmisión esté vacío*/
-    while((bool)(spiDescriptors[handler->channel]->spistat.reg & _SPI1STAT_SPITBE_MASK) == false);
+    /*Wait for TX FIFO to empty*/
+    while((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPITBE_MASK) == false);
 
     while(size--){
 
-        /*Escritura de bytes*/
+        /*Write Byte*/
         if(txBuffer != NULL){
-            spiDescriptors[handler->channel]->spibuf.reg = ((uint8_t*)txBuffer)[txCount++];
+            SPI_DESCRIPTOR(spiChannel)->spibuf.reg = ((uint8_t*)txBuffer)[txCount++];
         }
         else{
-            spiDescriptors[handler->channel]->spibuf.reg = handler->dummyByte;/*DUMMY*/
+            SPI_DESCRIPTOR(spiChannel)->spibuf.reg = 0xFF;/*DUMMY*/
         }
 
         /*Recepción*/
 
-        /*Esperar a que el buffer de RX se llene con bytes*/
-        while((spiDescriptors[handler->channel]->spistat.reg & _SPI1STAT_SPIRBE_MASK) == _SPI1STAT_SPIRBE_MASK);
+        /*Wait for RX FIFO*/
+        while((SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK) == _SPI1STAT_SPIRBE_MASK);
 
-        /*Leer el FIFO RX*/
-        receivedData = spiDescriptors[handler->channel]->spibuf.reg;
+        /*Read RX FIFO*/
+        receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
         if(rxBuffer != NULL){
             ((uint8_t*)rxBuffer)[rxCount++] = receivedData;
         }
+        if(setup->stopCharEnable && (receivedData == setup->stopChar))
+            return rxCount;
 
-        /*Byte transmit delay, useful for QTouch comms*/
-        if(handler->usDelay >= 0){
-            HAL_delay_us(handler->usDelay);
-        }
+        if(setup->usDelay != 0)
+            HAL_delay_us(setup->usDelay);
 
     }
 
-    /*Esperar que el registro de desplazamiento esté vacío*/
-    while ((bool)((spiDescriptors[handler->channel]->spistat.reg & _SPI1STAT_SRMT_MASK) == false));
+    /*Wait for TX FIFO to empty*/
+    while ((bool)((SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SRMT_MASK) == false));
     return txCount;
 }
 
-uint8_t SPI_TransferByte(SPI_Handler handler, uint8_t data)
+uint8_t SPI_byte_transfer(uint32_t spiChannel, uint8_t data)
 {
     uint8_t receivedData;
 
-    if(handler == NULL)
-        return 0;
-
-    SPI_Descriptor instance = spiDescriptors[handler->channel];
-
     /*Limpiar bandera de overflow*/
-    instance->spistat.clr = _SPI1STAT_SPIROV_MASK;
+    SPI_DESCRIPTOR(spiChannel)->spistat.clr = _SPI1STAT_SPIROV_MASK;
 
     /*Vaciar FIFO de recepción*/
-    while ((bool)(instance->spistat.reg & _SPI1STAT_SPIRBE_MASK) == false)
-        receivedData = instance->spibuf.reg;
+    while ((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK) == false) {
+        receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
+        (void)receivedData;
+    }
 
     /*Esperar que el FIFO de transmisión esté vacío*/
-    while((bool)(instance->spistat.reg & _SPI1STAT_SPITBE_MASK) == false);
+    while((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPITBE_MASK) == false);
 
     /*Enviar el byte*/
-    instance->spibuf.reg = data;
+    SPI_DESCRIPTOR(spiChannel)->spibuf.reg = data;
 
     /*Esperar a que el buffer de RX se llene con bytes*/
-    while((instance->spistat.reg & _SPI1STAT_SPIRBE_MASK) == _SPI1STAT_SPIRBE_MASK);
+    while((SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK) == _SPI1STAT_SPIRBE_MASK);
 
     /*Leer el FIFO RX*/
-    receivedData = instance->spibuf.reg;
+    receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
 
     return receivedData;
 }
 
-int SPI_InputMapping(SPI_CHANNEL channel, GPIO_ALTERNATE_FUNCTION alternate_function)
-{
-    *sdir[channel] = 0xf & alternate_function;
-    return 0;
-}
-
-int SPI_dma_transfer(const SPI_Handler handler, void *txBuffer, void *rxBuffer, size_t size)
-{
-
-    DMA_CHANNEL channel = DMA_CHANNEL_0;
-    DMA_CHANNEL_Config config = {
-            .src_phy_address = KVA_TO_PA(txBuffer),
-            .dst_phy_address = KVA_TO_PA(&spiDescriptors[handler->channel]->spibuf.reg),
-            .src_size = size,
-            .transfer_size = size,
-            .dst_size = 1,
-    };
-    DMA_channel_config(channel, &config);
-    DMA_channel_transfer(channel);
-    return 0;
-}
-
-static uint32_t _SPI_Baudrate_Get(uint32_t baudrate){
+static uint32_t SPI_Baudrate_Get_(uint32_t baudrate){
     uint32_t clock;
     uint32_t brg;
     uint32_t error;
@@ -248,5 +197,4 @@ static uint32_t _SPI_Baudrate_Get(uint32_t baudrate){
         brg++;
 
     return brg;
-
 }
