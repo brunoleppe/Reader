@@ -79,9 +79,13 @@
 **********************************************************************/
 typedef bool GPIO_STATE;
 typedef bool GPIO_IRQ_STATE;
-typedef uint32_t GPIO_PIN;
+
+typedef uint32_t GPIO_Pin;
+typedef uint32_t GPIO_Port;
+typedef uint32_t GPIO_PinMap;
+
 typedef uint32_t GPIO_ALTERNATE_FUNCTION;
-typedef void (*GPIO_CALLBACK)(GPIO_PIN);
+typedef void (*GPIO_CALLBACK)(GPIO_Pin);
 
 typedef struct{
     uint32_t pin;
@@ -95,15 +99,15 @@ typedef struct{
 extern "C"{
 #endif
     
-void    GPIO_pin_initialize             (uint32_t pin, int flags);
-void    GPIO_pin_deinitialize           (uint32_t pin);
-bool    GPIO_pin_read                   (uint32_t pin);
-void    GPIO_pin_write                  (uint32_t pin, bool value);
-void    GPIO_pin_toggle                 (uint32_t pin);
-void    GPIO_pin_interrupt_set          (uint32_t pin, bool state);
+void    GPIO_pin_initialize             (GPIO_PinMap pin, int flags);
+void    GPIO_pin_deinitialize           (GPIO_PinMap pin);
+bool    GPIO_pin_read                   (GPIO_PinMap pin);
+void    GPIO_pin_write                  (GPIO_PinMap pin, bool value);
+void    GPIO_pin_toggle                 (GPIO_PinMap pin);
+void    GPIO_pin_interrupt_set          (GPIO_PinMap pin, bool state);
 
-void    GPIO_pin_interrupt_callback     (uint32_t pin);
-void    GPIO_interrupt_handler          (uint32_t port);
+void    GPIO_pin_interrupt_callback     (GPIO_PinMap pin);
+void    GPIO_interrupt_handler          (GPIO_Port port);
 
 
 #ifdef __cplusplus

@@ -12,7 +12,7 @@
 #include <vector>
 
 typedef struct{
-    GPIO_PIN pin_number;
+    GPIO_PinMap pinMap;
     int delay_ms;
 }PinParams;
 
@@ -21,11 +21,11 @@ static void lcd_task(void *params);
 static void qt_task(void *params);
 
 static const PinParams pinParamsLed1 = {
-        .pin_number = LED1,
+        .pinMap = LED1,
         .delay_ms = 500
 };
 static const PinParams pinParamsLed2 = {
-        .pin_number = LED2,
+        .pinMap = LED2,
         .delay_ms = 500
 };
 
@@ -124,7 +124,7 @@ static void blink(void *params)
     PinParams *p = (PinParams*)params;
     while(1){
         /*Toggle pin B6 every ~500ms*/
-        GPIO_pin_toggle(p->pin_number);
+        GPIO_pin_toggle(p->pinMap);
         vTaskDelay(p->delay_ms);
     }
 }

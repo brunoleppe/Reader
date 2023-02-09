@@ -14,6 +14,7 @@
 #define GPIO_BASE_PORT                  (GPIO_Descriptor)&ANSELA
 #define GPIO_PORT(port)                 ((GPIO_Descriptor)(((uint8_t*)&ANSELA)+0x100*(port)))
 #define GPIO_PORT_IRQ_CHANNEL(port)     (EVIC_CHANNEL_CHANGE_NOTICE_A+(port))
+#define GPIO_PIN(val)                   (val & GPIO_PIN_MASK)
 /*********************************************************************
 * Module Preprocessor Macros
 **********************************************************************/
@@ -34,90 +35,90 @@
 /**********************************************************************
 * Function Definitions
 **********************************************************************/
-void    GPIO_pin_initialize             (uint32_t pin, int flags)
+void    GPIO_pin_initialize             (GPIO_PinMap pin, int flags)
 {
 
     if(flags & GPIO_ANALOG) {
-        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->ansel.set = pin;
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->ansel.set = GPIO_PIN(pin);
         return;
     }
 
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->ansel.clr = pin;
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->ansel.clr = GPIO_PIN(pin);
     if(flags & GPIO_OUTPUT){
-        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->tris.clr = pin;
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->tris.clr = GPIO_PIN(pin);
         if(flags & GPIO_OPENDRAIN)
-            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->odc.set = pin;
+            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->odc.set = GPIO_PIN(pin);
         if(flags & GPIO_SLOWEST) {
-            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.set = pin;
-            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.set = pin;
+            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.set = GPIO_PIN(pin);
+            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.set = GPIO_PIN(pin);
         }
         else if(flags & GPIO_SLOW) {
-            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.clr = pin;
-            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.set = pin;
+            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.clr = GPIO_PIN(pin);
+            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.set = GPIO_PIN(pin);
         }
         else if(flags & GPIO_FAST) {
-            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.set = pin;
-            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.clr = pin;
+            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.set = GPIO_PIN(pin);
+            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.clr = GPIO_PIN(pin);
         }
         return;
     }
 
     if(flags & GPIO_PULLUP)
-        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpu.set = pin;
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpu.set = GPIO_PIN(pin);
     else if(flags & GPIO_PULLDOWN)
-        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpd.set = pin;
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpd.set = GPIO_PIN(pin);
 
     if(flags & GPIO_IRQ) {
-        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnen.set = pin;
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnen.set = GPIO_PIN(pin);
         GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cncon.set = _CNCONA_ON_MASK;
     }
 }
-void    GPIO_pin_deinitialize           (uint32_t pin)
+void    GPIO_pin_deinitialize           (GPIO_PinMap pin)
 {
 
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->ansel.set = pin;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->tris.set = pin;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.clr = pin;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->port.clr = pin;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.clr = pin;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.clr = pin;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpd.clr = pin;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpu.clr = pin;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->odc.clr = pin;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnen.clr = pin;
-    if((GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnen.reg & pin) == 0)
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->ansel.set = GPIO_PIN(pin);
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->tris.set = GPIO_PIN(pin);
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.clr = GPIO_PIN(pin);
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->port.clr = GPIO_PIN(pin);
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.clr = GPIO_PIN(pin);
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.clr = GPIO_PIN(pin);
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpd.clr = GPIO_PIN(pin);
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpu.clr = GPIO_PIN(pin);
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->odc.clr = GPIO_PIN(pin);
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnen.clr = GPIO_PIN(pin);
+    if((GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnen.reg & GPIO_PIN(pin)) == 0)
         GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cncon.clr = _CNCONA_ON_MASK;
 }
-bool    GPIO_pin_read              (uint32_t pin)
+bool    GPIO_pin_read              (GPIO_PinMap pin)
 {
 
-    return (GPIO_PORT(pin>>GPIO_PORT_SHIFT)->port.reg & pin) == pin;
+    return (GPIO_PORT(pin>>GPIO_PORT_SHIFT)->port.reg & GPIO_PIN(pin)) == GPIO_PIN(pin);
 }
-void    GPIO_pin_write             (uint32_t pin, bool value)
+void    GPIO_pin_write             (GPIO_PinMap pin, bool value)
 {
 
     if(value){
-        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.set = pin;
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.set = GPIO_PIN(pin);
     }
     else{
-        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.clr = pin;
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.clr = GPIO_PIN(pin);
     }
 }
-void    GPIO_pin_toggle            (uint32_t pin)
+void    GPIO_pin_toggle            (GPIO_PinMap pin)
 {
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.inv = pin;
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.inv = GPIO_PIN(pin);
 }
-void    GPIO_pin_interrupt_set     (uint32_t pin, bool state)
-{
-
-}
-
-HAL_WEAK_FUNCTION void    GPIO_pin_interrupt_callback     (uint32_t pin)
+void    GPIO_pin_interrupt_set     (GPIO_PinMap pin, bool state)
 {
     (void)pin;
 }
 
-void GPIO_interrupt_handler(uint32_t port)
+HAL_WEAK_FUNCTION void    GPIO_pin_interrupt_callback     (GPIO_PinMap pin)
+{
+    (void)pin;
+}
+
+void GPIO_interrupt_handler(GPIO_Port port)
 {
     uint32_t status;
 
@@ -127,5 +128,5 @@ void GPIO_interrupt_handler(uint32_t port)
     GPIO_PORT(port)->port.reg;
 
     EVIC_channel_pending_clear(GPIO_PORT_IRQ_CHANNEL(port));
-    GPIO_pin_interrupt_callback(status);
+    GPIO_pin_interrupt_callback(status | (port << GPIO_PORT_SHIFT));
 }

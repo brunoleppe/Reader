@@ -26,10 +26,10 @@ struct LCD{
     SPI_Handler handler;
     uint8_t *lcd_buffer;
     int lcd_size;
-    GPIO_PIN cs_pin;
-    GPIO_PIN bla_pin;
-    GPIO_PIN dc_pin;
-    GPIO_PIN rst_pin;
+    GPIO_PinMap cs_pin;
+    GPIO_PinMap bla_pin;
+    GPIO_PinMap dc_pin;
+    GPIO_PinMap rst_pin;
 };
 typedef struct{
     uint8_t     bytes;      ///< Cantidad de bytes por caracter.
@@ -402,7 +402,7 @@ static LCD_COLOR LCD_color_inverse(LCD_COLOR color);
 /**********************************************************************
 * Function Definitions
 **********************************************************************/
-int     LCD_init        (SPI_Handler handler, GPIO_PIN cs, GPIO_PIN bla, GPIO_PIN dc, GPIO_PIN rst)
+int     LCD_init        (SPI_Handler handler, GPIO_PinMap cs, GPIO_PinMap bla, GPIO_PinMap dc, GPIO_PinMap rst)
 {
     lcd.handler = handler;
     lcd.bla_pin = bla;
