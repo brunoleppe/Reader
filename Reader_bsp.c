@@ -76,8 +76,6 @@ void    GPIO_pin_interrupt_callback     (uint32_t pin)
 
 static void qt_change_callback(uint32_t pin)
 {
-    uint32_t array[pin];
-    array[pin-1] = LED4;
     if(GPIO_pin_read(QT_CHANGE) == GPIO_LOW)
-        GPIO_pin_toggle(array[pin-1]);
+        GPIO_pin_toggle(LED4);
 }

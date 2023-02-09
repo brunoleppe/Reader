@@ -36,78 +36,76 @@
 **********************************************************************/
 void    GPIO_pin_initialize             (uint32_t pin, int flags)
 {
-    uint32_t pins = 1 << (pin & GPIO_PIN_MASK);
 
     if(flags & GPIO_ANALOG) {
-        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->ansel.set = pins;
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->ansel.set = pin;
         return;
     }
 
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->ansel.clr = pins;
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->ansel.clr = pin;
     if(flags & GPIO_OUTPUT){
-        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->tris.clr = pins;
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->tris.clr = pin;
         if(flags & GPIO_OPENDRAIN)
-            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->odc.set = pins;
+            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->odc.set = pin;
         if(flags & GPIO_SLOWEST) {
-            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.set = pins;
-            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.set = pins;
+            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.set = pin;
+            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.set = pin;
         }
         else if(flags & GPIO_SLOW) {
-            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.clr = pins;
-            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.set = pins;
+            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.clr = pin;
+            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.set = pin;
         }
         else if(flags & GPIO_FAST) {
-            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.set = pins;
-            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.clr = pins;
+            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.set = pin;
+            GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.clr = pin;
         }
         return;
     }
 
     if(flags & GPIO_PULLUP)
-        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpu.set = pins;
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpu.set = pin;
     else if(flags & GPIO_PULLDOWN)
-        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpd.set = pins;
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpd.set = pin;
 
     if(flags & GPIO_IRQ) {
-        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnen.set = pins;
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnen.set = pin;
         GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cncon.set = _CNCONA_ON_MASK;
     }
 }
 void    GPIO_pin_deinitialize           (uint32_t pin)
 {
-    uint32_t pins = 1 << (pin & GPIO_PIN_MASK);
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->ansel.set = pins;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->tris.set = pins;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.clr = pins;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->port.clr = pins;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.clr = pins;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.clr = pins;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpd.clr = pins;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpu.clr = pins;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->odc.clr = pins;
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnen.clr = pins;
-    if((GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnen.reg & pins) == 0)
+
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->ansel.set = pin;
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->tris.set = pin;
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.clr = pin;
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->port.clr = pin;
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon1.clr = pin;
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->srcon0.clr = pin;
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpd.clr = pin;
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnpu.clr = pin;
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->odc.clr = pin;
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnen.clr = pin;
+    if((GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnen.reg & pin) == 0)
         GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cncon.clr = _CNCONA_ON_MASK;
 }
 bool    GPIO_pin_read              (uint32_t pin)
 {
-    uint32_t pins = 1 << (pin & GPIO_PIN_MASK);
-    return (GPIO_PORT(pin>>GPIO_PORT_SHIFT)->port.reg & pins) == pins;
+
+    return (GPIO_PORT(pin>>GPIO_PORT_SHIFT)->port.reg & pin) == pin;
 }
 void    GPIO_pin_write             (uint32_t pin, bool value)
 {
-    uint32_t pins = 1 << (pin & GPIO_PIN_MASK);
+
     if(value){
-        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.set = pins;
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.set = pin;
     }
     else{
-        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.clr = pins;
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.clr = pin;
     }
 }
 void    GPIO_pin_toggle            (uint32_t pin)
 {
-    uint32_t pins = 1 << (pin & GPIO_PIN_MASK);
-    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.inv = pins;
+    GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.inv = pin;
 }
 void    GPIO_pin_interrupt_set     (uint32_t pin, bool state)
 {

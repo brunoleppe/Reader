@@ -9,6 +9,7 @@
 #include "hal_delay.h"
 #include "TestClass.h"
 #include <string>
+#include <vector>
 
 typedef struct{
     GPIO_PIN pin_number;
@@ -30,7 +31,6 @@ static const PinParams pinParamsLed2 = {
 
 
 int main(void){
-
     /*Initialize processor*/
     Initialize();
     /*Create a FreeRTOS Task*/
@@ -67,7 +67,7 @@ static void qt_task(void *params)
     vTaskDelay(100);
 
     while(1){
-        vTaskDelay(20);
+        vTaskDelay(500);
         if(GPIO_pin_read(QT_CHANGE) == GPIO_LOW)
         {
             uint8_t read_key[] = {0xC1, 0x00, 0x00};
@@ -94,10 +94,8 @@ static void lcd_task(void *params)
     LCD_init(__spi, LCD_SS, LCD_BLA, LCD_DC, LCD_RST);
 
     LCD_draw_bitmap(0,0,bitmap,sizeof(bitmap));
-
-    TestClass t(0,0,0);
     std::string s = "Hola Mundo";
-    LCD_draw_string(t.sum(),t.sum(),(char*)s.c_str(),LCD_FONT_MEDIUM,LCD_COLOR_BLACK);
+    LCD_draw_string(0,1,(char*)s.c_str(),LCD_FONT_MEDIUM,LCD_COLOR_BLACK);
 
     int x=0,y=0;
     while(1){
