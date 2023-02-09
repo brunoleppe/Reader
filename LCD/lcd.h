@@ -28,7 +28,7 @@ typedef enum{
 #ifdef __cplusplus
 extern "C"{
 #endif
-int     LCD_init        (SPI_Handler handler, GPIO_PinMap cs, GPIO_PinMap bla, GPIO_PinMap dc, GPIO_PinMap rst);
+int     LCD_init        (uint32_t spiChannel, GPIO_PinMap cs, GPIO_PinMap bla, GPIO_PinMap dc, GPIO_PinMap rst);
 void    LCD_draw_point  (int x, int y, LCD_COLOR color);
 void    LCD_draw_hline  (int x, int y, int length, LCD_COLOR color);
 void    LCD_draw_vline  (int x, int y, int length, LCD_COLOR color);

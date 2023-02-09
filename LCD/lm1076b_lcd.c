@@ -23,7 +23,7 @@
 * Module Typedefs
 **********************************************************************/
 struct LCD{
-    SPI_Handler handler;
+    uint32_t spiChannel;
     uint8_t *lcd_buffer;
     int lcd_size;
     GPIO_PinMap cs_pin;
@@ -393,7 +393,11 @@ static const LCD_Font *fonts[]={
         [LCD_FONT_SMALL]        = &small,
         [LCD_FONT_MEDIUM]       = &medium
 };
-
+static const SPI_TransferSetup setup = {
+        .usDelay = 0,
+        .stopCharEnable = 0,
+        .stopChar = 0,
+};
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
@@ -402,9 +406,9 @@ static LCD_COLOR LCD_color_inverse(LCD_COLOR color);
 /**********************************************************************
 * Function Definitions
 **********************************************************************/
-int     LCD_init        (SPI_Handler handler, GPIO_PinMap cs, GPIO_PinMap bla, GPIO_PinMap dc, GPIO_PinMap rst)
+int     LCD_init        (uint32_t spiChannel, GPIO_PinMap cs, GPIO_PinMap bla, GPIO_PinMap dc, GPIO_PinMap rst)
 {
-    lcd.handler = handler;
+    lcd.spiChannel = spiChannel;
     lcd.bla_pin = bla;
     lcd.cs_pin = cs;
     lcd.dc_pin = dc;
@@ -425,7 +429,7 @@ int     LCD_init        (SPI_Handler handler, GPIO_PinMap cs, GPIO_PinMap bla, G
 
     GPIO_pin_write(lcd.dc_pin, GPIO_LOW);
     GPIO_pin_write(lcd.cs_pin, GPIO_LOW);
-    SPI_Transfer(lcd.handler,config_buffer,NULL,sizeof(config_buffer));
+    SPI_transfer(lcd.spiChannel, &setup, config_buffer, NULL, sizeof(config_buffer));
     GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
 
     vTaskDelay(10);
@@ -511,9 +515,9 @@ void    LCD_print       ( void )
 
     GPIO_pin_write(lcd.dc_pin, GPIO_HIGH);
     GPIO_pin_write(lcd.cs_pin, GPIO_LOW);
-//    SPI_Transfer(lcd.handler, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
-    SPI_dma_transfer(lcd.handler, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
-//    GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
+    SPI_transfer(lcd.spiChannel, &setup, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
+//    SPI_dma_transfer(lcd.spiChannel, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
+    GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
 
 }
 
