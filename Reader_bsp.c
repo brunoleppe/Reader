@@ -53,6 +53,9 @@ void gpio_initialize( void )
 
     SYS_Lock();
 
+    SPI_initialize(LCD_SPI_CHANNEL, SPI_MASTER | SPI_SDI_DISABLE | SPI_MODE_3, 20000000);
+    SPI_initialize(QT_SPI_CHANNEL, SPI_MASTER | SPI_MODE_3 | SPI_SAMPLE_END, 1000000);
+
 }
 
 void interrupts_initialize( void )
