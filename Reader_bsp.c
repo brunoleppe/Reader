@@ -68,7 +68,7 @@ void interrupts_initialize( void )
 void    GPIO_pin_interrupt_callback     (uint32_t pin)
 {
     for(int i=0; i<sizeof(pinCallbackObj)/sizeof(GPIO_CALLBACK_OBJECT); i++){
-        if(((1 << pinCallbackObj[i].pin) & pin) && (pinCallbackObj[i].callback != NULL) ){
+        if((pinCallbackObj[i].pin & pin) && (pinCallbackObj[i].callback != NULL) ){
             pinCallbackObj[i].callback(pinCallbackObj[i].pin);
         }
     }
