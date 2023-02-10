@@ -83,6 +83,8 @@ typedef struct{
     void            *txBuffer;
     void            *rxBuffer;
     size_t          count;
+    size_t          rxSize;
+    size_t          txSize;
 }SPI_Object;
 
 ///**

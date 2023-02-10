@@ -15,12 +15,16 @@
 #include "spi.h"
 #include "pic32mz_registers.h"
 #include "hal_delay.h"
+#include "evic.h"
 #include <xc.h>
 /**********************************************************************
 * Module Preprocessor Constants
 **********************************************************************/
 #define SPI_BASE                            _SPI1_BASE_ADDRESS
 #define SPI_NUMBER_OF_CHANNELS              (6)
+#define SPI_IRQ_RX_CHANNEL(base)            ((base) + 1)
+#define SPI_IRQ_TX_CHANNEL(base)            ((base) + 1)
+
 /**********************************************************************
 * Module Preprocessor Macros
 **********************************************************************/
@@ -33,6 +37,14 @@
 * Module Variable Definitions
 **********************************************************************/
 static SPI_Object spiObjects[SPI_NUMBER_OF_CHANNELS];
+//static const EVIC_CHANNEL spiIRQBase[SPI_NUMBER_OF_CHANNELS]={
+//        EVIC_CHANNEL_SPI1_FAULT,
+//        EVIC_CHANNEL_SPI2_FAULT,
+//        EVIC_CHANNEL_SPI3_FAULT,
+//        EVIC_CHANNEL_SPI4_FAULT,
+//        EVIC_CHANNEL_SPI5_FAULT,
+//        EVIC_CHANNEL_SPI6_FAULT,
+//};
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
@@ -123,6 +135,7 @@ size_t SPI_transfer(uint32_t spiChannel, const SPI_TransferSetup *setup, void *t
     /*Empty RX FIFO*/
     while ((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK) == false) {
         receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
+        (void)receivedData;
     }
 
 
@@ -188,10 +201,42 @@ size_t SPI_transfer(uint32_t spiChannel, const SPI_TransferSetup *setup, void *t
     spiObjects[spiChannel].busy = false;
     return spiObjects[spiChannel].count;
 }
-size_t      SPI_transfer_isr    (uint32_t spiChannel, const SPI_TransferSetup *setup, void *txBuffer, void *rxBuffer, size_t size)
-{
-
-}
+//size_t      SPI_transfer_isr    (uint32_t spiChannel, const SPI_TransferSetup *setup, void *txBuffer, void *rxBuffer, size_t size)
+//{
+//    uint32_t receivedData;
+//
+//    if(spiObjects[spiChannel].busy)
+//        return 0;
+//    if(txBuffer == NULL && rxBuffer == NULL)
+//        return -1;
+//    if(size == 0)
+//        return 0;
+//
+//    spiObjects[spiChannel].busy = true;
+//    spiObjects[spiChannel].rxBuffer = rxBuffer;
+//    spiObjects[spiChannel].txBuffer = txBuffer;
+//    spiObjects[spiChannel].count = 0;
+//    spiObjects[spiChannel].rxSize = size;
+//    spiObjects[spiChannel].txSize = size;
+//
+//    /*Overflow-bit clear*/
+//    SPI_DESCRIPTOR(spiChannel)->spistat.clr = _SPI1STAT_SPIROV_MASK;
+//
+//    /*Empty RX FIFO*/
+//    while ((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK) == false) {
+//        receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
+//        (void)receivedData;
+//    }
+//
+//    SPI_DESCRIPTOR(spiChannel)->spicon1.clr = _SPI1CON_SRXISEL_MASK | _SPI1CON_STXISEL_MASK;
+//    SPI_DESCRIPTOR(spiChannel)->spicon1.set = 0x00000001;
+//    EVIC_channel_clr(SPI_IRQ_RX_CHANNEL(spiIRQBase[spiChannel]));
+//    EVIC_channel_clr(SPI_IRQ_TX_CHANNEL(spiIRQBase[spiChannel]));
+//    EVIC_channel_pending_clear(SPI_IRQ_RX_CHANNEL(spiIRQBase[spiChannel]));
+//    EVIC_channel_pending_clear(SPI_IRQ_TX_CHANNEL(spiIRQBase[spiChannel]));
+//
+//    spi
+//}
 uint8_t SPI_byte_transfer(uint32_t spiChannel, uint8_t data)
 {
     uint8_t receivedData;
