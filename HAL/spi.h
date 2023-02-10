@@ -42,6 +42,8 @@
 /**********************************************************************
 * Preprocessor Constants
 **********************************************************************/
+
+
 #define SPI_CHANNEL_1                       (0)
 #define SPI_CHANNEL_2                       (1)
 #define SPI_CHANNEL_3                       (2)
@@ -64,6 +66,7 @@
 #define SPI_SDO_DISABLE                     (0x0100)
 #define SPI_SDI_DISABLE                     (0x0200)
 #define SPI_SS_ENABLE                       (0x0400)
+#define SPI_IRQ_ENABLE                      (0x0800)
 
 #define SPI_DEFAULT                         (SPI_MODE_0 | SPI_MASTER | SPI_SAMPLE_MID | SPI_DATA_BITS_8)
 /**********************************************************************
@@ -74,6 +77,14 @@ typedef struct{
     uint8_t         stopChar;
     bool            stopCharEnable;
 }SPI_TransferSetup;
+
+typedef struct{
+    bool            busy;
+    void            *txBuffer;
+    void            *rxBuffer;
+    size_t          count;
+}SPI_Object;
+
 ///**
 // * @brief Configuration table.
 // * This table is used to configure SPI peripherals on initialization function.
@@ -126,6 +137,7 @@ extern "C"{
 int         SPI_initialize      (uint32_t spiChannel, uint32_t configFlags, uint32_t baudrate);
 size_t      SPI_transfer        (uint32_t spiChannel, const SPI_TransferSetup *setup, void *txBuffer, void *rxBuffer, size_t size);
 uint8_t     SPI_byte_transfer   (uint32_t spiChannel, uint8_t data);
+size_t      SPI_transfer_isr    (uint32_t spiChannel, const SPI_TransferSetup *setup, void *txBuffer, void *rxBuffer, size_t size);
 //bool SPI_TransferSetup(const SPI_Handler spiChannel, SPI_Setup *setup);
 
 static inline

@@ -12,6 +12,6 @@ add_library(HAL
         spi.c spi.h
         system.c system.h
         evic.h evic.c
-        hal_delay.c hal_delay.h dma.c dma.h pps.c pps.h hal_defs.h hal_config.c)
+        hal_delay.c hal_delay.h dma.c dma.h pps.c pps.h hal_defs.h hal_config.h)
 set_target_properties(HAL PROPERTIES LINKER_LANGUAGE C)
 target_compile_options(HAL PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc)

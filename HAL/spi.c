@@ -19,12 +19,12 @@
 /**********************************************************************
 * Module Preprocessor Constants
 **********************************************************************/
-#define SPI_BASE                        _SPI1_BASE_ADDRESS
-#define SPI_DESCRIPTOR(channel)         ((SPI_Descriptor)(((uint8_t*)(&SPI1CON)) + 0x200*(channel)))
+#define SPI_BASE                            _SPI1_BASE_ADDRESS
+#define SPI_NUMBER_OF_CHANNELS              (6)
 /**********************************************************************
 * Module Preprocessor Macros
 **********************************************************************/
-
+#define SPI_DESCRIPTOR(channel)             ((SPI_Descriptor)(((uint8_t*)(SPI_BASE)) + 0x200*(channel)))
 /**********************************************************************
 * Module Typedefs
 **********************************************************************/
@@ -32,7 +32,7 @@
 /*********************************************************************
 * Module Variable Definitions
 **********************************************************************/
-
+static SPI_Object spiObjects[SPI_NUMBER_OF_CHANNELS];
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
@@ -99,9 +99,11 @@ int SPI_initialize(uint32_t spiChannel, uint32_t configFlags, uint32_t baudrate)
 
 size_t SPI_transfer(uint32_t spiChannel, const SPI_TransferSetup *setup, void *txBuffer, void *rxBuffer, size_t size)
 {
-    size_t txCount = 0;
-    size_t rxCount = 0;
-    uint8_t receivedData;
+    uint32_t receivedData;
+
+    if(spiObjects[spiChannel].busy)
+        return 0;
+
     if(txBuffer == NULL && rxBuffer == NULL){
         return -1;
     }
@@ -109,6 +111,10 @@ size_t SPI_transfer(uint32_t spiChannel, const SPI_TransferSetup *setup, void *t
         return 0;
     }
 
+    spiObjects[spiChannel].busy = true;
+    spiObjects[spiChannel].rxBuffer = rxBuffer;
+    spiObjects[spiChannel].txBuffer = txBuffer;
+    spiObjects[spiChannel].count = 0;
     /*Transfer*/
 
     /*Overflow-bit clear*/
@@ -123,14 +129,32 @@ size_t SPI_transfer(uint32_t spiChannel, const SPI_TransferSetup *setup, void *t
     /*Wait for TX FIFO to empty*/
     while((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPITBE_MASK) == false);
 
+    if(SPI_DESCRIPTOR(spiChannel)->spicon1.reg & _SPI1CON_MODE32_MASK){
+        size >>= 2;
+    }
+    else if(SPI_DESCRIPTOR(spiChannel)->spicon1.reg & _SPI1CON_MODE16_MASK){
+        size >>= 1;
+    }
+
     while(size--){
 
         /*Write Byte*/
-        if(txBuffer != NULL){
-            SPI_DESCRIPTOR(spiChannel)->spibuf.reg = ((uint8_t*)txBuffer)[txCount++];
+        if(spiObjects[spiChannel].txBuffer != NULL){
+            if(SPI_DESCRIPTOR(spiChannel)->spicon1.reg & _SPI1CON_MODE32_MASK){
+                SPI_DESCRIPTOR(
+                    spiChannel)->spibuf.reg = ((uint32_t*)spiObjects[spiChannel].txBuffer)[spiObjects[spiChannel].count];
+            }
+            else if(SPI_DESCRIPTOR(spiChannel)->spicon1.reg & _SPI1CON_MODE16_MASK){
+                SPI_DESCRIPTOR(
+                    spiChannel)->spibuf.reg = ((uint16_t*)spiObjects[spiChannel].txBuffer)[spiObjects[spiChannel].count];
+            }
+            else {
+                SPI_DESCRIPTOR(
+                    spiChannel)->spibuf.reg = ((uint8_t*)spiObjects[spiChannel].txBuffer)[spiObjects[spiChannel].count];
+            }
         }
         else{
-            SPI_DESCRIPTOR(spiChannel)->spibuf.reg = 0xFF;/*DUMMY*/
+            SPI_DESCRIPTOR(spiChannel)->spibuf.reg = 0xFFFFFFFF;/*DUMMY*/
         }
 
         /*Recepción*/
@@ -141,21 +165,33 @@ size_t SPI_transfer(uint32_t spiChannel, const SPI_TransferSetup *setup, void *t
         /*Read RX FIFO*/
         receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
         if(rxBuffer != NULL){
-            ((uint8_t*)rxBuffer)[rxCount++] = receivedData;
+            if(SPI_DESCRIPTOR(spiChannel)->spicon1.reg & _SPI1CON_MODE32_MASK){
+                ((uint32_t*)spiObjects[spiChannel].rxBuffer)[spiObjects[spiChannel].count] = receivedData;
+            }
+            else if(SPI_DESCRIPTOR(spiChannel)->spicon1.reg & _SPI1CON_MODE16_MASK){
+                ((uint16_t*)spiObjects[spiChannel].rxBuffer)[spiObjects[spiChannel].count] = receivedData;
+            }
+            else {
+                ((uint8_t*)spiObjects[spiChannel].rxBuffer)[spiObjects[spiChannel].count] = receivedData;
+            }
         }
         if(setup->stopCharEnable && (receivedData == setup->stopChar))
-            return rxCount;
+            return spiObjects[spiChannel].count;
 
         if(setup->usDelay != 0)
             HAL_delay_us(setup->usDelay);
-
+        spiObjects[spiChannel].count++;
     }
 
     /*Wait for TX FIFO to empty*/
     while ((bool)((SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SRMT_MASK) == false));
-    return txCount;
+    spiObjects[spiChannel].busy = false;
+    return spiObjects[spiChannel].count;
 }
+size_t      SPI_transfer_isr    (uint32_t spiChannel, const SPI_TransferSetup *setup, void *txBuffer, void *rxBuffer, size_t size)
+{
 
+}
 uint8_t SPI_byte_transfer(uint32_t spiChannel, uint8_t data)
 {
     uint8_t receivedData;

@@ -77,6 +77,7 @@
 /**********************************************************************
 * Typedefs
 **********************************************************************/
+#if defined (__LANGUAGE_C__) || defined (__LANGUAGE_C_PLUS_PLUS)
 typedef bool GPIO_STATE;
 typedef bool GPIO_IRQ_STATE;
 
@@ -114,7 +115,7 @@ void    GPIO_interrupt_handler          (GPIO_Port port);
 }
 #endif
 
-
+#endif
 
 
 #endif
