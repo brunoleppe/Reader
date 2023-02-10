@@ -68,6 +68,13 @@ typedef struct{
     struct MemRegister dchcptr;
     struct MemRegister dchdat;
 }volatile * const DMA_Descriptor;
+
+typedef struct{
+    struct MemRegister txcon;
+    struct MemRegister tmrx;
+    struct MemRegister prx;
+}volatile * const TMR_Descriptor;
+
 #ifdef	__cplusplus
 }
 #endif
