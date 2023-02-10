@@ -63,12 +63,8 @@ void gpio_initialize( void )
 
 void interrupts_initialize( void )
 {
-    EVIC_channel_state_Set(
-            EVIC_CHANNEL_CHANGE_NOTICE_E,
-            EVIC_STATE_ENABLED,
-            EVIC_PRIORITY_4,
-            EVIC_SUB_PRIORITY_2);
-
+    EVIC_channel_priority(EVIC_CHANNEL_CHANGE_NOTICE_E, EVIC_PRIORITY_4, EVIC_SUB_PRIORITY_2);
+    EVIC_channel_set(EVIC_CHANNEL_CHANGE_NOTICE_E);
 }
 
 void    GPIO_pin_interrupt_callback     (uint32_t pin)
