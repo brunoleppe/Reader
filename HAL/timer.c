@@ -10,7 +10,7 @@
 * Module Preprocessor Constants
 **********************************************************************/
 #define TMR_BASE                            _TMR2_BASE_ADDRESS
-#define TMR_NUMBER_OF_CHANNELS              (6)
+#define TMR_NUMBER_OF_CHANNELS              (8)
 
 /**********************************************************************
 * Module Preprocessor Macros
@@ -25,7 +25,7 @@
 **********************************************************************/
 static const uint32_t prescalerTable[] = {
     1,2,4,8,16,32,64,256
-}
+};
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
@@ -43,11 +43,11 @@ void        TMR_initialize(uint32_t channel, uint32_t flags, uint32_t frequency)
         TMR_DESCRIPTOR(channel)->txcon.set = _T2CON_T32_MASK;
 
     TMR_DESCRIPTOR(channel)->tmrx.reg = 0;
-    TMR_DESCRIPTOR(channel)->prx.reg = TMR_period_get(frequency);
+    TMR_DESCRIPTOR(channel)->prx.reg = TMR_period_get(frequency, prescalerTable[TIMER_TCKPS_MASK & flags]);
 }
 void        TMR_start(uint32_t channel)
 {
-    TMR_DESCRIPTOR(channel)->tmrx = 0;
+    TMR_DESCRIPTOR(channel)->tmrx.reg = 0;
     TMR_DESCRIPTOR(channel)->txcon.set = _T2CON_ON_MASK;
 }
 void        TMR_stop(uint32_t channel)
