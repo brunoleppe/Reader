@@ -245,18 +245,21 @@ typedef enum{
 #ifdef __cplusplus
 extern "C"{
 #endif
-int     EVIC_init(void *data);
-int     EVIC_channel_state_Set(
-            EVIC_CHANNEL channel,
-            EVIC_STATE state,
-            EVIC_PRIORITY priority,
-            EVIC_SUB_PRIORITY sub_priority
-        );
-bool    EVIC_channel_pending_get(EVIC_CHANNEL channel);
-void    EVIC_channel_pending_clear(EVIC_CHANNEL);
+int         EVIC_init(void *data);
+int         EVIC_channel_state_Set(
+                EVIC_CHANNEL channel,
+                EVIC_STATE state,
+                EVIC_PRIORITY priority,
+                EVIC_SUB_PRIORITY sub_priority
+            );
+void        EVIC_channel_priority(EVIC_CHANNEL channel, EVIC_PRIORITY, EVIC_SUB_PRIORITY);
+void        EVIC_channel_set(EVIC_CHANNEL channel);
+void        EVIC_channel_clr(EVIC_CHANNEL channel);
+bool        EVIC_channel_pending_get(EVIC_CHANNEL channel);
+void        EVIC_channel_pending_clear(EVIC_CHANNEL);
 uint32_t    EVIC_enable_interrupts( void );
 uint32_t    EVIC_disable_interrupts( void );
-void    EVIC_restore_interrupts( uint32_t status );
+void        EVIC_restore_interrupts( uint32_t status );
 #ifdef __cplusplus
 }
 #endif

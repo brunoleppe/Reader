@@ -79,6 +79,35 @@ void    EVIC_channel_pending_clear(EVIC_CHANNEL channel)
     int bitOffset = 1<<(channel & 0x1f);
     (ifs_base+offset)->clr = bitOffset;
 }
+void        EVIC_channel_priority(EVIC_CHANNEL channel, EVIC_PRIORITY priority, EVIC_SUB_PRIORITY subPriority)
+{
+    uint32_t offset;
+
+    /*Dividir para cuatro el número del canal de interrupción para obtener
+         la dirección del registro IPC correspondiente.*/
+    offset = channel >> 2;
+    /*Se utiliza los dos primeros bits del número del canal para obtener el
+     offset del byte correspondiente dentro del registro IPC*/
+    uint32_t byteOffset = channel & 0b11;
+    /*Apuntar hacia el registro IPC correspondiente*/
+    /*Configurar prioridad y sub-prioridad del byte en el registro IPC*/
+    (ipc_base + offset)->set = (subPriority << (8 * byteOffset)) |
+                               (priority << (8*byteOffset+2));
+}
+void        EVIC_channel_set(EVIC_CHANNEL channel)
+{
+    uint32_t offset;
+    offset = channel >> 5;
+    int bitOffset = 1<<(channel & 0x1f);
+        (iec_base+offset)->set = bitOffset;
+}
+void        EVIC_channel_clr(EVIC_CHANNEL channel)
+{
+    uint32_t offset;
+    offset = channel >> 5;
+    int bitOffset = 1<<(channel & 0x1f);
+    (iec_base+offset)->clr = bitOffset;
+}
 uint32_t    EVIC_enable_interrupts( void )
 {
     return __builtin_enable_interrupts();
