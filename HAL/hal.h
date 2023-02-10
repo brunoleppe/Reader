@@ -29,7 +29,7 @@
 #define HAL_UART_PERIPHERAL_CLOCK           (HAL_SYSTEM_CLOCK/2)
 #define HAL_GPIO_PERIPHERAL_CLOCK           (HAL_SYSTEM_CLOCK/2)
 #define HAL_PWM_PERIPHERAL_CLOCK            (HAL_SYSTEM_CLOCK/2)
-
+#define HAL_TMR_PERIPHERAL_CLOCK            ()
 
 /**********************************************************************
 * Typedefs
