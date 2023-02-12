@@ -82,6 +82,10 @@
 
 /*Interrupts*/
 
+#define BUZZER                  GPIO_PIN_MAP(GPIO_PORT_F, GPIO_PIN_2)
+#define BUZZER_OUTPUT_REG       PPS_OUTPUT_REG_RPF2
+#define BUZZER_OUTPUT_MAP       PPS_GROUP_4_OUTPUT_MAPPING_OC1
+
 #endif /*__READER_V2__*/
 
 #define QTOUCH_VECTOR   .vector_122

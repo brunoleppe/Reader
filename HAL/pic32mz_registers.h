@@ -75,6 +75,12 @@ typedef struct{
     struct MemRegister prx;
 }volatile * const TMR_Descriptor;
 
+typedef struct{
+    struct MemRegister ocxcon;
+    struct MemRegister ocxr;
+    struct MemRegister ocxrs;
+}volatile * const OC_Descriptor;
+
 #ifdef	__cplusplus
 }
 #endif

@@ -1,12 +1,10 @@
 #include "initialization.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "gpio.h"
-#include "spi.h"
+#include "hal.h"
 #include "Reader_bsp.h"
 #include "lcd.h"
 #include "bitmap.h"
-#include "hal_delay.h"
 #include "TestClass.h"
 #include <string>
 #include <vector>
@@ -19,6 +17,7 @@ typedef struct{
 static void blink(void *params);
 static void lcd_task(void *params);
 static void qt_task(void *params);
+static void pwm(void *params);
 
 static const PinParams pinParamsLed1 = {
         .pinMap = LED1,
@@ -35,11 +34,12 @@ int main(void){
     Initialize();
     /*Create a FreeRTOS Task*/
     xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed1,1,NULL);
-//    xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed2,1,NULL);
-
+    xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed2,1,NULL);
 
     xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
     xTaskCreate(qt_task, "qt_task", 2048, NULL, 1, NULL);
+
+    xTaskCreate(pwm,"pwm_task",1024,NULL,2,NULL);
 
     while(1){
         /*Start FreeRTOS scheduler*/
@@ -110,4 +110,31 @@ static void blink(void *params)
         GPIO_pin_toggle(p->pinMap);
         vTaskDelay(p->delay_ms);
     }
+}
+static void pwm(void *params)
+{
+    (void)params;
+    TMR_start(TMR_CHANNEL_2);
+    OC_enable(OC_CHANNEL_1);
+    vTaskDelay(700);
+    OC_disable(OC_CHANNEL_1);
+    TMR_stop(TMR_CHANNEL_2);
+    TMR_period_set(TMR_CHANNEL_2, 4739);
+    OC_compare_set(OC_CHANNEL_1, 4739 >> 2);
+    TMR_start(TMR_CHANNEL_2);
+    OC_enable(OC_CHANNEL_1);
+    vTaskDelay(700);
+    OC_disable(OC_CHANNEL_1);
+    TMR_stop(TMR_CHANNEL_2);
+    TMR_period_set(TMR_CHANNEL_2, 3985);
+    OC_compare_set(OC_CHANNEL_1, 3985 >> 2);
+    TMR_start(TMR_CHANNEL_2);
+    OC_enable(OC_CHANNEL_1);
+    vTaskDelay(700);
+    OC_disable(OC_CHANNEL_1);
+    TMR_stop(TMR_CHANNEL_2);
+
+
+
+    vTaskDelay(portMAX_DELAY);
 }

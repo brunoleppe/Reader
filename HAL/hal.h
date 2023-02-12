@@ -20,16 +20,19 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#include "hal_delay.h"
+#include "dma.h"
+#include "evic.h"
+#include "gpio.h"
+#include "oc.h"
+#include "pps.h"
+#include "spi.h"
+#include "system.h"
+#include "timer.h"
+
 /**********************************************************************
 * Preprocessor Constants
 **********************************************************************/
-
-//#define HAL_SYSTEM_CLOCK                    (200000000UL)
-//#define HAL_SPI_PERIPHERAL_CLOCK            (HAL_SYSTEM_CLOCK/2)
-//#define HAL_UART_PERIPHERAL_CLOCK           (HAL_SYSTEM_CLOCK/2)
-//#define HAL_GPIO_PERIPHERAL_CLOCK           (HAL_SYSTEM_CLOCK/2)
-//#define HAL_PWM_PERIPHERAL_CLOCK            (HAL_SYSTEM_CLOCK/2)
-//#define HAL_TMR_PERIPHERAL_CLOCK            ()
 
 /**********************************************************************
 * Typedefs

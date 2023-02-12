@@ -39,11 +39,11 @@ static const EVIC_CHANNEL timerEvicChannels[]={
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
-static uint16_t TMR_period_get(uint32_t frequency, uint32_t prescaler);
+static uint16_t TMR_period_value_get(uint32_t frequency, uint32_t prescaler);
 /**********************************************************************
 * Function Definitions
 **********************************************************************/
-void        TMR_initialize(uint32_t channel, uint32_t flags, uint32_t frequency)
+void        TMR_initialize(uint32_t channel, uint32_t flags, uint32_t period)
 {
     TMR_DESCRIPTOR(channel)->txcon.reg = 0;
     TMR_DESCRIPTOR(channel)->txcon.set = (TMR_TCKPS_MASK & flags) << _T1CON_TCKPS0_POSITION;
@@ -53,7 +53,8 @@ void        TMR_initialize(uint32_t channel, uint32_t flags, uint32_t frequency)
         TMR_DESCRIPTOR(channel)->txcon.set = _T2CON_T32_MASK;
 
     TMR_DESCRIPTOR(channel)->tmrx.reg = 0;
-    TMR_DESCRIPTOR(channel)->prx.reg = TMR_period_get(frequency, prescalerTable[TMR_TCKPS_MASK & flags]);
+    TMR_DESCRIPTOR(channel)->prx.reg = period;
+    //    TMR_DESCRIPTOR(channel)->prx.reg = TMR_period_value_get(frequency, prescalerTable[TMR_TCKPS_MASK & flags]);
 }
 void        TMR_start(uint32_t channel)
 {
@@ -83,8 +84,23 @@ HAL_WEAK_FUNCTION void TMR_channel_interrupt_callback     (uint32_t channel)
 {
     (void)channel;
 }
+void        TMR_period_set(uint32_t channel, uint16_t period)
+{
+    TMR_DESCRIPTOR(channel)->prx.reg = period;
+}
+void        TMR_prescaler_set(uint32_t channel, uint16_t prescaler)
+{
+    TMR_DESCRIPTOR(channel)->txcon.set = prescaler << _T2CON_TCKPS0_POSITION;
+}
+uint32_t    TMR_frequency_set(uint32_t channel, uint32_t frequency)
+{
+    TMR_DESCRIPTOR(channel)->prx.reg = TMR_period_value_get(
+            frequency,
+            prescalerTable[
+                    (TMR_DESCRIPTOR(channel)->txcon.reg & _T2CON_TCKPS_MASK) >> _T2CON_TCKPS0_POSITION]);
+}
 
-static uint16_t TMR_period_get(uint32_t frequency, uint32_t prescaler)
+static uint16_t TMR_period_value_get(uint32_t frequency, uint32_t prescaler)
 {
     uint16_t period = (HAL_TMR_PERIPHERAL_CLOCK)/(prescaler * frequency) - 1;
     return period;

@@ -43,11 +43,14 @@
 extern "C"{
 #endif
 
-void        TMR_initialize(uint32_t channel, uint32_t flags, uint32_t frequency);
+void        TMR_initialize(uint32_t channel, uint32_t flags, uint32_t period);
 void        TMR_start(uint32_t channel);
 void        TMR_stop(uint32_t channel);
+void        TMR_period_set(uint32_t channel, uint16_t period);
+void        TMR_prescaler_set(uint32_t channel, uint16_t prescaler);
 uint32_t    TMR_count_get(uint32_t channel);
 uint32_t    TMR_frequency_get(uint32_t channel);
+uint32_t    TMR_frequency_set(uint32_t channel, uint32_t frequency);
 void        TMR_interrupt_handler(uint32_t channel);
 void        TMR_channel_interrupt_callback(uint32_t channel);
 
