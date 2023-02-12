@@ -26,6 +26,16 @@
 static const uint32_t prescalerTable[] = {
     1,2,4,8,16,32,64,256
 };
+static const EVIC_CHANNEL timerEvicChannels[]={
+        EVIC_CHANNEL_TIMER_2,
+        EVIC_CHANNEL_TIMER_3,
+        EVIC_CHANNEL_TIMER_4,
+        EVIC_CHANNEL_TIMER_5,
+        EVIC_CHANNEL_TIMER_6,
+        EVIC_CHANNEL_TIMER_7,
+        EVIC_CHANNEL_TIMER_8,
+        EVIC_CHANNEL_TIMER_9,
+};
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
@@ -36,14 +46,14 @@ static uint16_t TMR_period_get(uint32_t frequency, uint32_t prescaler);
 void        TMR_initialize(uint32_t channel, uint32_t flags, uint32_t frequency)
 {
     TMR_DESCRIPTOR(channel)->txcon.reg = 0;
-    TMR_DESCRIPTOR(channel)->txcon.set = (TIMER_TCKPS_MASK & flags) << _T1CON_TCKPS0_POSITION;
-    if(flags & TIMER_GATED)
+    TMR_DESCRIPTOR(channel)->txcon.set = (TMR_TCKPS_MASK & flags) << _T1CON_TCKPS0_POSITION;
+    if(flags & TMR_GATED)
         TMR_DESCRIPTOR(channel)->txcon.set = _T2CON_TGATE_MASK;
-    if(flags & TIMER_MODE_32)
+    if(flags & TMR_MODE_32)
         TMR_DESCRIPTOR(channel)->txcon.set = _T2CON_T32_MASK;
 
     TMR_DESCRIPTOR(channel)->tmrx.reg = 0;
-    TMR_DESCRIPTOR(channel)->prx.reg = TMR_period_get(frequency, prescalerTable[TIMER_TCKPS_MASK & flags]);
+    TMR_DESCRIPTOR(channel)->prx.reg = TMR_period_get(frequency, prescalerTable[TMR_TCKPS_MASK & flags]);
 }
 void        TMR_start(uint32_t channel)
 {
@@ -64,8 +74,19 @@ uint32_t    TMR_frequency_get(uint32_t channel)
     return (HAL_TMR_PERIPHERAL_CLOCK)/((TMR_DESCRIPTOR(channel)->prx.reg + 1)*pre);
 }
 
+void        TMR_interrupt_handler(uint32_t channel)
+{
+    EVIC_channel_pending_clear(timerEvicChannels[channel]);
+    TMR_channel_interrupt_callback(channel);
+}
+HAL_WEAK_FUNCTION void TMR_channel_interrupt_callback     (uint32_t channel)
+{
+    (void)channel;
+}
+
 static uint16_t TMR_period_get(uint32_t frequency, uint32_t prescaler)
 {
     uint16_t period = (HAL_TMR_PERIPHERAL_CLOCK)/(prescaler * frequency) - 1;
     return period;
 }
+

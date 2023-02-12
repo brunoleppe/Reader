@@ -1,10 +1,11 @@
+#include <xc.h>
 #include "Reader_bsp.h"
 #include "gpio.h"
 #include "spi.h"
 #include "system.h"
 #include "evic.h"
 #include "pps.h"
-#include <xc.h>
+#include "timer.h"
 
 static void qt_change_callback(uint32_t pin);
 
@@ -59,12 +60,18 @@ void gpio_initialize( void )
         20000000);
     SPI_initialize(QT_SPI_CHANNEL, SPI_MASTER | SPI_MODE_3 | SPI_SAMPLE_END, 1000000);
 
+    TMR_initialize(TMR_CHANNEL_2, TMR_PRESCALER_256, 6);
+    TMR_start(TMR_CHANNEL_2);
+
+
 }
 
 void interrupts_initialize( void )
 {
     EVIC_channel_priority(EVIC_CHANNEL_CHANGE_NOTICE_E, EVIC_PRIORITY_4, EVIC_SUB_PRIORITY_2);
     EVIC_channel_set(EVIC_CHANNEL_CHANGE_NOTICE_E);
+    EVIC_channel_priority(EVIC_CHANNEL_TIMER_2, EVIC_PRIORITY_1, EVIC_SUB_PRIORITY_1);
+    EVIC_channel_set(EVIC_CHANNEL_TIMER_2);
 }
 
 void    GPIO_pin_interrupt_callback     (uint32_t pin)
@@ -80,4 +87,13 @@ static void qt_change_callback(uint32_t pin)
 {
     if(GPIO_pin_read(QT_CHANGE) == GPIO_LOW)
         GPIO_pin_toggle(LED4);
+}
+
+void TMR_channel_interrupt_callback(uint32_t channel)
+{
+    static volatile int counter = 0;
+    if(counter++ == 1) {
+        GPIO_pin_toggle(LED2);
+        counter = 0;
+    }
 }

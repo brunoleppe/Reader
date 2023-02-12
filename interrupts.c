@@ -5,9 +5,4 @@
 #include <xc.h>
 #include <sys/attribs.h>
 
-
-
-void CORE_TIMER_Handler (void)
-{
-
-}
+void __ISR(_TIMER_2_VECTOR, IPL1AUTO)   TIMER2_Interrupt_Handler(void);

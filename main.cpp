@@ -35,7 +35,7 @@ int main(void){
     Initialize();
     /*Create a FreeRTOS Task*/
     xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed1,1,NULL);
-    xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed2,1,NULL);
+//    xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed2,1,NULL);
 
 
     xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
