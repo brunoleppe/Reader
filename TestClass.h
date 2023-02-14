@@ -22,7 +22,7 @@ public:
         this->c = c;
     }
 
-    int sum()
+    int sum() const
     {
         return a+b+c;
     }
