@@ -73,6 +73,7 @@ void    GPIO_pin_interrupt_callback     (uint32_t pin)
 }
 
 static void qt_change_callback(uint32_t pin) {
+    (void)pin;
     if (GPIO_pin_read(QT_CHANGE) == GPIO_LOW)
         GPIO_pin_toggle(LED4);
 }
