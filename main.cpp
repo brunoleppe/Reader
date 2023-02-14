@@ -1,13 +1,15 @@
 #include "initialization.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "hal.h"
 #include "Reader_bsp.h"
 #include "lcd.h"
 #include "bitmap.h"
-#include "TestClass.h"
 #include <string>
-#include <vector>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma ide diagnostic ignored "UnreachableCode"
+#pragma ide diagnostic ignored "EndlessLoop"
 
 typedef struct{
     GPIO_PinMap pinMap;
@@ -17,7 +19,6 @@ typedef struct{
 static void blink(void *params);
 static void lcd_task(void *params);
 static void qt_task(void *params);
-static void pwm(void *params);
 
 static const PinParams pinParamsLed1 = {
         .pinMap = LED1,
@@ -29,19 +30,17 @@ static const PinParams pinParamsLed2 = {
 };
 
 
-int main(void){
+int main(){
     /*Initialize processor*/
     Initialize();
     /*Create a FreeRTOS Task*/
-    xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed1,1,NULL);
-    xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed2,1,NULL);
+    xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed1,1,nullptr);
+    xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed2,1,nullptr);
 
-    xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
-    xTaskCreate(qt_task, "qt_task", 2048, NULL, 1, NULL);
+    xTaskCreate(lcd_task, "lcd_task", 2048, nullptr, 3, nullptr);
+    xTaskCreate(qt_task, "qt_task", 2048, nullptr, 1, nullptr);
 
-    xTaskCreate(pwm,"pwm_task",1024,NULL,2,NULL);
-
-    while(1){
+    while(true){
         /*Start FreeRTOS scheduler*/
         vTaskStartScheduler();
     }
@@ -51,6 +50,7 @@ int main(void){
 
 static void qt_task(void *params)
 {
+    (void)params;
     static SPI_TransferSetup setup;
     setup.usDelay = 160;
     GPIO_pin_write(QT_RST, GPIO_LOW);
@@ -58,13 +58,13 @@ static void qt_task(void *params)
     GPIO_pin_write(QT_RST, GPIO_HIGH);
     vTaskDelay(100);
 
-    while(1){
+    while(true){
         vTaskDelay(500);
         if(GPIO_pin_read(QT_CHANGE) == GPIO_LOW)
         {
             uint8_t read_key[] = {0xC1, 0x00, 0x00};
             GPIO_pin_write(QT_SS, GPIO_LOW);
-            SPI_transfer(QT_SPI_CHANNEL, &setup, read_key, NULL, sizeof(read_key));
+            SPI_transfer(QT_SPI_CHANNEL, &setup, read_key, nullptr, sizeof(read_key));
             GPIO_pin_write(QT_SS, GPIO_HIGH);
             GPIO_pin_toggle(LED3);
         }
@@ -74,6 +74,7 @@ static void qt_task(void *params)
 
 static void lcd_task(void *params)
 {
+    (void)params;
     LCD_init(LCD_SPI_CHANNEL, LCD_SS, LCD_BLA, LCD_DC, LCD_RST);
 
     LCD_draw_bitmap(0,0,bitmap,sizeof(bitmap));
@@ -81,17 +82,11 @@ static void lcd_task(void *params)
     LCD_draw_string(0,1,(char*)s.c_str(),LCD_FONT_MEDIUM,LCD_COLOR_BLACK);
 
     int x=0,y=0;
-    while(1){
+    while(true){
         LCD_print();
         vTaskDelay(17);
         GPIO_pin_toggle(LCD_SS);
-        LCD_draw_point(x++,y,LCD_COLOR_BLACK);//        LCD_print();
-//        vTaskDelay(500);
-//        GPIO_pin_toggle(LCD_SS);
-//        LCD_print();
-//        vTaskDelay(500);
-//        GPIO_pin_toggle(LCD_SS);
-//        vTaskDelay(portMAX_DELAY);
+        LCD_draw_point(x++,y,LCD_COLOR_BLACK);
         if(x>=240){
             x=0;
             if(y++>=128)
@@ -102,37 +97,12 @@ static void lcd_task(void *params)
 
 static void blink(void *params)
 {
-    PinParams *p = (PinParams*)params;
-    while(1){
+    auto *p = (PinParams*)params;
+    while(true){
         /*Toggle pin B6 every ~500ms*/
         GPIO_pin_toggle(p->pinMap);
         vTaskDelay(p->delay_ms);
     }
 }
-static void pwm(void *params)
-{
-    (void)params;
-    TMR_start(TMR_CHANNEL_2);
-    OC_enable(OC_CHANNEL_1);
-    vTaskDelay(700);
-    OC_disable(OC_CHANNEL_1);
-    TMR_stop(TMR_CHANNEL_2);
-    TMR_period_set(TMR_CHANNEL_2, 4739);
-    OC_compare_set(OC_CHANNEL_1, 4739 >> 2);
-    TMR_start(TMR_CHANNEL_2);
-    OC_enable(OC_CHANNEL_1);
-    vTaskDelay(700);
-    OC_disable(OC_CHANNEL_1);
-    TMR_stop(TMR_CHANNEL_2);
-    TMR_period_set(TMR_CHANNEL_2, 3985);
-    OC_compare_set(OC_CHANNEL_1, 3985 >> 2);
-    TMR_start(TMR_CHANNEL_2);
-    OC_enable(OC_CHANNEL_1);
-    vTaskDelay(700);
-    OC_disable(OC_CHANNEL_1);
-    TMR_stop(TMR_CHANNEL_2);
 
-
-
-    vTaskDelay(portMAX_DELAY);
-}
+#pragma clang diagnostic pop
