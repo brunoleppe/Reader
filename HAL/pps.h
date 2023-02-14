@@ -118,7 +118,7 @@
 **********************************************************************/
 typedef volatile uint32_t * PPS_Register;
 typedef uint32_t PPS_AlternateFunction;
-
+/*INPUT*/
 enum PPS_INT3{
     PPS_INT3_RPD2 	 = 0,
     PPS_INT3_RPG8 	 = 1,
@@ -894,6 +894,7 @@ enum PPS_REFCLKI3{
     PPS_REFCLKI3_RPC2 	 = 12,
     PPS_REFCLKI3_RPE8 	 = 13,
 };
+/*OUTPUT*/
 enum PPS_RPD2{
     PPS_RPD2_NoConnect 	 = 0,
     PPS_RPD2_U3TX 	 = 1,
