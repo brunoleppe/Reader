@@ -85,21 +85,19 @@ static void lcd_task(void *params)
         LCD_print();
         vTaskDelay(17);
         GPIO_pin_toggle(LCD_SS);
-        LCD_draw_point(x++,y,LCD_COLOR_BLACK);
-        if(x>=240){
-            x=0;
-            if(y++>=128)
-                y=0;
-        }
-    }
-//        LCD_print();
+        LCD_draw_point(x++,y,LCD_COLOR_BLACK);//        LCD_print();
 //        vTaskDelay(500);
 //        GPIO_pin_toggle(LCD_SS);
 //        LCD_print();
 //        vTaskDelay(500);
 //        GPIO_pin_toggle(LCD_SS);
 //        vTaskDelay(portMAX_DELAY);
-
+        if(x>=240){
+            x=0;
+            if(y++>=128)
+                y=0;
+        }
+    }
 }
 
 static void blink(void *params)
