@@ -1,9 +1,3 @@
-set(PIC  32MZ1024EFM100)
-set(OPTIMIZATION 1)
-set(USER_FLAGS -Wall)
-set(MPROCESSOR -mprocessor=${PIC})
-set(MOPTIMIZATION -O${OPTIMIZATION})
-
 include_directories(Source/include)
 IF(ARCH STREQUAL MZ)
     include_directories(Source/portable/MPLAB/PIC32MZ)
@@ -48,5 +42,3 @@ add_library(FreeRTOS
         Source/stream_buffer.c
         Source/timers.c
 )
-
-target_compile_options(FreeRTOS PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc)

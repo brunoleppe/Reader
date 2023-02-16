@@ -42,6 +42,7 @@ include_directories(.)
 add_subdirectory(FreeRTOS)
 add_subdirectory(HAL)
 add_subdirectory(LCD)
+
 add_executable(${PROJECT_NAME}.elf ${SOURCES})
 
 
@@ -75,7 +76,15 @@ add_custom_target(${PROJECT_NAME}_hex ALL
         DEPENDS ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex
         )
 
+set_target_properties(LCD PROPERTIES LINKER_LANGUAGE C)
+target_compile_options(LCD PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc)
+
+set_target_properties(HAL PROPERTIES LINKER_LANGUAGE C)
+target_compile_options(HAL PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc)
+
+target_compile_options(FreeRTOS PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc)
 target_compile_options(${PROJECT_NAME}.elf PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP})
+
 target_compile_definitions(${PROJECT_NAME}.elf PUBLIC XPRJ_default=default ${DEFINES})
 target_link_options(${PROJECT_NAME}.elf PUBLIC ${MPROCESSOR} ${MOPTIMIZATION} )
 target_link_libraries(${PROJECT_NAME}.elf "-Wl,${XC32_LINK_FLAGS}")
