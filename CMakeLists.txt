@@ -8,8 +8,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti -Wno-write-str
 #set(DFP /opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-EF_DFP/1.3.58)
 
 #Device
-set(PIC  32MZ1024EFM100)
-
 set(OPTIMIZATION 1)
 set(USER_FLAGS -Wall)
 set(USER_DEFINITIONS )
