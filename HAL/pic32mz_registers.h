@@ -81,6 +81,9 @@ typedef struct{
     struct MemRegister ocxrs;
 }volatile * const OC_Descriptor;
 
+typedef struct{
+    struct MemRegister pbxdiv;
+}volatile * const PBCLK_Descriptor;
 #ifdef	__cplusplus
 }
 #endif
