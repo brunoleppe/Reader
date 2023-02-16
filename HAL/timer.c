@@ -92,7 +92,7 @@ void        TMR_prescaler_set(uint32_t channel, uint16_t prescaler)
 {
     TMR_DESCRIPTOR(channel)->txcon.set = prescaler << _T2CON_TCKPS0_POSITION;
 }
-uint32_t    TMR_frequency_set(uint32_t channel, uint32_t frequency)
+void    TMR_frequency_set(uint32_t channel, uint32_t frequency)
 {
     TMR_DESCRIPTOR(channel)->prx.reg = TMR_period_value_get(
             frequency,
