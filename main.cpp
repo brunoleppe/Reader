@@ -6,11 +6,6 @@
 #include "bitmap.h"
 #include <string>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma ide diagnostic ignored "UnreachableCode"
-#pragma ide diagnostic ignored "EndlessLoop"
-
 typedef struct{
     GPIO_PinMap pinMap;
     int delay_ms;
@@ -104,5 +99,3 @@ static void blink(void *params)
         vTaskDelay(p->delay_ms);
     }
 }
-
-#pragma clang diagnostic pop
