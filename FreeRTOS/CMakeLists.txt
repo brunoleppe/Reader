@@ -5,8 +5,21 @@ set(MPROCESSOR -mprocessor=${PIC})
 set(MOPTIMIZATION -O${OPTIMIZATION})
 
 include_directories(Source/include)
-include_directories(Source/portable/MPLAB/PIC32MZ)
-
+IF(ARCH STREQUAL MZ)
+    include_directories(Source/portable/MPLAB/PIC32MZ)
+    set(PORTABLE_SOURCES
+            Source/portable/MPLAB/PIC32MZ/ISR_Support.h
+            Source/portable/MPLAB/PIC32MZ/port.c
+            Source/portable/MPLAB/PIC32MZ/port_asm.S
+            Source/portable/MPLAB/PIC32MZ/portmacro.h)
+ELSEIF(ARCH STREQUAL MX)
+    include_directories(Source/portable/MPLAB/PIC32MX)
+    set(PORTABLE_SOURCES
+            Source/portable/MPLAB/PIC32MX/ISR_Support.h
+            Source/portable/MPLAB/PIC32MX/port.c
+            Source/portable/MPLAB/PIC32MX/port_asm.S
+            Source/portable/MPLAB/PIC32MX/portmacro.h)
+ENDIF()
 
 add_library(FreeRTOS
         Source/include/croutine.h
@@ -26,10 +39,7 @@ add_library(FreeRTOS
         Source/include/task.h
         Source/include/timers.h
         Source/portable/MemMang/heap_4.c
-        Source/portable/MPLAB/PIC32MZ/ISR_Support.h
-        Source/portable/MPLAB/PIC32MZ/port.c
-        Source/portable/MPLAB/PIC32MZ/port_asm.S
-        Source/portable/MPLAB/PIC32MZ/portmacro.h
+        ${PORTABLE_SOURCES}
         Source/croutine.c
         Source/event_groups.c
         Source/FreeRTOS_tasks.c
