@@ -36,7 +36,7 @@ void gpio_initialize( void )
     GPIO_pin_write(QT_RST, GPIO_HIGH);
     GPIO_pin_write(QT_SS, GPIO_HIGH);
 
-    SYS_Unlock();
+    SYS_Unlock(SYS_UNLOCK_IO);
     /* LCD SPI */
     PPS_pin_mapping(LCD_SPI_OUTPUT_REG, LCD_SPI_OUTPUT_MAP);
     /* QTOUCH SPI */

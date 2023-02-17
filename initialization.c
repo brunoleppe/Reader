@@ -75,6 +75,7 @@ void Initialize(void)
     INTCONSET = _INTCON_MVEC_MASK;
     interrupts_initialize();
     DMA_init();
+    DMA_channel_init(0);
     gpio_initialize();
 
     __builtin_enable_interrupts();

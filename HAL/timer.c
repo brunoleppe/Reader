@@ -6,6 +6,7 @@
 #include "pic32mz_registers.h"
 #include "evic.h"
 #include <xc.h>
+#include "system.h"
 /**********************************************************************
 * Module Preprocessor Constants
 **********************************************************************/
@@ -72,7 +73,7 @@ uint32_t    TMR_count_get(uint32_t channel)
 uint32_t    TMR_frequency_get(uint32_t channel)
 {
     uint32_t pre = prescalerTable[(TMR_DESCRIPTOR(channel)->txcon.reg & _T2CON_TCKPS_MASK) >> _T2CON_TCKPS0_POSITION];
-    return (HAL_TMR_PERIPHERAL_CLOCK)/((TMR_DESCRIPTOR(channel)->prx.reg + 1)*pre);
+    return (SYS_peripheral_clock_frequency_get(SYS_PERIPHERAL_CLOCK_3))/((TMR_DESCRIPTOR(channel)->prx.reg + 1)*pre);
 }
 
 void        TMR_interrupt_handler(uint32_t channel)
@@ -102,7 +103,7 @@ void    TMR_frequency_set(uint32_t channel, uint32_t frequency)
 
 static uint16_t TMR_period_value_get(uint32_t frequency, uint32_t prescaler)
 {
-    uint16_t period = (HAL_TMR_PERIPHERAL_CLOCK)/(prescaler * frequency) - 1;
+    uint16_t period = (SYS_peripheral_clock_frequency_get(SYS_PERIPHERAL_CLOCK_3))/(prescaler * frequency) - 1;
     return period;
 }
 

@@ -34,12 +34,15 @@ void SYS_initialize()
     CFGCONbits.ECCCON = 3;
 }
 
-void SYS_Unlock()
+void SYS_Unlock(uint32_t flags)
 {
     SYSKEY = 0x00000000;
     SYSKEY = 0xAA996655;
     SYSKEY = 0x556699AA;
-    CFGCONbits.IOLOCK = 0;
+
+    if(flags & SYS_UNLOCK_IO)
+        CFGCONbits.IOLOCK = 0;
+
 }
 void SYS_Lock()
 {
@@ -49,11 +52,25 @@ void SYS_Lock()
 
 void SYS_peripheral_clock_config(uint32_t clockChannel, uint32_t flags)
 {
-    if(clockChannel > 7)
+    if(clockChannel > SYS_PERIPHERAL_CLOCK_8)
         return;
     if((flags & SYS_PBCLK_DISABLED) && clockChannel > 1)
         SYS_PBCLK(clockChannel)->pbxdiv.clr = _PB2DIV_ON_MASK;
     
     while(!(SYS_PBCLK(clockChannel)->pbxdiv.reg & _PB1DIV_PBDIVRDY_POSITION));
 
+    if((HAL_SYSTEM_CLOCK > 100000000UL) &&
+            ((clockChannel != SYS_PERIPHERAL_CLOCK_4) && (clockChannel != SYS_PERIPHERAL_CLOCK_7)) &&
+            ((flags & 127) & SYS_PBCLK_DIVISOR_1))
+        return;
+
+    SYS_PBCLK(clockChannel)->pbxdiv.set = (flags & 127) - 1;
+
+}
+
+uint32_t    SYS_peripheral_clock_frequency_get(uint32_t clockChannel)
+{
+    if(!(SYS_PBCLK(clockChannel)->pbxdiv.reg & _PB2DIV_ON_MASK))
+        return 0;
+    return HAL_SYSTEM_CLOCK / ((SYS_PBCLK(clockChannel)->pbxdiv.reg & _PB2DIV_PBDIV_MASK)+1);
 }

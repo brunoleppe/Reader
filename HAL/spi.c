@@ -17,6 +17,7 @@
 #include "hal_delay.h"
 #include "evic.h"
 #include <xc.h>
+#include <system.h>
 /**********************************************************************
 * Module Preprocessor Constants
 **********************************************************************/
@@ -270,7 +271,7 @@ static uint32_t SPI_Baudrate_Get_(uint32_t baudrate){
     uint32_t brg;
     uint32_t error;
 
-    clock = HAL_SPI_PERIPHERAL_CLOCK;
+    clock = SYS_peripheral_clock_frequency_get(SYS_PERIPHERAL_CLOCK_2);
     brg = ((clock/baudrate)/2)-1;
 
     error = (clock / (2 * (brg + 1)));
