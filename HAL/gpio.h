@@ -18,35 +18,35 @@
 /**********************************************************************
 * Preprocessor Constants
 **********************************************************************/
-#define GPIO_PORT_SHIFT             (17)
+#define GPIO_PORT_SHIFT             (16)
 #define GPIO_PORT_MASK              (0xF0000)
 
-#define GPIO_PORT_A                  (0x0UL)
-#define GPIO_PORT_B                  (0x1UL)
-#define GPIO_PORT_C                  (0x2UL)
-#define GPIO_PORT_D                  (0x3UL)
-#define GPIO_PORT_E                  (0x4UL)
-#define GPIO_PORT_F                  (0x5UL)
-#define GPIO_PORT_G                  (0x6UL)
-#define GPIO_PORT_H                  (0x7UL)
-#define GPIO_PORT_J                  (0x8UL)
-#define GPIO_PORT_K                  (0x9UL)
+#define GPIO_PORT_A                 (0x0)
+#define GPIO_PORT_B                 (0x1)
+#define GPIO_PORT_C                 (0x2)
+#define GPIO_PORT_D                 (0x3)
+#define GPIO_PORT_E                 (0x4)
+#define GPIO_PORT_F                 (0x5)
+#define GPIO_PORT_G                 (0x6)
+#define GPIO_PORT_H                 (0x7)
+#define GPIO_PORT_J                 (0x8)
+#define GPIO_PORT_K                 (0x9)
 
-#define GPIO_INPUT                  0x0000UL
-#define GPIO_OUTPUT                 0x0001UL
-#define GPIO_ANALOG                 0x0002UL
-#define GPIO_PULLUP                 0x0004UL
-#define GPIO_PULLDOWN               0x0008UL
-#define GPIO_OPENDRAIN              0x0010UL
-#define GPIO_SLOWEST                0x0020UL
-#define GPIO_SLOW                   0x0040UL
-#define GPIO_FAST                   0x0080UL
-#define GPIO_FASTEST                0x0100UL
-#define GPIO_IRQ                    0x0200UL
+#define GPIO_INPUT                  (0x0000)
+#define GPIO_OUTPUT                 (0x0001)
+#define GPIO_ANALOG                 (0x0002)
+#define GPIO_PULLUP                 (0x0004)
+#define GPIO_PULLDOWN               (0x0008)
+#define GPIO_OPENDRAIN              (0x0010)
+#define GPIO_SLOWEST                (0x0020)
+#define GPIO_SLOW                   (0x0040)
+#define GPIO_FAST                   (0x0080)
+#define GPIO_FASTEST                (0x0100)
+#define GPIO_IRQ                    (0x0200)
 
-#define GPIO_INPUT_PULLUP          (GPIO_PULLUP)
-#define GPIO_INPUT_PULLDOWN        (GPIO_PULLDOWN)
-#define GPIO_OUTPUT_OD             (GPIO_OUTPUT | GPIO_OPENDRAIN)
+#define GPIO_INPUT_PULLUP           (GPIO_PULLUP)
+#define GPIO_INPUT_PULLDOWN         (GPIO_PULLDOWN)
+#define GPIO_OUTPUT_OD              (GPIO_OUTPUT | GPIO_OPENDRAIN)
 
 
 #define GPIO_PIN_MASK               (0xFFFF)
@@ -86,7 +86,7 @@ typedef uint32_t GPIO_Port;
 typedef uint32_t GPIO_PinMap;
 
 typedef uint32_t GPIO_ALTERNATE_FUNCTION;
-typedef void (*GPIO_CALLBACK)(GPIO_Pin);
+typedef void (*GPIO_CALLBACK)(GPIO_PinMap);
 
 typedef struct{
     uint32_t pin;
@@ -100,15 +100,20 @@ typedef struct{
 extern "C"{
 #endif
     
-void    GPIO_pin_initialize             (GPIO_PinMap pin, int flags);
-void    GPIO_pin_deinitialize           (GPIO_PinMap pin);
-bool    GPIO_pin_read                   (GPIO_PinMap pin);
-void    GPIO_pin_write                  (GPIO_PinMap pin, bool value);
-void    GPIO_pin_toggle                 (GPIO_PinMap pin);
-void    GPIO_pin_interrupt_set          (GPIO_PinMap pin, bool state);
+void        GPIO_pin_initialize             (GPIO_PinMap pin, int flags);
+void        GPIO_pin_deinitialize           (GPIO_PinMap pin);
+bool        GPIO_pin_read                   (GPIO_PinMap pin);
+void        GPIO_pin_write                  (GPIO_PinMap pin, bool value);
+void        GPIO_pin_toggle                 (GPIO_PinMap pin);
+void        GPIO_pin_interrupt_set          (GPIO_PinMap pin, bool state);
 
-void    GPIO_pin_interrupt_callback     (GPIO_PinMap pin);
-void    GPIO_interrupt_handler          (GPIO_Port port);
+void        GPIO_port_write                 (GPIO_Port port, uint32_t value, uint32_t mask);
+uint32_t    GPIO_port_read                  (GPIO_Port port, uint32_t mask);
+void        GPIO_port_toggle                (GPIO_Port port, uint32_t mask);
+
+void        GPIO_pin_interrupt_callback     (GPIO_PinMap pin);
+void        GPIO_pin_callback_register      (GPIO_PinMap pin, GPIO_CALLBACK callback);
+void        GPIO_interrupt_handler          (GPIO_Port port);
 
 
 #ifdef __cplusplus

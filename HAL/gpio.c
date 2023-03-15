@@ -16,6 +16,7 @@
 #define GPIO_PORT(port)                 ((GPIO_Descriptor)(((uint8_t*)&ANSELA)+0x100*(port)))
 #define GPIO_PORT_IRQ_CHANNEL(port)     (EVIC_CHANNEL_CHANGE_NOTICE_A+(port))
 #define GPIO_PIN(val)                   (val & GPIO_PIN_MASK)
+#define GPIO_MAX_PINS                   (112)
 /*********************************************************************
 * Module Preprocessor Macros
 **********************************************************************/
@@ -109,9 +110,26 @@ void    GPIO_pin_toggle            (GPIO_PinMap pin)
 {
     GPIO_PORT(pin>>GPIO_PORT_SHIFT)->lat.inv = GPIO_PIN(pin);
 }
+
+void GPIO_port_write(GPIO_Port port, uint32_t value, uint32_t mask)
+{
+    GPIO_PORT(port)->lat.reg = value & mask;
+}
+uint32_t    GPIO_port_read                  (GPIO_Port port, uint32_t mask)
+{
+    return GPIO_PORT(port)->port.reg & mask;
+}
+void    GPIO_port_toggle                (GPIO_Port port, uint32_t mask)
+{
+    GPIO_PORT(port)->lat.inv = mask;
+}
+
 void    GPIO_pin_interrupt_set     (GPIO_PinMap pin, bool state)
 {
-    (void)pin;
+    if(state)
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnen.set = GPIO_PIN(pin);
+    else
+        GPIO_PORT(pin>>GPIO_PORT_SHIFT)->cnen.clr = GPIO_PIN(pin);
 }
 
 HAL_WEAK_FUNCTION void    GPIO_pin_interrupt_callback     (GPIO_PinMap pin)
@@ -131,103 +149,3 @@ void GPIO_interrupt_handler(GPIO_Port port)
     EVIC_channel_pending_clear(GPIO_PORT_IRQ_CHANNEL(port));
     GPIO_pin_interrupt_callback(status | (port << GPIO_PORT_SHIFT));
 }
-#if GPIO_USE_IRQ_PORT_A == 1
-void __ISR(_CHANGE_NOTICE_A_VECTOR, IPL1AUTO) PORTE_Change_Notice_IRQ(void)
-#if HAL_USE_FREERTOS == 1
-;
-#else
-{
-    GPIO_interrupt_handler(GPIO_PORT_A);
-}
-#endif
-#endif
-#if GPIO_USE_IRQ_PORT_B == 1
-void __ISR(_CHANGE_NOTICE_B_VECTOR, IPL1AUTO) PORTE_Change_Notice_IRQ(void)
-#if HAL_USE_FREERTOS == 1
-;
-#else
-{
-    GPIO_interrupt_handler(GPIO_PORT_B);
-}
-#endif
-#endif
-#if GPIO_USE_IRQ_PORT_C == 1
-void __ISR(_CHANGE_NOTICE_C_VECTOR, IPL1AUTO) PORTE_Change_Notice_IRQ(void)
-#if HAL_USE_FREERTOS == 1
-;
-#else
-{
-    GPIO_interrupt_handler(GPIO_PORT_C);
-}
-#endif
-#endif
-#if GPIO_USE_IRQ_PORT_D == 1
-void __ISR(_CHANGE_NOTICE_D_VECTOR, IPL1AUTO) PORTE_Change_Notice_IRQ(void)
-#if HAL_USE_FREERTOS == 1
-;
-#else
-{
-    GPIO_interrupt_handler(GPIO_PORT_D);
-}
-#endif
-#endif
-#if GPIO_USE_IRQ_PORT_E == 1
-void __ISR(_CHANGE_NOTICE_E_VECTOR, IPL1AUTO) PORTE_Change_Notice_IRQ(void)
-#if HAL_USE_FREERTOS == 1
-;
-#else
-{
-    GPIO_interrupt_handler(GPIO_PORT_E);
-}
-#endif
-#endif
-#if GPIO_USE_IRQ_PORT_F == 1
-void __ISR(_CHANGE_NOTICE_F_VECTOR, IPL1AUTO) PORTE_Change_Notice_IRQ(void)
-#if HAL_USE_FREERTOS == 1
-;
-#else
-{
-    GPIO_interrupt_handler(GPIO_PORT_F);
-}
-#endif
-#endif
-#if GPIO_USE_IRQ_PORT_G == 1
-void __ISR(_CHANGE_NOTICE_G_VECTOR, IPL1AUTO) PORTE_Change_Notice_IRQ(void)
-#if HAL_USE_FREERTOS == 1
-;
-#else
-{
-    GPIO_interrupt_handler(GPIO_PORT_G);
-}
-#endif
-#endif
-#if GPIO_USE_IRQ_PORT_H == 1
-void __ISR(_CHANGE_NOTICE_H_VECTOR, IPL1AUTO) PORTE_Change_Notice_IRQ(void)
-#if HAL_USE_FREERTOS == 1
-;
-#else
-{
-    GPIO_interrupt_handler(GPIO_PORT_H);
-}
-#endif
-#endif
-#if GPIO_USE_IRQ_PORT_J == 1
-void __ISR(_CHANGE_NOTICE_J_VECTOR, IPL1AUTO) PORTE_Change_Notice_IRQ(void)
-#if HAL_USE_FREERTOS == 1
-;
-#else
-{
-    GPIO_interrupt_handler(GPIO_PORT_J);
-}
-#endif
-#endif
-#if GPIO_USE_IRQ_PORT_K == 1
-void __ISR(_CHANGE_NOTICE_K_VECTOR, IPL1AUTO) PORTE_Change_Notice_IRQ(void)
-#if HAL_USE_FREERTOS == 1
-;
-#else
-{
-    GPIO_interrupt_handler(GPIO_PORT_K);
-}
-#endif
-#endif
