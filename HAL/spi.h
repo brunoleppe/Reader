@@ -140,6 +140,7 @@ int         SPI_initialize      (uint32_t spiChannel, uint32_t configFlags, uint
 size_t      SPI_transfer        (uint32_t spiChannel, const SPI_TransferSetup *setup, void *txBuffer, void *rxBuffer, size_t size);
 uint8_t     SPI_byte_transfer   (uint32_t spiChannel, uint8_t data);
 size_t      SPI_transfer_isr    (uint32_t spiChannel, const SPI_TransferSetup *setup, void *txBuffer, void *rxBuffer, size_t size);
+bool        SPI_is_busy         (uint32_t spiChannel);
 //bool SPI_TransferSetup(const SPI_Handler spiChannel, SPI_Setup *setup);
 
 static inline
