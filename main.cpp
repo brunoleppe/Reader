@@ -4,6 +4,7 @@
 #include "Reader_bsp.h"
 #include "lcd.h"
 #include "bitmap.h"
+#include "hal_delay.h"
 #include <string>
 
 typedef struct{
@@ -46,8 +47,8 @@ int main(){
 static void qt_task(void *params)
 {
     (void)params;
-    static SPI_TransferSetup setup;
-    setup.usDelay = 160;
+//    static SPI_TransferSetup setup;
+//    setup.usDelay = 160;
     GPIO_pin_write(QT_RST, GPIO_LOW);
     vTaskDelay(10);
     GPIO_pin_write(QT_RST, GPIO_HIGH);
@@ -59,7 +60,12 @@ static void qt_task(void *params)
         {
             uint8_t read_key[] = {0xC1, 0x00, 0x00};
             GPIO_pin_write(QT_SS, GPIO_LOW);
-            SPI_transfer(QT_SPI_CHANNEL, &setup, read_key, nullptr, sizeof(read_key));
+            SPI_byte_transfer(QT_SPI_CHANNEL, read_key[0]);
+            HAL_delay_us(160);
+            SPI_byte_transfer(QT_SPI_CHANNEL, read_key[1]);
+            HAL_delay_us(160);
+            SPI_byte_transfer(QT_SPI_CHANNEL, read_key[2]);
+            HAL_delay_us(160);
             GPIO_pin_write(QT_SS, GPIO_HIGH);
             GPIO_pin_toggle(LED3);
         }
