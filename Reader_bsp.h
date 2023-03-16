@@ -9,6 +9,7 @@
 #if defined (__LANGUAGE_C__) || defined (__LANGUAGE_C_PLUS_PLUS)
 #include "pps.h"
 #include "gpio.h"
+#include "dma.h"
 #endif
 
 #define STRGIZE(x)              #x
@@ -92,8 +93,7 @@
 
 #endif /*__READER_V2__*/
 
-#define QTOUCH_VECTOR   .vector_122
-#define QTOUCH_VECTOR_DISPATCH   __vector_dispatch_122
+#define LCD_DMA_CHANNEL         DMA_CHANNEL_0
 
 
 #if defined (__LANGUAGE_C__) || defined (__LANGUAGE_C_PLUS_PLUS)
