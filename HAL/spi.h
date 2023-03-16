@@ -72,62 +72,16 @@
 /**********************************************************************
 * Typedefs
 **********************************************************************/
+#if defined (__LANGUAGE_C__) || defined (__LANGUAGE_C_PLUS_PLUS)
+
+typedef uint32_t SPI_Channel;
 typedef struct{
     uint32_t        usDelay;
     uint8_t         stopChar;
     bool            stopCharEnable;
 }SPI_TransferSetup;
+typedef void (*SPI_Callback)(SPI_Channel);
 
-typedef struct{
-    bool            busy;
-    void            *txBuffer;
-    void            *rxBuffer;
-    size_t          count;
-    size_t          rxSize;
-    size_t          txSize;
-}SPI_Object;
-
-///**
-// * @brief Configuration table.
-// * This table is used to configure SPI peripherals on initialization function.
-// *
-// */
-//typedef struct{
-//    SPI_MODE mode; ///<SPI mode
-//    SPI_MASTER_SLAVE mastermode;///<SPI working mode
-//    uint32_t baudrate;///<SPI channel baudrate;
-//    SPI_DATA_SAMPLE sample;///<SPI channel sampling scheme
-//}SPI_Setup;
-//
-///**
-// * @brief Struct that defines the data structure for SPI transfers.
-// *
-// */
-//struct _SPI_Handler{
-//    SPI_CHANNEL         channel;
-//    SPI_Setup           setup; ///<Configuration table of current SPI peripheral.
-//
-//    uint8_t             *txBuffer; ///<Pointer to TX buffer.
-//    size_t              txSize; ///<Size of TX buffer.
-//    size_t              txCount; ///<Maintains the count of transfered bytes, when txCount == txSize all bytes are transmited.
-//
-//    uint8_t             *rxBuffer; ///<Pointer to RX buffer.
-//    size_t              rxSize; ///<Size of RX buffer.
-//    size_t              rxCount; ///<Maintains the count of transfered bytes, when rxCount == rxSize all bytes are received.
-//
-//    size_t              dummySize; ///<Member that specifies dummy bytes to transmit when a transfer is only receiving data.
-//
-//    SPI_ERROR           error; ///<Contains the error.
-//
-//    uint32_t            usDelay; ///<Time in us to wait between every transfered byte. Useful when dealing with QTouch comms. Used in blocking transfers.
-//    uint8_t             dummyByte;///<Value to transmit when a transfer is only receiving data.
-//
-//    bool                busy; ///<Busy state of the SPI channel. True when a transfer is in progress.
-//
-//    SPI_Callback        errorCallback; ///<Function to be called when an error occurs.
-//    SPI_Callback        cpltCallback; ///<Function to be called when a byte has been transfered.
-//    SPI_Callback        halfCallback; ///<Function to be called when a transfer is completed.
-//};
 
 /**********************************************************************
 * Function Prototypes
@@ -136,27 +90,44 @@ typedef struct{
 extern "C"{
 #endif
 
-int         SPI_initialize      (uint32_t spiChannel, uint32_t configFlags, uint32_t baudrate);
-size_t      SPI_transfer        (uint32_t spiChannel, const SPI_TransferSetup *setup, void *txBuffer, void *rxBuffer, size_t size);
-uint8_t     SPI_byte_transfer   (uint32_t spiChannel, uint8_t data);
-size_t      SPI_transfer_isr    (uint32_t spiChannel, const SPI_TransferSetup *setup, void *txBuffer, void *rxBuffer, size_t size);
-bool        SPI_is_busy         (uint32_t spiChannel);
+int         SPI_initialize              (uint32_t spiChannel, uint32_t configFlags, uint32_t baudrate);
+size_t      SPI_transfer                (uint32_t spiChannel, void *txBuffer, void *rxBuffer, size_t size);
+uint8_t     SPI_byte_transfer           (uint32_t spiChannel, uint8_t data);
+bool        SPI_is_busy                 (uint32_t spiChannel);
+void        SPI_callback_register       (SPI_Channel spiChannel, SPI_Callback callback);
+bool        SPI_transfer_isr            (uint32_t spiChannel, void* pTransmitData, void* pReceiveData, size_t size);
+void        SPI_rx_interrupt_handler    (SPI_Channel spiChannel);
+void        SPI_tx_interrupt_handler    (SPI_Channel spiChannel);
+
+
 //bool SPI_TransferSetup(const SPI_Handler spiChannel, SPI_Setup *setup);
 
 static inline
-size_t      SPI_Write           (uint32_t spiChannel, SPI_TransferSetup *setup, void *txBuffer, size_t size)
+size_t      SPI_write           (uint32_t spiChannel, void *txBuffer, size_t size)
 {
-    return SPI_transfer(spiChannel, setup, txBuffer, NULL, size);
+    return SPI_transfer(spiChannel, txBuffer, NULL, size);
 }
 
 static inline
-size_t      SPI_Read            (uint32_t spiChannel,  SPI_TransferSetup *setup, void *rxBuffer, size_t size)
+size_t      SPI_read            (uint32_t spiChannel, void *rxBuffer, size_t size)
 {
-    return SPI_transfer(spiChannel, setup, NULL, rxBuffer, size);
+    return SPI_transfer(spiChannel, NULL, rxBuffer, size);
+}
+
+static inline
+size_t      SPI_write_isr       (uint32_t spiChannel, void *txBuffer, size_t size)
+{
+    return SPI_transfer_isr(spiChannel, txBuffer, NULL, size);
+}
+
+static inline
+size_t      SPI_read_isr        (uint32_t spiChannel, void *rxBuffer, size_t size)
+{
+    return SPI_transfer_isr(spiChannel, NULL, rxBuffer, size);
 }
 
 #ifdef __cplusplus
 }
 #endif
-
+#endif
 #endif /*SPI_H*/
