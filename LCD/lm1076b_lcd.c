@@ -6,6 +6,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "gpio.h"
+#include "dma.h"
 #include <string.h>
 #include <stdint.h>
 /**********************************************************************
@@ -393,16 +394,13 @@ static const LCD_Font *fonts[]={
         [LCD_FONT_SMALL]        = &small,
         [LCD_FONT_MEDIUM]       = &medium
 };
-static const SPI_TransferSetup setup = {
-        .usDelay = 0,
-        .stopCharEnable = 0,
-        .stopChar = 0,
-};
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
 static unsigned char* LCD_get_char(unsigned char c, const LCD_Font *font);
 static LCD_COLOR LCD_color_inverse(LCD_COLOR color);
+//static void SPI_callback(SPI_Channel channel);
+static void DMA_callback(DMA_Channel channel, DMA_IRQ_CAUSE cause);
 /**********************************************************************
 * Function Definitions
 **********************************************************************/
@@ -429,10 +427,25 @@ int     LCD_init        (uint32_t spiChannel, GPIO_PinMap cs, GPIO_PinMap bla, G
 
     GPIO_pin_write(lcd.dc_pin, GPIO_LOW);
     GPIO_pin_write(lcd.cs_pin, GPIO_LOW);
-    SPI_transfer(lcd.spiChannel, &setup, config_buffer, NULL, sizeof(config_buffer));
+    SPI_transfer(lcd.spiChannel, config_buffer, NULL, sizeof(config_buffer));
     GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
 
+//    SPI_callback_register(lcd.spiChannel, SPI_callback);
+
     vTaskDelay(10);
+
+    DMA_CHANNEL_Config dmaConfig = {
+        .startIrq = _SPI2_TX_VECTOR,
+        .cellSize = 1,
+        .dstSize = 1,
+        .dstAddress = (uint32_t)(&SPI2BUF),
+        .srcSize = LCD_BUFFER_SIZE,
+        .srcAddress = (uint32_t)(lcd_buffer),
+    };
+
+    DMA_channel_init(DMA_CHANNEL_0, DMA_CHANNEL_PRIORITY_3 | DMA_CHANNEL_START_IRQ);
+    DMA_channel_config(DMA_CHANNEL_0, &dmaConfig);
+    DMA_callback_register(DMA_CHANNEL_0, DMA_callback);
     return 0;
 }
 void    LCD_draw_point  (int x, int y, LCD_COLOR color)
@@ -515,9 +528,11 @@ void    LCD_print       ( void )
 
     GPIO_pin_write(lcd.dc_pin, GPIO_HIGH);
     GPIO_pin_write(lcd.cs_pin, GPIO_LOW);
-    SPI_transfer(lcd.spiChannel, &setup, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
+//    SPI_transfer_isr(lcd.spiChannel, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
+    DMA_channel_transfer(DMA_CHANNEL_0);
+//    SPI_transfer(lcd.spiChannel, &setup, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
 //    SPI_dma_transfer(lcd.spiChannel, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
-    GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
+//    GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
 
 }
 
@@ -559,4 +574,12 @@ LCD_COLOR LCD_color_inverse(LCD_COLOR color)
         case LCD_COLOR_WHITE: return LCD_COLOR_BLACK;
         default: return LCD_COLOR_BLACK;
     }
+}
+//void SPI_callback(SPI_Channel channel)
+//{
+//    GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
+//}
+void DMA_callback(DMA_Channel channel, DMA_IRQ_CAUSE cause)
+{
+//    GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
 }
