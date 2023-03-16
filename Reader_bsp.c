@@ -61,6 +61,10 @@ void interrupts_initialize( void )
 {
     EVIC_channel_priority(EVIC_CHANNEL_CHANGE_NOTICE_E, EVIC_PRIORITY_4, EVIC_SUB_PRIORITY_2);
     EVIC_channel_set(EVIC_CHANNEL_CHANGE_NOTICE_E);
+    EVIC_channel_priority(EVIC_CHANNEL_DMA0, EVIC_PRIORITY_2, EVIC_SUB_PRIORITY_2);
+    EVIC_channel_set(EVIC_CHANNEL_DMA0);
+//    EVIC_channel_priority(EVIC_CHANNEL_SPI2_RX, EVIC_PRIORITY_2, EVIC_SUB_PRIORITY_2);
+//    EVIC_channel_priority(EVIC_CHANNEL_SPI2_TX, EVIC_PRIORITY_2, EVIC_SUB_PRIORITY_2);
 }
 
 void    GPIO_pin_interrupt_callback     (uint32_t pin)
