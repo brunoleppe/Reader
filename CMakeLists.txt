@@ -18,14 +18,16 @@ set(READER_TYPE     __DesktopReaderV2__)
 # set(CMAKE_VERBOSE_MAKEFILE True)
 
 set(SOURCES
-#        main.c
+        main.c
         FreeRTOSConfig.h
         initialization.c initialization.h
         Reader_bsp.h Reader_bsp.c
         bitmap.c bitmap.h
         interrupts.c
         interrupts_as.S
-        main.cpp TestClass.cpp TestClass.h)
+#        main.cpp
+#        TestClass.cpp TestClass.h
+        )
 
 project(Reader CXX C ASM)
 
