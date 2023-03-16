@@ -5,29 +5,29 @@
 * Includes
 **********************************************************************/
 #include "dma.h"
+#include "evic.h"
 #include "pic32mz_registers.h"
 #include <xc.h>
+#include <sys/kmem.h>
 /**********************************************************************
 * Module Preprocessor Constants
 **********************************************************************/
-#define MAX_DMA_CHANNELS    8
+#define DMA_NUMBER_OF_CHANNELS                  8
 /*********************************************************************
 * Module Preprocessor Macros
 **********************************************************************/
-
+#define DMA_DESCRIPTOR(channel)                 ((DMA_Descriptor)(((uint8_t*)(&DCH0CON)) + 0xC0*(channel)))
+#define DMA_EVIC_CHANNEL(channel)               (EVIC_CHANNEL_DMA0 + channel)
 /**********************************************************************
 * Module Typedefs
 **********************************************************************/
-
+typedef struct{
+    DMA_Callback callback;
+}DMA_Object;
 /**********************************************************************
 * Module Variable Definitions
 **********************************************************************/
-static DMA_CHANNEL channel = 0;
-static DMA_Descriptor dmaDescriptors[] = {
-        (DMA_Descriptor)&DCH0CON, (DMA_Descriptor)&DCH1CON, (DMA_Descriptor)&DCH2CON,
-        (DMA_Descriptor)&DCH3CON, (DMA_Descriptor)&DCH4CON, (DMA_Descriptor)&DCH5CON,
-        (DMA_Descriptor)&DCH6CON, (DMA_Descriptor)&DCH7CON,
-};
+static DMA_Object dmaObjs[DMA_NUMBER_OF_CHANNELS];
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
@@ -40,37 +40,62 @@ int DMA_init()
     DMACONSET = _DMACON_ON_MASK;
     return 0;
 }
-DMA_CHANNEL DMA_free_channel_get()
+int DMA_channel_init(int channel, int configFlags)
 {
-    if(channel >= MAX_DMA_CHANNELS)
-        return -1;
-    return channel++;
+    DMA_DESCRIPTOR(channel)->dchcon.reg = 0x03 & configFlags;
+    DMA_DESCRIPTOR(channel)->dchecon.reg = 0;
+    DMA_DESCRIPTOR(channel)->dchint.reg = 0;
+    if((configFlags & DMA_CHANNEL_ABORT_IRQ) == DMA_CHANNEL_ABORT_IRQ) {
+        DMA_DESCRIPTOR(channel)->dchecon.set = _DCH0ECON_AIRQEN_MASK;
+        DMA_DESCRIPTOR(channel)->dchint.set = _DCH0INT_CHTAIE_MASK;
+    }
+    if((configFlags & DMA_CHANNEL_START_IRQ) == DMA_CHANNEL_START_IRQ) {
+        DMA_DESCRIPTOR(channel)->dchecon.set = _DCH0ECON_SIRQEN_MASK;
+        DMA_DESCRIPTOR(channel)->dchint.set = _DCH0INT_CHBCIE_MASK;
+    }
+    dmaObjs[channel].callback = NULL;
     return 0;
 }
-int DMA_channel_init(DMA_CHANNEL channel)
+int DMA_channel_config(int channel, DMA_CHANNEL_Config *config)
 {
-    dmaDescriptors[channel]->dchcon.reg = 0x03;
-    dmaDescriptors[channel]->dchecon.reg = 0;
-    dmaDescriptors[channel]->dchint.clr = 0x00ff00ff;
+    DMA_DESCRIPTOR(channel)->dchssa.reg = KVA_TO_PA(config->srcAddress);
+    DMA_DESCRIPTOR(channel)->dchdsa.reg = KVA_TO_PA(config->dstAddress);
+    DMA_DESCRIPTOR(channel)->dchssiz.reg = config->srcSize;
+    DMA_DESCRIPTOR(channel)->dchdsiz.reg = config->dstSize;
+    DMA_DESCRIPTOR(channel)->dchcsiz.reg = config->cellSize;
+    DMA_DESCRIPTOR(channel)->dchecon.set = config->startIrq << _DCH0ECON_CHSIRQ_POSITION;
+    DMA_DESCRIPTOR(channel)->dchecon.set = config->abortIrq << _DCH0ECON_CHAIRQ_POSITION;
     return 0;
 }
-int DMA_channel_config(DMA_CHANNEL channel, DMA_CHANNEL_Config *config)
+int DMA_channel_transfer(int channel)
 {
-    dmaDescriptors[channel]->dchssa.reg = config->src_phy_address;
-    dmaDescriptors[channel]->dchdsa.reg = config->dst_phy_address;
-    dmaDescriptors[channel]->dchssiz.reg = config->src_size;
-    dmaDescriptors[channel]->dchdsiz.reg = config->dst_size;
-    dmaDescriptors[channel]->dchecon.set = (144) << _DCH0ECON_CHSIRQ_POSITION;
-    dmaDescriptors[channel]->dchecon.set = _DCH0ECON_SIRQEN_MASK;
-    dmaDescriptors[channel]->dchcsiz.reg = 1;
+    DMA_DESCRIPTOR(channel)->dchcon.set = _DCH0CON_CHEN_MASK;
+    if((DMA_DESCRIPTOR(channel)->dchcon.reg & _DCH0CON_CHBUSY_MASK) != _DCH0CON_CHBUSY_MASK){
+        DMA_DESCRIPTOR(channel)->dchecon.set = _DCH0ECON_CFORCE_MASK;
+    }
 
-//    dmaDescriptors[channel]->dchecon.set = ((config->interrupt_vector) << _DCH0ECON_CHSIRQ_POSITION) |
-//            _DCH0ECON_SIRQEN_MASK;
-    dmaDescriptors[channel]->dchcon.set = _DCH0CON_CHEN_MASK;
     return 0;
 }
-int DMA_channel_transfer(DMA_CHANNEL channel)
+
+void DMA_callback_register(DMA_Channel channel, DMA_Callback callback)
 {
-//    dmaDescriptors[channel]->dchecon.set = _DCH0ECON_CFORCE_MASK;
-    return 0;
+    dmaObjs[channel].callback = callback;
+}
+
+void DMA_interrupt_handler(DMA_Channel channel){
+    DMA_IRQ_CAUSE cause = 0;
+    if((DMA_DESCRIPTOR(channel)->dchint.reg & _DCH0INT_CHBCIF_MASK) == _DCH0INT_CHBCIF_MASK){
+        cause = DMA_IRQ_CAUSE_TRANSFER_COMPLETE;
+        DMA_DESCRIPTOR(channel)->dchint.clr = _DCH0INT_CHBCIF_MASK;
+    }
+    else if((DMA_DESCRIPTOR(channel)->dchint.reg & _DCH0INT_CHTAIF_MASK) == _DCH0INT_CHTAIF_MASK){
+        cause = DMA_IRQ_CAUSE_ABORT;
+        DMA_DESCRIPTOR(channel)->dchint.clr = _DCH0INT_CHTAIF_MASK;
+    }
+
+    if(dmaObjs[channel].callback != NULL){
+        dmaObjs[channel].callback(channel, cause);
+    }
+
+    EVIC_channel_pending_clear(DMA_EVIC_CHANNEL(channel));
 }

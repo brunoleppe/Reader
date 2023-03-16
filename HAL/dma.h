@@ -8,34 +8,49 @@
 /**********************************************************************
 * Includes
 **********************************************************************/
-#include "hal.h"
+#include "hal_defs.h"
 
 /**********************************************************************
 * Preprocessor Constants
 **********************************************************************/
+#define DMA_CHANNEL_0                                       (0)
+#define DMA_CHANNEL_1                                       (1)
+#define DMA_CHANNEL_2                                       (2)
+#define DMA_CHANNEL_3                                       (3)
+#define DMA_CHANNEL_4                                       (4)
+#define DMA_CHANNEL_5                                       (5)
+#define DMA_CHANNEL_6                                       (6)
+#define DMA_CHANNEL_7                                       (7)
 
+#define DMA_CHANNEL_PRIORITY_3                              (0x0003)
+#define DMA_CHANNEL_PRIORITY_2                              (0x0002)
+#define DMA_CHANNEL_PRIORITY_1                              (0x0001)
+#define DMA_CHANNEL_PRIORITY_0                              (0x0000)
+
+#define DMA_CHANNEL_ABORT_IRQ                               (0x0004)
+#define DMA_CHANNEL_START_IRQ                               (0x0008)
 /**********************************************************************
 * Typedefs
 **********************************************************************/
-typedef enum{
-    DMA_CHANNEL_0,
-    DMA_CHANNEL_1,
-    DMA_CHANNEL_2,
-    DMA_CHANNEL_3,
-    DMA_CHANNEL_4,
-    DMA_CHANNEL_5,
-    DMA_CHANNEL_6,
-    DMA_CHANNEL_7,
-}DMA_CHANNEL;
+#if defined (__LANGUAGE_C__) || defined (__LANGUAGE_C_PLUS_PLUS)
+
+typedef int DMA_Channel;
 
 typedef struct{
-    uint32_t                src_phy_address;
-    size_t                  src_size;
-    uint32_t                dst_phy_address;
-    size_t                  dst_size;
-    size_t                  transfer_size;
-    uint8_t                 interrupt_vector;
+    uint8_t                 abortIrq;
+    uint8_t                 startIrq;
+    uint16_t                srcSize;
+    uint16_t                dstSize;
+    uint16_t                cellSize;
+    uint32_t                srcAddress;
+    uint32_t                dstAddress;
 }DMA_CHANNEL_Config;
+typedef enum{
+    DMA_IRQ_CAUSE_TRANSFER_COMPLETE,
+    DMA_IRQ_CAUSE_ABORT,
+}DMA_IRQ_CAUSE;
+
+typedef void (*DMA_Callback)(DMA_Channel, DMA_IRQ_CAUSE);
 
 /**********************************************************************
 * Function Prototypes
@@ -43,12 +58,16 @@ typedef struct{
 #ifdef __cplusplus
 extern "C"{
 #endif
+
 int DMA_init();
-DMA_CHANNEL DMA_free_channel_get();
-int DMA_channel_init(DMA_CHANNEL channel);
-int DMA_channel_config(DMA_CHANNEL channel, DMA_CHANNEL_Config *config);
-int DMA_channel_transfer(DMA_CHANNEL channel);
+int DMA_channel_init(DMA_Channel channel, int configFlags);
+int DMA_channel_config(DMA_Channel channel, DMA_CHANNEL_Config *config);
+int DMA_channel_transfer(DMA_Channel channel);
+void DMA_callback_register(DMA_Channel channel, DMA_Callback callback);
+
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 #endif //DMA_H
