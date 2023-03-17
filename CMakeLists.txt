@@ -1,3 +1,9 @@
+#Define the following variables in the CMake profile configurations tab -> CMake Options:
+#PIC -> Ex: -DPIC=32MZ1024EFM100
+#DFP -> Ex: -DDFP=/opt/microchip/mplabx/v6.05/packs/Microchip/PIC32MZ-EF_DFP/1.3.58
+#ARCH -> Ex: -DARCH=MZ (for FreeRTOS port of pic32mz or pic32mx)
+#user defines if any
+
 cmake_minimum_required(VERSION 3.24.2)
 
 #Compiler
