@@ -22,13 +22,11 @@
 **********************************************************************/
 #define SPI_BASE                                _SPI1_BASE_ADDRESS
 #define SPI_NUMBER_OF_CHANNELS                  (6)
-#define SPI_IRQ_RX_CHANNEL(base)                ((base) + 1)
-#define SPI_IRQ_TX_CHANNEL(base)                ((base) + 1)
-
+#define SPI_PERIPHERAL_INTERVAL                 (200)
 /**********************************************************************
 * Module Preprocessor Macros
 **********************************************************************/
-#define SPI_DESCRIPTOR(channel)                 ((SPI_Descriptor)(((uint8_t*)(SPI_BASE)) + 0x200*(channel)))
+#define SPI_DESCRIPTOR(channel)                 ((SPI_Descriptor)(((uint8_t*)(SPI_BASE)) + SPI_PERIPHERAL_INTERVAL*(channel)))
 #define SPI_RX_INTERRUPT_CHANNEL(channel)       (spiIRQBase[channel] + 1)
 #define SPI_TX_INTERRUPT_CHANNEL(channel)       (spiIRQBase[channel] + 2)
 #define SPI_FAULT_INTERRUPT_CHANNEL(channel)    (spiIRQBase[channel])
