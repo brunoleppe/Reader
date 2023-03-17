@@ -84,6 +84,14 @@ typedef struct{
 typedef struct{
     struct MemRegister pbxdiv;
 }volatile * const PBCLK_Descriptor;
+
+typedef struct{
+    struct MemRegister umode;
+    struct MemRegister usta;
+    struct MemRegister utxreg;
+    struct MemRegister urxreg;
+    struct MemRegister ubrg;
+}volatile * const UART_Descriptor;
 #ifdef	__cplusplus
 }
 #endif
