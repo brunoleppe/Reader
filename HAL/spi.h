@@ -43,7 +43,6 @@
 * Preprocessor Constants
 **********************************************************************/
 
-
 #define SPI_CHANNEL_1                       (0)
 #define SPI_CHANNEL_2                       (1)
 #define SPI_CHANNEL_3                       (2)
@@ -81,7 +80,11 @@ typedef struct{
     bool            stopCharEnable;
 }SPI_TransferSetup;
 typedef void (*SPI_Callback)(SPI_Channel);
-
+typedef struct{
+    int fault;
+    int tx;
+    int rx;
+}SPI_IRQ_Vector;
 
 /**********************************************************************
 * Function Prototypes
@@ -98,7 +101,7 @@ void        SPI_callback_register       (SPI_Channel spiChannel, SPI_Callback ca
 bool        SPI_transfer_isr            (uint32_t spiChannel, void* pTransmitData, void* pReceiveData, size_t size);
 void        SPI_rx_interrupt_handler    (SPI_Channel spiChannel);
 void        SPI_tx_interrupt_handler    (SPI_Channel spiChannel);
-
+SPI_IRQ_Vector* SPI_get_irq_vector_base     (SPI_Channel spiChannel);
 
 //bool SPI_TransferSetup(const SPI_Handler spiChannel, SPI_Setup *setup);
 

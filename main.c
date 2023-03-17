@@ -75,7 +75,7 @@ static void qt_task(void *params)
 static void lcd_task(void *params)
 {
     (void)params;
-    LCD_init(LCD_SPI_CHANNEL, LCD_SS, LCD_BLA, LCD_DC, LCD_RST);
+    LCD_init(LCD_SPI_CHANNEL, LCD_DMA_CHANNEL, LCD_SS, LCD_BLA, LCD_DC, LCD_RST);
 
     LCD_draw_bitmap(0,0,bitmap,sizeof(bitmap));
     char *s = "Hola Mundo";

@@ -25,12 +25,14 @@
 **********************************************************************/
 struct LCD{
     uint32_t spiChannel;
+    uint32_t dmaChannel;
     uint8_t *lcd_buffer;
     int lcd_size;
     GPIO_PinMap cs_pin;
     GPIO_PinMap bla_pin;
     GPIO_PinMap dc_pin;
     GPIO_PinMap rst_pin;
+
 };
 typedef struct{
     uint8_t     bytes;      ///< Cantidad de bytes por caracter.
@@ -404,9 +406,10 @@ static void DMA_callback(DMA_Channel channel, DMA_IRQ_CAUSE cause);
 /**********************************************************************
 * Function Definitions
 **********************************************************************/
-int     LCD_init        (uint32_t spiChannel, GPIO_PinMap cs, GPIO_PinMap bla, GPIO_PinMap dc, GPIO_PinMap rst)
+int LCD_init (uint32_t spiChannel, uint32_t dma, GPIO_PinMap cs, GPIO_PinMap bla, GPIO_PinMap dc, GPIO_PinMap rst)
 {
     lcd.spiChannel = spiChannel;
+    lcd.dmaChannel = dma;
     lcd.bla_pin = bla;
     lcd.cs_pin = cs;
     lcd.dc_pin = dc;
@@ -435,7 +438,7 @@ int     LCD_init        (uint32_t spiChannel, GPIO_PinMap cs, GPIO_PinMap bla, G
     vTaskDelay(10);
 
     DMA_CHANNEL_Config dmaConfig = {
-        .startIrq = _SPI2_TX_VECTOR,
+        .startIrq = SPI_get_irq_vector_base(lcd.spiChannel)->tx,
         .cellSize = 1,
         .dstSize = 1,
         .dstAddress = (uint32_t)(&SPI2BUF),
@@ -443,9 +446,9 @@ int     LCD_init        (uint32_t spiChannel, GPIO_PinMap cs, GPIO_PinMap bla, G
         .srcAddress = (uint32_t)(lcd_buffer),
     };
 
-    DMA_channel_init(DMA_CHANNEL_0, DMA_CHANNEL_PRIORITY_3 | DMA_CHANNEL_START_IRQ);
-    DMA_channel_config(DMA_CHANNEL_0, &dmaConfig);
-    DMA_callback_register(DMA_CHANNEL_0, DMA_callback);
+    DMA_channel_init(lcd.dmaChannel, DMA_CHANNEL_PRIORITY_3 | DMA_CHANNEL_START_IRQ);
+    DMA_channel_config(lcd.dmaChannel, &dmaConfig);
+    DMA_callback_register(lcd.dmaChannel, DMA_callback);
     return 0;
 }
 void    LCD_draw_point  (int x, int y, LCD_COLOR color)
@@ -529,7 +532,7 @@ void    LCD_print       ( void )
     GPIO_pin_write(lcd.dc_pin, GPIO_HIGH);
     GPIO_pin_write(lcd.cs_pin, GPIO_LOW);
 //    SPI_transfer_isr(lcd.spiChannel, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
-    DMA_channel_transfer(DMA_CHANNEL_0);
+    DMA_channel_transfer(lcd.dmaChannel);
 //    SPI_transfer(lcd.spiChannel, &setup, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
 //    SPI_dma_transfer(lcd.spiChannel, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
 //    GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);

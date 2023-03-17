@@ -51,12 +51,12 @@ typedef struct{
 **********************************************************************/
 static SPI_Object spiObjects[SPI_NUMBER_OF_CHANNELS];
 static const EVIC_CHANNEL spiIRQBase[SPI_NUMBER_OF_CHANNELS]={
-        EVIC_CHANNEL_SPI1_FAULT,
-        EVIC_CHANNEL_SPI2_FAULT,
-        EVIC_CHANNEL_SPI3_FAULT,
-        EVIC_CHANNEL_SPI4_FAULT,
-        EVIC_CHANNEL_SPI5_FAULT,
-        EVIC_CHANNEL_SPI6_FAULT,
+    EVIC_CHANNEL_SPI1_FAULT,
+    EVIC_CHANNEL_SPI2_FAULT,
+    EVIC_CHANNEL_SPI3_FAULT,
+    EVIC_CHANNEL_SPI4_FAULT,
+    EVIC_CHANNEL_SPI5_FAULT,
+    EVIC_CHANNEL_SPI6_FAULT,
 };
 /**********************************************************************
 * Function Prototypes
@@ -413,7 +413,14 @@ void SPI_tx_interrupt_handler (SPI_Channel spiChannel)
     EVIC_channel_pending_clear(SPI_TX_INTERRUPT_CHANNEL(spiChannel));
 }
 
-
+SPI_IRQ_Vector* SPI_get_irq_vector_base          (SPI_Channel spiChannel)
+{
+    static SPI_IRQ_Vector v;
+    v.fault = spiIRQBase[spiChannel];
+    v.rx = spiIRQBase[spiChannel]+1;
+    v.tx = spiIRQBase[spiChannel] +2;
+    return &v;
+}
 
 static uint32_t SPI_Baudrate_Get_(uint32_t baudrate){
     uint32_t clock;
