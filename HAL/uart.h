@@ -41,9 +41,14 @@
 **********************************************************************/
 #if defined (__LANGUAGE_C__) || defined (__LANGUAGE_C_PLUS_PLUS)
 
+typedef enum{
+    UART_CHANNEL_EVENT_BUFFER_FULL,
+    UART_CHANNEL_EVENT_BYTE_RECEIVED,
+}UART_CHANNEL_EVENT;
+
 typedef int UART_Channel;
 typedef uint32_t UART_Flags;
-typedef void (*UART_Callback)(UART_Channel, )
+typedef void (*UART_Callback)(UART_Channel, UART_CHANNEL_EVENT event);
 
 /**********************************************************************
 * Function Prototypes
@@ -58,11 +63,8 @@ size_t  UART_write(UART_Channel channel, uint8_t *txBuffer, size_t size);
 size_t  UART_read(UART_Channel channel, uint8_t *rxBuffer, size_t size);
 uint8_t UART_write_byte(UART_Channel channel, uint8_t data);
 uint8_t UART_read_byte(UART_Channel channel);
-
-bool    UART_write_isr(UART_Channel channel, uint8_t *txBuffer, size_t size);
-bool    UART_read_isr(UART_Channel channel, uint8_t *rxBuffer, size_t size);
-void    UART_callback_register(UART_Channel channel, )
-
+void    UART_callback_register(UART_Channel channel, UART_Callback callback);
+UART_Descriptor UART_get_descriptor(UART_Channel channel);
 #ifdef __cplusplus
 }
 #endif

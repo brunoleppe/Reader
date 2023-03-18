@@ -10,4 +10,6 @@ add_library(HAL
         pps.c pps.h
         hal_defs.h hal_config.h
         timer.c timer.h
-        oc.c oc.h)
+        oc.c oc.h
+        uart.h uart.c
+        hal_ring_buffer.c hal_ring_buffer.h)

@@ -184,28 +184,29 @@ size_t SPI_transfer(uint32_t spiChannel, void *txBuffer, void *rxBuffer, size_t 
 uint8_t SPI_byte_transfer(uint32_t spiChannel, uint8_t data)
 {
     uint8_t receivedData;
-
-    /*Limpiar bandera de overflow*/
+    spiObjects[spiChannel].busy = true;
+    /*Overflow-bit clear*/
     SPI_DESCRIPTOR(spiChannel)->spistat.clr = _SPI1STAT_SPIROV_MASK;
 
-    /*Vaciar FIFO de recepción*/
+    /*Empty RX FIFO*/
     while ((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK) == false) {
         receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
         (void)receivedData;
     }
-
-    /*Esperar que el FIFO de transmisión esté vacío*/
-    while((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPITBE_MASK) == false);
-
-    /*Enviar el byte*/
-    SPI_DESCRIPTOR(spiChannel)->spibuf.reg = data;
-
-    /*Esperar a que el buffer de RX se llene con bytes*/
-    while((SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK) == _SPI1STAT_SPIRBE_MASK);
-
-    /*Leer el FIFO RX*/
-    receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
-
+//    /*Wait for TX FIFO to empty*/
+//    while((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPITBE_MASK) == false);
+//
+//    /*Enviar el byte*/
+//    SPI_DESCRIPTOR(spiChannel)->spibuf.reg = data;/*DUMMY*/
+//
+//    /*Wait for RX FIFO*/
+//    while((SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK) == _SPI1STAT_SPIRBE_MASK);
+//
+//    /*Read RX FIFO*/
+//    receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
+//
+//    while ((bool)((SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SRMT_MASK) == false));
+    spiObjects[spiChannel].busy = false;
     return receivedData;
 }
 bool SPI_transfer_isr (uint32_t spiChannel, void* pTransmitData, void* pReceiveData, size_t size)
@@ -418,6 +419,10 @@ SPI_IRQ_Vector* SPI_get_irq_vector_base          (SPI_Channel spiChannel)
     v.rx = spiIRQBase[spiChannel]+1;
     v.tx = spiIRQBase[spiChannel] +2;
     return &v;
+}
+SPI_Descriptor SPI_get_descriptor      (SPI_Channel channel)
+{
+    return SPI_DESCRIPTOR(channel);
 }
 
 static uint32_t SPI_Baudrate_Get_(uint32_t baudrate){

@@ -102,7 +102,7 @@ bool        SPI_transfer_isr            (uint32_t spiChannel, void* pTransmitDat
 void        SPI_rx_interrupt_handler    (SPI_Channel spiChannel);
 void        SPI_tx_interrupt_handler    (SPI_Channel spiChannel);
 SPI_IRQ_Vector* SPI_get_irq_vector_base     (SPI_Channel spiChannel);
-
+SPI_Descriptor SPI_get_descriptor       (SPI_Channel channel);
 //bool SPI_TransferSetup(const SPI_Handler spiChannel, SPI_Setup *setup);
 
 static inline

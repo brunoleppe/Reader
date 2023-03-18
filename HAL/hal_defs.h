@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
-
+#include "pic32mz_registers.h"
 #include "hal_config.h"
 
 #define HAL_SYSTEM_CLOCK                    (200000000UL)
