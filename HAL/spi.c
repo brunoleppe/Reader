@@ -22,7 +22,7 @@
 **********************************************************************/
 #define SPI_BASE                                _SPI1_BASE_ADDRESS
 #define SPI_NUMBER_OF_CHANNELS                  (6)
-#define SPI_PERIPHERAL_INTERVAL                 (200)
+#define SPI_PERIPHERAL_INTERVAL                 (0x200)
 /**********************************************************************
 * Module Preprocessor Macros
 **********************************************************************/
