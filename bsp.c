@@ -1,14 +1,12 @@
 #include <xc.h>
-#include "Reader_bsp.h"
+#include "bsp.h"
 #include "hal.h"
 
-static void qt_change_callback(uint32_t pin);
-
 GPIO_CALLBACK_OBJECT pinCallbackObj[] = {
-        {.pin = QT_CHANGE, .callback = qt_change_callback}
+        {.pin = QT_CHANGE, 0, 0}
 };
 
-void gpio_initialize( void )
+void BSP_gpio_initialize(void )
 {
     GPIO_pin_initialize(LED1, GPIO_OUTPUT);
     GPIO_pin_initialize(LED2, GPIO_OUTPUT);
@@ -55,9 +53,11 @@ void gpio_initialize( void )
 
     TMR_initialize(TMR_CHANNEL_2, TMR_PRESCALER_64, 5971);
     OC_initialize(OC_CHANNEL_1, OC_MODE_PWM | OC_MODE_USE_TMR2, 2985);
+
+    DMA_channel_init(LCD_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_3 | DMA_CHANNEL_START_IRQ);
 }
 
-void interrupts_initialize( void )
+void BSP_interrupts_initialize(void )
 {
     EVIC_channel_priority(EVIC_CHANNEL_CHANGE_NOTICE_E, EVIC_PRIORITY_4, EVIC_SUB_PRIORITY_2);
     EVIC_channel_set(EVIC_CHANNEL_CHANGE_NOTICE_E);
@@ -67,17 +67,23 @@ void interrupts_initialize( void )
 //    EVIC_channel_priority(EVIC_CHANNEL_SPI2_TX, EVIC_PRIORITY_2, EVIC_SUB_PRIORITY_2);
 }
 
-void    GPIO_pin_interrupt_callback     (uint32_t pin)
+
+void BSP_gpio_callback_register(GPIO_PinMap pinMap, GPIO_CALLBACK callback, uintptr_t context)
 {
     for(int i=0; i<sizeof(pinCallbackObj)/sizeof(GPIO_CALLBACK_OBJECT); i++){
-        if((pinCallbackObj[i].pin & pin) && (pinCallbackObj[i].callback != NULL) ){
-            pinCallbackObj[i].callback(pinCallbackObj[i].pin);
+        if(pinCallbackObj[i].pin == pinMap){
+            pinCallbackObj[i].callback = callback;
+            pinCallbackObj[i].context = context;
+            return;
         }
     }
 }
 
-static void qt_change_callback(uint32_t pin) {
-    (void)pin;
-    if (GPIO_pin_read(QT_CHANGE) == GPIO_LOW)
-        GPIO_pin_toggle(LED4);
+void    GPIO_pin_interrupt_callback     (uint32_t pin)
+{
+    for(int i=0; i<sizeof(pinCallbackObj)/sizeof(GPIO_CALLBACK_OBJECT); i++){
+        if((pinCallbackObj[i].pin & pin) && (pinCallbackObj[i].callback != NULL) ){
+            pinCallbackObj[i].callback(pinCallbackObj[i].pin, pinCallbackObj[i].context);
+        }
+    }
 }
