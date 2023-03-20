@@ -5,7 +5,7 @@
 #include "initialization.h"
 #include "gpio.h"
 #include <xc.h>
-#include "Reader_bsp.h"
+#include "bsp.h"
 #include "dma.h"
 
 // <editor-fold defaultstate="collapsed" desc="Configuration Bits">
@@ -73,9 +73,9 @@ void Initialize(void)
     CFGCONbits.ECCCON = 3;
 
     INTCONSET = _INTCON_MVEC_MASK;
-    interrupts_initialize();
+    BSP_interrupts_initialize();
     DMA_init();
-    gpio_initialize();
+    BSP_gpio_initialize();
 
     __builtin_enable_interrupts();
 }
