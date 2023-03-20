@@ -98,12 +98,12 @@ size_t      SPI_transfer                (uint32_t spiChannel, void *txBuffer, vo
 uint8_t     SPI_byte_transfer           (uint32_t spiChannel, uint8_t data);
 bool        SPI_is_busy                 (uint32_t spiChannel);
 void        SPI_callback_register       (SPI_Channel spiChannel, SPI_Callback callback);
-bool        SPI_transfer_isr            (uint32_t spiChannel, void* pTransmitData, void* pReceiveData, size_t size);
+bool        SPI_transfer_isr            (uint32_t spiChannel, void* txBuffer, void* rxBuffer, size_t size);
 void        SPI_rx_interrupt_handler    (SPI_Channel spiChannel);
 void        SPI_tx_interrupt_handler    (SPI_Channel spiChannel);
-SPI_IRQ_Vector* SPI_get_irq_vector_base     (SPI_Channel spiChannel);
-SPI_Descriptor SPI_get_descriptor       (SPI_Channel channel);
-//bool SPI_TransferSetup(const SPI_Handler spiChannel, SPI_Setup *setup);
+bool        SPI_write_dma               (SPI_Channel spiChannel, uint32_t dmaChannel, void *txBuffer, size_t size);
+
+
 
 static inline
 size_t      SPI_write           (uint32_t spiChannel, void *txBuffer, size_t size)

@@ -17,6 +17,7 @@
 #include "evic.h"
 #include <xc.h>
 #include <system.h>
+#include "dma.h"
 /**********************************************************************
 * Module Preprocessor Constants
 **********************************************************************/
@@ -193,22 +194,54 @@ uint8_t SPI_byte_transfer(uint32_t spiChannel, uint8_t data)
         receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
         (void)receivedData;
     }
-//    /*Wait for TX FIFO to empty*/
-//    while((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPITBE_MASK) == false);
-//
-//    /*Enviar el byte*/
-//    SPI_DESCRIPTOR(spiChannel)->spibuf.reg = data;/*DUMMY*/
-//
-//    /*Wait for RX FIFO*/
-//    while((SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK) == _SPI1STAT_SPIRBE_MASK);
-//
-//    /*Read RX FIFO*/
-//    receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
-//
-//    while ((bool)((SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SRMT_MASK) == false));
+    /*Wait for TX FIFO to empty*/
+    while((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPITBE_MASK) == false);
+
+    /*Enviar el byte*/
+    SPI_DESCRIPTOR(spiChannel)->spibuf.reg = data;/*DUMMY*/
+
+    /*Wait for RX FIFO*/
+    while((SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK) == _SPI1STAT_SPIRBE_MASK);
+
+    /*Read RX FIFO*/
+    receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
+
+    while ((bool)((SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SRMT_MASK) == false));
     spiObjects[spiChannel].busy = false;
     return receivedData;
 }
+
+static void DMA_callback(DMA_Channel dma, DMA_IRQ_CAUSE cause, SPI_Channel channel){
+    spiObjects[channel].busy = false;
+    if(spiObjects[channel].callback != NULL){
+        spiObjects[channel].callback(channel);
+    }
+}
+
+bool        SPI_write_dma               (SPI_Channel spiChannel, uint32_t dmaChannel, void *txBuffer, size_t size)
+{
+    if(size == 0 || (txBuffer == NULL) || spiObjects[spiChannel].busy)
+        return false;
+
+    spiObjects[spiChannel].busy = true;
+
+    DMA_CHANNEL_Config dmaConfig = {
+            .startIrq = SPI_TX_INTERRUPT_CHANNEL(spiChannel),
+            .cellSize = 1,
+            .dstSize = 1,
+            .dstAddress = (uint32_t)(&SPI_DESCRIPTOR(spiChannel)->spibuf.reg),
+            .srcSize = size,
+            .srcAddress = (uint32_t)(txBuffer),
+    };
+    DMA_channel_config(dmaChannel, &dmaConfig);
+    DMA_callback_register(dmaChannel, DMA_callback, (uintptr_t)spiChannel);
+    DMA_channel_transfer(dmaChannel);
+    return true;
+}
+
+
+
+
 bool SPI_transfer_isr (uint32_t spiChannel, void* pTransmitData, void* pReceiveData, size_t size)
 {
     uint32_t dummyData = 0U;
