@@ -22,7 +22,7 @@
 **********************************************************************/
 #define UART_BASE                               _UART1_BASE_ADDRESS
 #define UART_NUMBER_OF_CHANNELS                 (6)
-#define UART_PERIPHERAL_INTERVAL                (200)
+#define UART_PERIPHERAL_INTERVAL                (0x200)
 /**********************************************************************
 * Module Preprocessor Macros
 **********************************************************************/

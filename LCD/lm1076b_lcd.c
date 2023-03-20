@@ -441,7 +441,7 @@ int LCD_init (uint32_t spiChannel, uint32_t dma, GPIO_PinMap cs, GPIO_PinMap bla
         .startIrq = SPI_get_irq_vector_base(lcd.spiChannel)->tx,
         .cellSize = 1,
         .dstSize = 1,
-        .dstAddress = (uint32_t)(&SPI2BUF),
+        .dstAddress = (uint32_t)(&SPI_get_descriptor(spiChannel)->spibuf.reg),
         .srcSize = LCD_BUFFER_SIZE,
         .srcAddress = (uint32_t)(lcd_buffer),
     };

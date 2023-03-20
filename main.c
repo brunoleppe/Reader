@@ -59,11 +59,11 @@ static void qt_task(void *params)
         {
             uint8_t read_key[] = {0xC1, 0x00, 0x00};
             GPIO_pin_write(QT_SS, GPIO_LOW);
-            SPI_byte_transfer(QT_SPI_CHANNEL, read_key[0]);
-            HAL_delay_us(160);
-            SPI_byte_transfer(QT_SPI_CHANNEL, read_key[1]);
-            HAL_delay_us(160);
-            SPI_byte_transfer(QT_SPI_CHANNEL, read_key[2]);
+            SPI_transfer(QT_SPI_CHANNEL, read_key, NULL, 1);
+//            HAL_delay_us(160);
+//            SPI_write(QT_SPI_CHANNEL, read_key+1, 1);
+//            HAL_delay_us(160);
+//            SPI_write(QT_SPI_CHANNEL, read_key+2, 1);
             HAL_delay_us(160);
             GPIO_pin_write(QT_SS, GPIO_HIGH);
             GPIO_pin_toggle(LED3);
