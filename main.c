@@ -1,10 +1,11 @@
 #include "initialization.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "Reader_bsp.h"
+#include "bsp.h"
 #include "lcd.h"
 #include "bitmap.h"
 #include "hal_delay.h"
+#include "keypad.h"
 
 typedef struct{
     GPIO_PinMap pinMap;
@@ -13,7 +14,6 @@ typedef struct{
 
 static void blink(void *params);
 static void lcd_task(void *params);
-static void qt_task(void *params);
 
 static const PinParams pinParamsLed1 = {
         .pinMap = LED1,
@@ -33,7 +33,7 @@ int main(){
     xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed2,1,NULL);
 
     xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
-    xTaskCreate(qt_task, "qt_task", 2048, NULL, 1, NULL);
+    xTaskCreate(keypad_task, "qt_task", 2048, NULL, 1, NULL);
 
     while(true){
         /*Start FreeRTOS scheduler*/
@@ -41,35 +41,6 @@ int main(){
     }
 
     return EXIT_FAILURE;
-}
-
-static void qt_task(void *params)
-{
-    (void)params;
-//    static SPI_TransferSetup setup;
-//    setup.usDelay = 160;
-    GPIO_pin_write(QT_RST, GPIO_LOW);
-    vTaskDelay(10);
-    GPIO_pin_write(QT_RST, GPIO_HIGH);
-    vTaskDelay(100);
-
-    while(true){
-        vTaskDelay(500);
-        if(GPIO_pin_read(QT_CHANGE) == GPIO_LOW)
-        {
-            uint8_t read_key[] = {0xC1, 0x00, 0x00};
-            GPIO_pin_write(QT_SS, GPIO_LOW);
-            SPI_transfer(QT_SPI_CHANNEL, read_key, NULL, 1);
-//            HAL_delay_us(160);
-//            SPI_write(QT_SPI_CHANNEL, read_key+1, 1);
-//            HAL_delay_us(160);
-//            SPI_write(QT_SPI_CHANNEL, read_key+2, 1);
-            HAL_delay_us(160);
-            GPIO_pin_write(QT_SS, GPIO_HIGH);
-            GPIO_pin_toggle(LED3);
-        }
-
-    }
 }
 
 static void lcd_task(void *params)
