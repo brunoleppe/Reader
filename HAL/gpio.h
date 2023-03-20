@@ -86,11 +86,12 @@ typedef uint32_t GPIO_Port;
 typedef uint32_t GPIO_PinMap;
 
 typedef uint32_t GPIO_ALTERNATE_FUNCTION;
-typedef void (*GPIO_CALLBACK)(GPIO_PinMap);
+typedef void (*GPIO_Callback)(GPIO_PinMap, uintptr_t context);
 
 typedef struct{
-    uint32_t pin;
-    GPIO_CALLBACK  callback;
+    GPIO_PinMap pin;
+    GPIO_Callback  callback;
+    uintptr_t context;
 }GPIO_CALLBACK_OBJECT;
 
 /**********************************************************************
@@ -112,7 +113,6 @@ uint32_t    GPIO_port_read                  (GPIO_Port port, uint32_t mask);
 void        GPIO_port_toggle                (GPIO_Port port, uint32_t mask);
 
 void        GPIO_pin_interrupt_callback     (GPIO_PinMap pin);
-void        GPIO_pin_callback_register      (GPIO_PinMap pin, GPIO_CALLBACK callback);
 void        GPIO_interrupt_handler          (GPIO_Port port);
 
 

@@ -68,7 +68,7 @@ void BSP_interrupts_initialize(void )
 }
 
 
-void BSP_gpio_callback_register(GPIO_PinMap pinMap, GPIO_CALLBACK callback, uintptr_t context)
+void BSP_gpio_callback_register(GPIO_PinMap pinMap, GPIO_Callback callback, uintptr_t context)
 {
     for(int i=0; i<sizeof(pinCallbackObj)/sizeof(GPIO_CALLBACK_OBJECT); i++){
         if(pinCallbackObj[i].pin == pinMap){
