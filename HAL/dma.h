@@ -34,7 +34,7 @@
 **********************************************************************/
 #if defined (__LANGUAGE_C__) || defined (__LANGUAGE_C_PLUS_PLUS)
 
-typedef int DMA_Channel;
+typedef uint32_t DMA_Channel;
 
 typedef struct{
     uint8_t                 abortIrq;
@@ -50,7 +50,7 @@ typedef enum{
     DMA_IRQ_CAUSE_ABORT,
 }DMA_IRQ_CAUSE;
 
-typedef void (*DMA_Callback)(DMA_Channel, DMA_IRQ_CAUSE);
+typedef void (*DMA_Callback)(DMA_Channel, DMA_IRQ_CAUSE, uintptr_t);
 
 /**********************************************************************
 * Function Prototypes
@@ -63,7 +63,7 @@ int DMA_init();
 int DMA_channel_init(DMA_Channel channel, int configFlags);
 int DMA_channel_config(DMA_Channel channel, DMA_CHANNEL_Config *config);
 int DMA_channel_transfer(DMA_Channel channel);
-void DMA_callback_register(DMA_Channel channel, DMA_Callback callback);
+void DMA_callback_register(DMA_Channel channel, DMA_Callback callback, uintptr_t context);
 
 #ifdef __cplusplus
 }
