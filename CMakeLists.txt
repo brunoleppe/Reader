@@ -27,13 +27,13 @@ set(SOURCES
         main.c
         FreeRTOSConfig.h
         initialization.c initialization.h
-        Reader_bsp.h Reader_bsp.c
+        bsp.h bsp.c
         bitmap.c bitmap.h
         interrupts.c
         interrupts_as.S
 #        main.cpp
 #        TestClass.cpp TestClass.h
-        )
+        keypad.c keypad.h Drivers/qtouch.c Drivers/qtouch.h)
 
 project(Reader CXX C ASM)
 
