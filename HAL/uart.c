@@ -12,11 +12,13 @@
 /**********************************************************************
 * Includes
 **********************************************************************/
+#include <xc.h>
 #include "uart.h"
 #include "pic32mz_registers.h"
 #include "evic.h"
-#include <xc.h>
 #include "system.h"
+#include "hal_ring_buffer.h"
+
 /**********************************************************************
 * Module Preprocessor Constants
 **********************************************************************/
@@ -34,14 +36,20 @@
 * Module Typedefs
 **********************************************************************/
 typedef struct{
-    bool            busy;
-    void            *txBuffer;
-    void            *rxBuffer;
-    size_t          rxCount;
+    bool            txBusy;
+    bool            rxBusy;
+    bool            threshold;
+    bool            termination;
+
+
+    UART_ERROR      error;
+
+    uint8_t         *txBuffer;
     size_t          txCount;
-    size_t          rxSize;
     size_t          txSize;
-    SPI_Callback    callback;
+    UART_Callback    callback;
+
+    RingBuffer      rxBuffer;
 }UART_Object;
 /*********************************************************************
 * Module Variable Definitions
@@ -59,6 +67,7 @@ static const EVIC_CHANNEL uartIRQBase[UART_NUMBER_OF_CHANNELS]={
 * Function Prototypes
 **********************************************************************/
 static int UART_baudrate(UART_Channel channel, int baudrate);
+static void  UART_error_clear(UART_Channel channel);
 /**********************************************************************
 * Function Definitions
 **********************************************************************/
@@ -76,9 +85,16 @@ static int UART_baudrate(UART_Channel channel, int baudrate);
 //#define UART_TX_INVERTED                                    0x0080
 //#define UART_TX_DISABLED                                    0x0200
 
-int     UART_initialize(UART_Channel channel, UART_Flags flags, int baudrate)
+int     UART_initialize(UART_Channel channel, UART_Flags flags, int baudrate, uint8_t *rxBuffer, size_t bufferSize)
 {
-    uartObjects[channel].busy = false;
+    EVIC_channel_clr(UART_FAULT_INTERRUPT_CHANNEL(channel));
+    EVIC_channel_clr(UART_RX_INTERRUPT_CHANNEL(channel));
+    EVIC_channel_clr(UART_TX_INTERRUPT_CHANNEL(channel));
+
+    ring_buffer_initialize(&uartObjects[channel].rxBuffer,bufferSize, rxBuffer);
+    uartObjects[channel].txBusy = false;
+    uartObjects[channel].rxBusy = false;
+
     return UART_setup(channel, flags, baudrate);
 }
 int     UART_setup(UART_Channel channel, UART_Flags flags, int baudrate)
@@ -100,9 +116,6 @@ int     UART_setup(UART_Channel channel, UART_Flags flags, int baudrate)
     if((flags & UART_LOOP_BACK) == UART_LOOP_BACK)
         UART_DESCRIPTOR(channel)->umode.set = _U1MODE_LPBACK_MASK;
 
-
-
-
     UART_DESCRIPTOR(channel)->usta.set =  _U1STA_URXEN_MASK | _U1STA_UTXEN_MASK;
 
     if((flags & UART_RX_INVERTED) == UART_RX_INVERTED)
@@ -116,13 +129,176 @@ int     UART_setup(UART_Channel channel, UART_Flags flags, int baudrate)
     return 0;
 }
 
-size_t  UART_write(UART_Channel channel, uint8_t *txBuffer, size_t size);
-size_t  UART_read(UART_Channel channel, uint8_t *rxBuffer, size_t size);
-uint8_t UART_write_byte(UART_Channel channel, uint8_t data);
-uint8_t UART_read_byte(UART_Channel channel);
+size_t  UART_write(UART_Channel channel, uint8_t *txBuffer, size_t size)
+{
+    size_t processedSize = 0;
 
-bool    UART_write_isr(UART_Channel channel, uint8_t *txBuffer, size_t size);
-bool    UART_read_isr(UART_Channel channel, uint8_t *rxBuffer, size_t size);
+    if(txBuffer == NULL || size == 0)
+        return 0;
+
+    uartObjects[channel].txBusy = true;
+
+    while( size > processedSize )
+    {
+        /* Wait while TX buffer is full */
+        while (UART_DESCRIPTOR(channel)->usta.reg & _U1STA_UTXBF_MASK);
+
+        if (( UART_DESCRIPTOR(channel)->umode.reg & (_U1MODE_PDSEL0_MASK | _U1MODE_PDSEL1_MASK)) == (_U1MODE_PDSEL0_MASK | _U1MODE_PDSEL1_MASK))
+        {
+            /* 9-bit mode */
+            UART_DESCRIPTOR(channel)->utxreg.reg = *(uint16_t*)txBuffer;
+            txBuffer += 2;
+        }
+        else
+        {
+            /* 8-bit mode */
+            UART_DESCRIPTOR(channel)->utxreg.reg = *txBuffer++;
+        }
+
+        processedSize++;
+    }
+
+    uartObjects[channel].txBusy = false;
+    return processedSize;
+}
+
+size_t  UART_read(UART_Channel channel, uint8_t *rxBuffer, size_t size)
+{
+    size_t bytesRead = 0;
+    while (ring_buffer_pull(&uartObjects[channel].rxBuffer,rxBuffer++) && (bytesRead < size))
+    {
+        bytesRead++;
+    }
+    return bytesRead;
+}
+
+uint8_t UART_write_byte(UART_Channel channel, uint8_t data)
+{
+    while (UART_DESCRIPTOR(channel)->usta.reg & _U1STA_UTXBF_MASK);
+    UART_DESCRIPTOR(channel)->utxreg.reg = data;
+    return data;
+}
+uint8_t UART_read_byte(UART_Channel channel)
+{
+    return(UART_DESCRIPTOR(channel)->urxreg.reg);
+}
+
+bool    UART_tx_ready(UART_Channel channel)
+{
+    if(!(UART_DESCRIPTOR(channel)->usta.reg & _U1STA_UTXBF_MASK) && !uartObjects[channel].txBusy)
+    {
+        return true;
+    }
+    return false;
+}
+
+UART_ERROR  UART_error_get(UART_Channel channel)
+{
+    return uartObjects[channel].error;
+}
+
+bool    UART_write_isr(UART_Channel channel, uint8_t *txBuffer, size_t size)
+{
+    if(txBuffer == NULL || size == 0)
+        return false;
+
+    UART_Object *uartObj = &uartObjects[channel];
+
+    if(uartObj->txBusy)
+        return false;
+
+    uartObj->txBuffer = txBuffer;
+    uartObj->txSize = size;
+    uartObj->txCount = 0;
+    uartObj->txBusy = true;
+
+    /* Initiate the transfer by writing as many bytes as we can */
+    while((!(UART_DESCRIPTOR(channel)->usta.reg & _U2STA_UTXBF_MASK)) && (uartObj->txSize > uartObj->txCount) )
+    {
+        if (( UART_DESCRIPTOR(channel)->umode.reg & (_U2MODE_PDSEL0_MASK | _U2MODE_PDSEL1_MASK)) == (_U2MODE_PDSEL0_MASK | _U2MODE_PDSEL1_MASK))
+        {
+            /* 9-bit mode */
+            UART_DESCRIPTOR(channel)->utxreg.reg = ((uint16_t*)uartObj->txBuffer)[uartObj->txCount++];
+        }
+        else
+        {
+            /* 8-bit mode */
+            UART_DESCRIPTOR(channel)->utxreg.reg = uartObj->txBuffer[uartObj->txCount++];
+        }
+    }
+
+    EVIC_channel_set(UART_TX_INTERRUPT_CHANNEL(channel));
+    return true;
+}
+
+void UART_rx_interrupt_handler (UART_Channel channel)
+{
+    /* Keep reading until there is a character availabe in the RX FIFO */
+    while((UART_DESCRIPTOR(channel)->usta.reg & _U1STA_URXDA_MASK) == _U1STA_URXDA_MASK)
+    {
+        if (ring_buffer_push(&uartObjects[channel].rxBuffer , (uint16_t )(UART_DESCRIPTOR(channel)->urxreg.reg) ))
+        {
+            if( uartObjects[channel].callback != NULL )
+            {
+                if(ring_buffer_count(&uartObjects[channel].rxBuffer) == uartObjects[channel].rxBuffer.size)
+                    uartObjects[channel].callback(channel, UART_CHANNEL_EVENT_BUFFER_FULL);
+                else
+                    uartObjects[channel].callback(channel, UART_CHANNEL_EVENT_BYTE_RECEIVED);
+            }
+        }
+        else{
+
+        }
+    }
+    /* Clear UART3 RX Interrupt flag */
+    EVIC_channel_pending_clear(UART_RX_INTERRUPT_CHANNEL(channel));
+}
+void UART_fault_interrupt_handler (UART_Channel channel)
+{
+    /* Save the error to be reported later */
+    uartObjects[channel].error = (UART_ERROR)(U3STA & (_U3STA_OERR_MASK | _U3STA_FERR_MASK | _U3STA_PERR_MASK));
+
+    UART_error_clear(channel);
+
+    /* Client must call UARTx_ErrorGet() function to clear the errors */
+    if( uartObjects[channel].callback != NULL )
+    {
+        uartObjects[channel].callback(channel, UART_CHANNEL_EVENT_READ_ERROR);
+    }
+}
+
+void    UART_callback_register(UART_Channel channel, UART_Callback callback)
+{
+    uartObjects[channel].callback = callback;
+}
+
+UART_Descriptor UART_get_descriptor(UART_Channel channel)
+{
+    return UART_DESCRIPTOR(channel);
+}
+
+static void  UART_error_clear(UART_Channel channel)
+{
+    uartObjects[channel].error = 0;
+
+    uartObjects[channel].error = (UART_ERROR)(U1STA & (_U1STA_OERR_MASK | _U1STA_FERR_MASK | _U1STA_PERR_MASK));
+    if(uartObjects[channel].error == UART_ERROR_NONE)
+        return;
+
+    if (UART_DESCRIPTOR(channel)->usta.reg & _U1STA_OERR_MASK) {
+        UART_DESCRIPTOR(channel)->usta.clr = _U1STA_OERR_MASK;
+    }
+
+    uint8_t dummyData;
+    while (UART_DESCRIPTOR(channel)->usta.reg & _U1STA_URXDA_MASK) {
+        dummyData = UART_DESCRIPTOR(channel)->urxreg.reg;
+        (void) dummyData;
+    }
+
+    EVIC_channel_pending_clear(UART_FAULT_INTERRUPT_CHANNEL(channel));
+    EVIC_channel_pending_clear(UART_RX_INTERRUPT_CHANNEL(channel));
+
+}
 
 static int UART_baudrate(UART_Channel channel, int baudrate){
     int clock;
