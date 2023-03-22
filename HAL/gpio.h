@@ -68,6 +68,8 @@
 #define GPIO_PIN_15                 (0x8000)  /* Pin 15 selected   */
 #define GPIO_ALL                    (0xFFFF)
 
+#define GPIO_PIN_INVALID            (0xFFFFFFFF)
+
 #define GPIO_LOW                    (0)
 #define GPIO_HIGH                   (1)
 /*********************************************************************
