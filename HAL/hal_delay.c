@@ -5,19 +5,19 @@
 #include <xc.h>
 #include "hal_delay.h"
 
-static const uint32_t _usec = (HAL_SYSTEM_CLOCK/2)*MICRO_SECONDS;
-static const uint32_t _msec = (HAL_SYSTEM_CLOCK/2)*MILI_SECONDS;
+static const uint32_t uSeconds = (HAL_SYSTEM_CLOCK / MICRO_SECONDS) >> 1;
+static const uint32_t mSeconds = (HAL_SYSTEM_CLOCK / MILI_SECONDS) >> 1;
 
 void HAL_delay_ms(uint32_t ms)
 {
-    uint32_t t_wait = _msec * ms;
+    uint32_t t_wait = mSeconds * ms;
     uint32_t t_start = _CP0_GET_COUNT();
     t_start=_CP0_GET_COUNT();
     while((_CP0_GET_COUNT()-t_start)<t_wait);
 }
 void HAL_delay_us(uint32_t us)
 {
-    uint32_t t_wait = _usec * us;
+    uint32_t t_wait = uSeconds * us;
     uint32_t t_start = _CP0_GET_COUNT();
     t_start=_CP0_GET_COUNT();
     while((_CP0_GET_COUNT()-t_start)<t_wait);
