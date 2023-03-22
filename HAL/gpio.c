@@ -3,11 +3,9 @@
 * Includes
 **********************************************************************/
 #include <xc.h>
-#include <sys/attribs.h>
 #include "gpio.h"
 #include "pic32mz_registers.h"
 #include "evic.h"
-#include "gpio_config.h"
 
 /**********************************************************************
 * Module Preprocessor Constants
