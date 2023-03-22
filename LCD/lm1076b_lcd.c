@@ -401,7 +401,7 @@ static const LCD_Font *fonts[]={
 **********************************************************************/
 static unsigned char* LCD_get_char(unsigned char c, const LCD_Font *font);
 static LCD_COLOR LCD_color_inverse(LCD_COLOR color);
-static void SPI_callback(SPI_Channel channel);
+static void SPI_callback(SPI_Channel channel, uintptr_t context);
 //static void DMA_callback(DMA_Channel channel, DMA_IRQ_CAUSE cause);
 /**********************************************************************
 * Function Definitions
@@ -433,19 +433,23 @@ int LCD_init (uint32_t spiChannel, uint32_t dma, GPIO_PinMap cs, GPIO_PinMap bla
     SPI_transfer(lcd.spiChannel, config_buffer, NULL, sizeof(config_buffer));
     GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
 
-    SPI_callback_register(lcd.spiChannel, SPI_callback);
+    SPI_callback_register(lcd.spiChannel, SPI_callback, 0);
 
     vTaskDelay(10);
     return 0;
 }
 void    LCD_draw_point  (int x, int y, LCD_COLOR color)
 {
-    uint8_t *p = lcd.lcd_buffer + x/2 + 120*y;
-    *p |= (color & 0xF) << (((x%2)^1) * 4);
+    uint8_t parity = (x&1);
+    uint8_t mask = 0x0f << (4*parity);
+    uint8_t *p = lcd.lcd_buffer + (x>>1) + 120*y;
+    *p &= mask;
+    *p |= color << (4*(parity^1));
+
 //    if(color == LCD_COLOR_BLACK)
-//        *p |= 0x7 << (((x%2)^1) * 4);
+//        *p |= 0xF << (((x&1)^1) * 4);
 //    else
-//        *p &= 0xff ^ (0xE << (((x%2)^1) * 4));
+//        *p &= 0xff ^ (0xE << (((x&1)^1) * 4));
 }
 void    LCD_draw_hline  (int x, int y, int length, LCD_COLOR color)
 {
@@ -491,7 +495,6 @@ void    LCD_draw_char   (int x, int y, char c, LCD_Fonts f, LCD_COLOR color)
             if(val&(1<<j))
                 LCD_draw_point(x+i,y+j,color);
         }
-
     }
 }
 void    LCD_draw_string (int x, int y, char *str, LCD_Fonts f, LCD_COLOR color)
@@ -555,14 +558,9 @@ static unsigned char* LCD_get_char(unsigned char c, const LCD_Font *font){
 
 LCD_COLOR LCD_color_inverse(LCD_COLOR color)
 {
-    switch(color)
-    {
-        case LCD_COLOR_BLACK: return LCD_COLOR_WHITE;
-        case LCD_COLOR_WHITE: return LCD_COLOR_BLACK;
-        default: return LCD_COLOR_BLACK;
-    }
+    return LCD_COLOR_BLACK^color;
 }
-void SPI_callback(SPI_Channel channel)
+void SPI_callback(SPI_Channel channel, uintptr_t context)
 {
     GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
 }

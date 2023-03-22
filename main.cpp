@@ -1,7 +1,7 @@
 #include "initialization.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "bsp.h"
+#include "BSP/bsp.h"
 #include "lcd.h"
 #include "bitmap.h"
 #include "hal_delay.h"
