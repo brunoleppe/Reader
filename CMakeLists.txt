@@ -17,7 +17,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti -Wno-write-str
 set(OPTIMIZATION 1)
 set(USER_FLAGS -Wall)
 set(USER_DEFINITIONS )
-set(HEAP 0)
+set(HEAP 1024)
 
 set(READER_TYPE     __DesktopReaderV2__)
 
@@ -27,13 +27,18 @@ set(SOURCES
         main.c
         FreeRTOSConfig.h
         initialization.c initialization.h
-        bsp.h bsp.c
         bitmap.c bitmap.h
         interrupts.c
         interrupts_as.S
 #        main.cpp
 #        TestClass.cpp TestClass.h
-        keypad.c keypad.h Drivers/qtouch.c Drivers/qtouch.h)
+        keypad.c keypad.h
+        BSP/bsp.c BSP/bsp.h
+        BSP/qtouch.c BSP/qtouch.h
+        BSP/linux_keys.h
+        BSP/Drivers/SPI/spi_driver.c BSP/Drivers/SPI/spi_driver.h BSP/Drivers/SPI/spi_driver_config.h
+
+        )
 
 project(Reader CXX C ASM)
 
@@ -41,7 +46,9 @@ project(Reader CXX C ASM)
 include_directories(FreeRTOS/Source/include)
 include_directories(FreeRTOS/Source/portable/MPLAB/PIC32MZ)
 include_directories(HAL/)
+include_directories(BSP/)
 include_directories(LCD/)
+
 # FreeRTOSConfig.h is located here
 include_directories(.)
 
@@ -82,11 +89,11 @@ add_custom_target(${PROJECT_NAME}_hex ALL
         DEPENDS ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex
         )
 
-set_target_properties(LCD PROPERTIES LINKER_LANGUAGE C)
-target_compile_options(LCD PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc)
-
 set_target_properties(HAL PROPERTIES LINKER_LANGUAGE C)
 target_compile_options(HAL PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc)
+
+set_target_properties(LCD PROPERTIES LINKER_LANGUAGE C)
+target_compile_options(LCD PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc)
 
 target_compile_options(FreeRTOS PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc)
 target_compile_options(${PROJECT_NAME}.elf PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP})
