@@ -6,7 +6,12 @@
 #include "hal.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "bsp.h"
+#include "BSP/bsp.h"
+#include "qtouch.h"
+
+#include <stdio.h>
+#include <string.h>
+#include "lcd.h"
 
 static TaskHandle_t thisTask;
 
@@ -28,26 +33,18 @@ void keypad_task(void *params)
     (void)params;
     thisTask = xTaskGetCurrentTaskHandle();
     BSP_gpio_callback_register(QT_CHANGE, qt_change_handler, 0);
+    QTouch_initialize(QT_SPI_CHANNEL, QT_SS, QT_RST, QT_CHANGE, 0);
 
+    int key = 0;
 
-    GPIO_pin_write(QT_RST, GPIO_LOW);
-    vTaskDelay(10);
-    GPIO_pin_write(QT_RST, GPIO_HIGH);
-    vTaskDelay(100);
+    while(true) {
 
+        xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
 
-    while(true){
+        key = QTouch_get_key();
 
-        xTaskNotifyWait(0,0,NULL,portMAX_DELAY );
-        uint8_t read_key[] = {0xC1, 0x00, 0x00};
-        GPIO_pin_write(QT_SS, GPIO_LOW);
-        SPI_transfer(QT_SPI_CHANNEL, read_key, NULL, 1);
-        HAL_delay_us(160);
-        SPI_transfer(QT_SPI_CHANNEL, read_key, NULL, 2);
-        HAL_delay_us(160);
-        SPI_transfer(QT_SPI_CHANNEL, read_key, NULL, 3);
-        HAL_delay_us(160);
-        GPIO_pin_write(QT_SS, GPIO_HIGH);
-        GPIO_pin_toggle(LED3);
+        char s[17];
+        sprintf(s,"%4x",key);
+        LCD_draw_string(0,48, s, LCD_FONT_SMALL, LCD_COLOR_BLACK);
     }
 }
