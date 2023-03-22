@@ -7,7 +7,7 @@
 
 
 #if defined (__LANGUAGE_C__) || defined (__LANGUAGE_C_PLUS_PLUS)
-#include "pps.h"
+//#include "hal.h"
 #include "gpio.h"
 #include "dma.h"
 #endif
