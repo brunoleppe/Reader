@@ -24,11 +24,14 @@
 #include "dma.h"
 #include "evic.h"
 #include "gpio.h"
+#include "hal_delay.h"
+#include "hal_ring_buffer.h"
 #include "oc.h"
 #include "pps.h"
 #include "spi.h"
 #include "system.h"
 #include "timer.h"
+#include "uart.h"
 
 /**********************************************************************
 * Preprocessor Constants
