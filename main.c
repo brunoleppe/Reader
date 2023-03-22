@@ -51,18 +51,16 @@ static void lcd_task(void *params)
     LCD_draw_bitmap(0,0,bitmap,sizeof(bitmap));
     char *s = "Hola Mundo";
     LCD_draw_string(0,1,(char*)s,LCD_FONT_MEDIUM,LCD_COLOR_BLACK);
-
-    int x=0,y=0;
     while(true){
         LCD_print();
         vTaskDelay(17);
-        GPIO_pin_toggle(LCD_SS);
-        LCD_draw_point(x++,y,LCD_COLOR_BLACK);
-        if(x>=240){
-            x=0;
-            if(y++>=128)
-                y=0;
-        }
+//        GPIO_pin_toggle(LCD_SS);
+//        LCD_draw_point(x++,y,LCD_COLOR_BLACK);
+//        if(x>=240){
+//            x=0;
+//            if(y++>=128)
+//                y=0;
+//        }
     }
 }
 
