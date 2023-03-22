@@ -5,7 +5,7 @@
 #include "initialization.h"
 #include "gpio.h"
 #include <xc.h>
-#include "bsp.h"
+#include "BSP/bsp.h"
 #include "dma.h"
 
 // <editor-fold defaultstate="collapsed" desc="Configuration Bits">
