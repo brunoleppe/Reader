@@ -79,7 +79,7 @@ typedef struct{
     uint8_t         stopChar;
     bool            stopCharEnable;
 }SPI_TransferSetup;
-typedef void (*SPI_Callback)(SPI_Channel);
+typedef void (*SPI_Callback)(SPI_Channel, uintptr_t);
 typedef struct{
     int fault;
     int tx;
@@ -97,12 +97,12 @@ int         SPI_initialize              (uint32_t spiChannel, uint32_t configFla
 size_t      SPI_transfer                (uint32_t spiChannel, void *txBuffer, void *rxBuffer, size_t size);
 uint8_t     SPI_byte_transfer           (uint32_t spiChannel, uint8_t data);
 bool        SPI_is_busy                 (uint32_t spiChannel);
-void        SPI_callback_register       (SPI_Channel spiChannel, SPI_Callback callback);
+void        SPI_callback_register       (SPI_Channel spiChannel, SPI_Callback callback, uintptr_t context);
 bool        SPI_transfer_isr            (uint32_t spiChannel, void* txBuffer, void* rxBuffer, size_t size);
 void        SPI_rx_interrupt_handler    (SPI_Channel spiChannel);
 void        SPI_tx_interrupt_handler    (SPI_Channel spiChannel);
 bool        SPI_write_dma               (SPI_Channel spiChannel, uint32_t dmaChannel, void *txBuffer, size_t size);
-
+void        SPI_setup                   (SPI_Channel spiChannel, uint32_t configFlags, uint32_t baudrate);
 
 
 static inline

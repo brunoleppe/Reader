@@ -44,6 +44,7 @@ typedef struct{
     size_t          txSize;
     size_t          dummySize;
     SPI_Callback    callback;
+    uintptr_t       context;
 }SPI_Object;
 /*********************************************************************
 * Module Variable Definitions
@@ -80,35 +81,40 @@ int SPI_initialize(uint32_t spiChannel, uint32_t configFlags, uint32_t baudrate)
     EVIC_channel_pending_clear(SPI_TX_INTERRUPT_CHANNEL(spiChannel));
     EVIC_channel_pending_clear(SPI_FAULT_INTERRUPT_CHANNEL(spiChannel));
 
-    /*Configure Baudrate Generator*/
-    uint32_t brg = SPI_Baudrate_Get_(baudrate);
-//    if (brg > 0x1FF) {
-//        /*ERROR*/
-//        return -1;
-//    }
-    SPI_DESCRIPTOR(spiChannel)->spibrg.reg = brg;
     SPI_DESCRIPTOR(spiChannel)->spistat.clr = _SPI1STAT_SPIROV_MASK;
-    /*Configure SPI as master*/
     if((configFlags & SPI_MASTER))//master
         SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_MSTEN_MASK;
-    /*Configure input sample phase bit*/
-    if(configFlags & SPI_SAMPLE_END)
-        SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_SMP_MASK;
 
-    /*SPI MODE Configuration*/
-    uint32_t cke = 1, ckp = 0;/*SPI_MODE_0*/
-    if(configFlags & SPI_MODE_1) {
-        cke = ckp = 0;
-    }
-    else if(configFlags & SPI_MODE_2){
-        cke = ckp = 1;
-    }
-    else if(configFlags & SPI_MODE_3){
-        cke = 0;
-        ckp = 1;
-    }
-    SPI_DESCRIPTOR(spiChannel)->spicon1.clr = _SPI1CON_CKP_MASK | _SPI1CON_CKE_MASK;
-    SPI_DESCRIPTOR(spiChannel)->spicon1.set = (cke << _SPI1CON_CKE_POSITION) | (ckp << _SPI1CON_CKP_POSITION);
+    SPI_setup(spiChannel, configFlags, baudrate);
+
+//    /*Configure Baudrate Generator*/
+//    uint32_t brg = SPI_Baudrate_Get_(baudrate);
+////    if (brg > 0x1FF) {
+////        /*ERROR*/
+////        return -1;
+////    }
+//    SPI_DESCRIPTOR(spiChannel)->spibrg.reg = brg;
+//
+//    /*Configure SPI as master*/
+//
+//    /*Configure input sample phase bit*/
+//    if(configFlags & SPI_SAMPLE_END)
+//        SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_SMP_MASK;
+//
+//    /*SPI MODE Configuration*/
+//    uint32_t cke = 1, ckp = 0;/*SPI_MODE_0*/
+//    if(configFlags & SPI_MODE_1) {
+//        cke = ckp = 0;
+//    }
+//    else if(configFlags & SPI_MODE_2){
+//        cke = ckp = 1;
+//    }
+//    else if(configFlags & SPI_MODE_3){
+//        cke = 0;
+//        ckp = 1;
+//    }
+//    SPI_DESCRIPTOR(spiChannel)->spicon1.clr = _SPI1CON_CKP_MASK | _SPI1CON_CKE_MASK;
+//    SPI_DESCRIPTOR(spiChannel)->spicon1.set = (cke << _SPI1CON_CKE_POSITION) | (ckp << _SPI1CON_CKP_POSITION);
     /*SPI data bits configuration*/
     if(configFlags & SPI_DATA_BITS_16)
         SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_MODE16_MASK;
@@ -125,23 +131,58 @@ int SPI_initialize(uint32_t spiChannel, uint32_t configFlags, uint32_t baudrate)
         SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_SSEN_MASK;
     /*Turn on SPI peripheral*/
 
-    SPI_DESCRIPTOR(spiChannel)->spicon1.set = 0x00000005;
+
+    SPI_DESCRIPTOR(spiChannel)->spicon1.set = 0x00000005 | _SPI1CON_ENHBUF_MASK;
     SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_ON_MASK;
+
+
     return 0;
 }
 
-//TODO quitar SPI_TransferSetup, moverlo al objeto SPI_Object.
+void SPI_setup (SPI_Channel spiChannel, uint32_t configFlags, uint32_t baudrate)
+{
+
+    uint32_t brg = SPI_Baudrate_Get_(baudrate);
+    SPI_DESCRIPTOR(spiChannel)->spibrg.reg = brg;
+
+    if(configFlags & SPI_SAMPLE_END)
+        SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_SMP_MASK;
+    else
+        SPI_DESCRIPTOR(spiChannel)->spicon1.clr = _SPI1CON_SMP_MASK;
+
+    uint32_t cke = 1, ckp = 0;/*SPI_MODE_0*/
+    if(configFlags & SPI_MODE_1) {
+        cke = ckp = 0;
+    }
+    else if(configFlags & SPI_MODE_2){
+        cke = ckp = 1;
+    }
+    else if(configFlags & SPI_MODE_3){
+        cke = 0;
+        ckp = 1;
+    }
+    SPI_DESCRIPTOR(spiChannel)->spicon1.clr = _SPI1CON_CKP_MASK | _SPI1CON_CKE_MASK;
+    SPI_DESCRIPTOR(spiChannel)->spicon1.set = (cke << _SPI1CON_CKE_POSITION) | (ckp << _SPI1CON_CKP_POSITION);
+}
+
 size_t SPI_transfer(uint32_t spiChannel, void *txBuffer, void *rxBuffer, size_t size)
 {
     uint32_t receivedData;
-
+    size_t rxSize = size;
+    size_t txSize = size;
     if(spiObjects[spiChannel].busy || (txBuffer == NULL && rxBuffer == NULL) || size == 0)
         return 0;
+
+    if(txBuffer == NULL)
+        txSize = 0;
+    if(rxBuffer == NULL)
+        rxSize = 0;
 
     spiObjects[spiChannel].busy = true;
     spiObjects[spiChannel].rxBuffer = rxBuffer;
     spiObjects[spiChannel].txBuffer = txBuffer;
     spiObjects[spiChannel].rxCount = 0;
+    spiObjects[spiChannel].txCount = 0;
     /*Transfer*/
 
     /*Overflow-bit clear*/
@@ -158,7 +199,7 @@ size_t SPI_transfer(uint32_t spiChannel, void *txBuffer, void *rxBuffer, size_t 
     while(size--){
 
         /*Write Byte*/
-        if(spiObjects[spiChannel].txBuffer != NULL){
+        if(spiObjects[spiChannel].txCount != txSize){
                 SPI_DESCRIPTOR(
                     spiChannel)->spibuf.reg = ((uint8_t*)spiObjects[spiChannel].txBuffer)[spiObjects[spiChannel].rxCount];
         }
@@ -166,6 +207,9 @@ size_t SPI_transfer(uint32_t spiChannel, void *txBuffer, void *rxBuffer, size_t 
             SPI_DESCRIPTOR(spiChannel)->spibuf.reg = 0xFFFFFFFF;/*DUMMY*/
         }
 
+        if(spiObjects[spiChannel].rxCount == rxSize){
+
+        }
         /*Wait for RX FIFO*/
         while((SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK) == _SPI1STAT_SPIRBE_MASK);
 
@@ -184,37 +228,31 @@ size_t SPI_transfer(uint32_t spiChannel, void *txBuffer, void *rxBuffer, size_t 
 
 uint8_t SPI_byte_transfer(uint32_t spiChannel, uint8_t data)
 {
-    uint8_t receivedData;
-    spiObjects[spiChannel].busy = true;
-    /*Overflow-bit clear*/
+
     SPI_DESCRIPTOR(spiChannel)->spistat.clr = _SPI1STAT_SPIROV_MASK;
 
+#ifdef SPI_EMPTY_RX_FIFO
     /*Empty RX FIFO*/
     while ((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK) == false) {
         receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
-        (void)receivedData;
+//        (void)receivedData;
     }
+#endif
+
+#ifdef SPI_EMPTY_TX_FIFO
     /*Wait for TX FIFO to empty*/
     while((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPITBE_MASK) == false);
+#endif
 
-    /*Enviar el byte*/
-    SPI_DESCRIPTOR(spiChannel)->spibuf.reg = data;/*DUMMY*/
-
-    /*Wait for RX FIFO*/
-    while((SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK) == _SPI1STAT_SPIRBE_MASK);
-
-    /*Read RX FIFO*/
-    receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
-
-    while ((bool)((SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SRMT_MASK) == false));
-    spiObjects[spiChannel].busy = false;
-    return receivedData;
+    SPI_DESCRIPTOR(spiChannel)->spibuf.reg = data;
+    while(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK);
+    return SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
 }
 
 static void DMA_callback(DMA_Channel dma, DMA_IRQ_CAUSE cause, SPI_Channel channel){
     spiObjects[channel].busy = false;
     if(spiObjects[channel].callback != NULL){
-        spiObjects[channel].callback(channel);
+        spiObjects[channel].callback(channel, spiObjects->context);
     }
 }
 
@@ -238,9 +276,6 @@ bool        SPI_write_dma               (SPI_Channel spiChannel, uint32_t dmaCha
     DMA_channel_transfer(dmaChannel);
     return true;
 }
-
-
-
 
 bool SPI_transfer_isr (uint32_t spiChannel, void* pTransmitData, void* pReceiveData, size_t size)
 {
@@ -331,9 +366,10 @@ bool SPI_is_busy (uint32_t spiChannel)
 {
     return ( (spiObjects[spiChannel].busy) || ((SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SRMT_MASK) == 0));
 }
-void SPI_callback_register (SPI_Channel spiChannel, SPI_Callback callback)
+void SPI_callback_register (SPI_Channel spiChannel, SPI_Callback callback, uintptr_t context)
 {
     spiObjects[spiChannel].callback = callback;
+    spiObjects[spiChannel].context = context;
 }
 
 void SPI_rx_interrupt_handler (SPI_Channel spiChannel)
@@ -394,7 +430,7 @@ void SPI_rx_interrupt_handler (SPI_Channel spiChannel)
 
                 if(spiObj->callback != NULL)
                 {
-                    spiObj->callback(spiChannel);
+                    spiObj->callback(spiChannel, spiObj->context);
                 }
             }
         }
@@ -437,7 +473,7 @@ void SPI_tx_interrupt_handler (SPI_Channel spiChannel)
 
             if(spiObj->callback != NULL)
             {
-                spiObj->callback(spiChannel);
+                spiObj->callback(spiChannel, spiObj->context);
             }
         }
     }
