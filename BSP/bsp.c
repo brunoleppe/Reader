@@ -1,9 +1,24 @@
 #include <xc.h>
 #include "bsp.h"
 #include "hal.h"
+#include "Drivers/SPI/spi_driver.h"
 
-GPIO_CALLBACK_OBJECT pinCallbackObj[] = {
+static GPIO_CALLBACK_OBJECT pinCallbackObj[] = {
         {.pin = QT_CHANGE, 0, 0}
+};
+
+static SpiClientObject spiDriverInstance0_clientArray[SPI_DRIVER_INSTANCE_0_CLIENTS];
+static SpiDriverInit   spiDriverInstance0_init = {
+    .nClientsMax = SPI_DRIVER_INSTANCE_0_CLIENTS,
+    .spiChannel = QT_SPI_CHANNEL,
+    .clientArray = spiDriverInstance0_clientArray,
+};
+
+static SpiClientObject spiDriverInstance1_clientArray[SPI_DRIVER_INSTANCE_1_CLIENTS];
+static SpiDriverInit   spiDriverInstance1_init = {
+        .nClientsMax = SPI_DRIVER_INSTANCE_1_CLIENTS,
+        .spiChannel = LCD_SPI_CHANNEL,
+        .clientArray = spiDriverInstance1_clientArray,
 };
 
 void BSP_gpio_initialize(void )
@@ -55,6 +70,9 @@ void BSP_gpio_initialize(void )
     OC_initialize(OC_CHANNEL_1, OC_MODE_PWM | OC_MODE_USE_TMR2, 2985);
 
     DMA_channel_init(LCD_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_3 | DMA_CHANNEL_START_IRQ);
+
+    SpiDriver_initialize(0, &spiDriverInstance0_init);
+    SpiDriver_initialize(1, &spiDriverInstance1_init);
 }
 
 void BSP_interrupts_initialize(void )

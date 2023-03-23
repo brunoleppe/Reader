@@ -8,8 +8,8 @@
 #include "../../bsp.h"
 
 
-#ifndef SPI_SPI_DRIVER_INSTANCES
-    #define SPI_DRIVER_INSTANCES    1
+#ifndef SPI_DRIVER_INSTANCES
+    #define SPI_DRIVER_INSTANCES    0
 #endif
 
 

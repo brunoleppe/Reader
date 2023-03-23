@@ -83,26 +83,39 @@ int SpiDriver_initialize(uint32_t driverIndex, SpiDriverInit *driverInit)
 SpiDriverHandle SpiDriver_open(uint32_t driverIndex)
 {
     if(driverIndex >= SPI_DRIVER_INSTANCES)
-        return (uintptr_t)NULL;
-    SpiDriverObject *dObj = spiDriverInstances+driverIndex;
+        return 0;
+    SpiDriverObject *dObj = &spiDriverInstances[driverIndex];
     if(!dObj->inUse)
         return (uintptr_t)NULL;
 
+    if(dObj->nClientsMax == dObj->nClients)
+        return 0;
+
     if(xSemaphoreTake(dObj->clientMutex, portMAX_DELAY) == pdFALSE)
-        return (uintptr_t)NULL;
+        return 0;
+
+    SpiClientObject *client = NULL;
+    uintptr_t   clientHandle = 0;
 
     for(int i=0; i<dObj->nClientsMax; i++){
         if(!dObj->clientArray[i].inUse){
-            SpiClientObject *obj = &dObj->clientArray[i];
-            obj->driverObject = dObj;
-            obj->clientHandle = SPI_Driver_handle_create(driverIndex, dObj->nClients++, dObj->clientToken++);
-            obj->inUse = true;
-            obj->setupChanged = false;
-            obj->csPin = GPIO_PIN_INVALID;
-            return obj->clientHandle;
+            client = &dObj->clientArray[i];
+            break;
         }
     }
-    return (uintptr_t)NULL;
+    if(client != NULL) {
+        client->driverObject = dObj;
+        client->clientHandle = SPI_Driver_handle_create(driverIndex, dObj->nClients, dObj->clientToken);
+        client->inUse = true;
+        client->setupChanged = false;
+        client->csPin = 0xFFFFFFFF;
+        dObj->nClients++;
+        dObj->clientToken++;
+        dObj->activeClient = client;
+        clientHandle = client->clientHandle;
+    }
+    xSemaphoreGive(dObj->clientMutex);
+    return clientHandle;
 }
 int SpiDriver_setup(SpiDriverHandle handle, SpiDriverSetup *setup)
 {
@@ -214,11 +227,14 @@ static void SPI_callback_function(SPI_Channel channel, uintptr_t context)
 }
 static uintptr_t SPI_Driver_handle_create(uint32_t driverIndex, uint32_t clientIndex, uint32_t token)
 {
-    return ((driverIndex << 16) | (clientIndex << 8) | token);
+    const int magic = 0xBAD5;
+    return (((token|magic) << 16) | (clientIndex << 8) | driverIndex);
 }
 static SpiClientObject*  SPI_Driver_handle_validate(uintptr_t handle)
 {
-    uint32_t driverIndex = (handle >> 16) & 0xFF;
+    if(handle == 0)
+        return NULL;
+    uint32_t driverIndex = (handle) & 0xFF;
     uint32_t clientIndex = (handle >> 8) & 0xFF;
     if(driverIndex >= SPI_DRIVER_INSTANCES)
         return NULL;

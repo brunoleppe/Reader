@@ -252,7 +252,7 @@ uint8_t SPI_byte_transfer(uint32_t spiChannel, uint8_t data)
 static void DMA_callback(DMA_Channel dma, DMA_IRQ_CAUSE cause, SPI_Channel channel){
     spiObjects[channel].busy = false;
     if(spiObjects[channel].callback != NULL){
-        spiObjects[channel].callback(channel, spiObjects->context);
+        spiObjects[channel].callback(channel, spiObjects[channel].context);
     }
 }
 

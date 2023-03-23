@@ -7,6 +7,7 @@
 #include "task.h"
 #include "gpio.h"
 #include "dma.h"
+#include "BSP/Drivers/SPI/spi_driver.h"
 #include <string.h>
 #include <stdint.h>
 /**********************************************************************
@@ -432,6 +433,16 @@ int LCD_init (uint32_t spiChannel, uint32_t dma, GPIO_PinMap cs, GPIO_PinMap bla
     GPIO_pin_write(lcd.cs_pin, GPIO_LOW);
     SPI_transfer(lcd.spiChannel, config_buffer, NULL, sizeof(config_buffer));
     GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
+
+//    uintptr_t handle = SpiDriver_open(1);
+//    SpiDriverSetup setup = {
+//            .csPin = cs,
+//            .baudRate = 20000000,
+//            .spiMode = SPI_MODE_3,
+//    };
+//    SpiDriver_setup(handle, &setup);
+//    SpiDriver_transfer(handle, config_buffer, NULL, sizeof(config_buffer));
+
 
     SPI_callback_register(lcd.spiChannel, SPI_callback, 0);
 

@@ -38,7 +38,7 @@ set(SOURCES
         BSP/linux_keys.h
         BSP/Drivers/SPI/spi_driver.c BSP/Drivers/SPI/spi_driver.h BSP/Drivers/SPI/spi_driver_config.h
 
-        )
+        BSP/Drivers/driver_defs.h)
 
 project(Reader CXX C ASM)
 

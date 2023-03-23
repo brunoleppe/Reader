@@ -40,7 +40,7 @@ void keypad_task(void *params)
     while(true) {
 
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
-
+        GPIO_pin_toggle(LED4);
         key = QTouch_get_key();
 
         char s[17];

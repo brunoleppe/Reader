@@ -47,4 +47,12 @@ typedef uintptr_t SpiDriverHandle;
 * Function Prototypes
 ***********************************************************************************************************************/
 
+int SpiDriver_initialize(uint32_t driverIndex, SpiDriverInit *driverInit);
+SpiDriverHandle SpiDriver_open(uint32_t driverIndex);
+int SpiDriver_setup(SpiDriverHandle handle, SpiDriverSetup *setup);
+size_t SpiDriver_transfer(SpiDriverHandle handle, void *txBuffer, void *rxBuffer, size_t size);
+bool SpiDriver_byte_transfer(SpiDriverHandle handle, uint8_t data, uint8_t *outData);
+bool SpiDriver_write_dma(SpiDriverHandle handle, void *txBuffer, size_t size);
+
+
 #endif //READER_SPI_DRIVER_H

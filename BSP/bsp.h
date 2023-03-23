@@ -55,6 +55,15 @@
 #define BUZZER_OUTPUT_REG       PPS_OUTPUT_REG_RPF2
 #define BUZZER_OUTPUT_MAP       PPS_RPF2_OC1
 
+/*SPI Driver*/
+#define SPI_DRIVER_INSTANCES    2
+
+#define SPI_DRIVER_INSTANCE_0   0
+#define SPI_DRIVER_INSTANCE_0_CLIENTS   1
+
+#define SPI_DRIVER_INSTANCE_1   1
+#define SPI_DRIVER_INSTANCE_1_CLIENTS   1
+
 #else
 /*LEDs*/
 #define LED1                    GPIO_PIN_MAP(GPIO_PORT_B, GPIO_PIN_6)
