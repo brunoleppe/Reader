@@ -120,7 +120,8 @@ int     UART_setup(UART_Channel channel, UART_Flags flags, int baudrate)
     if((flags & UART_LOOP_BACK) == UART_LOOP_BACK)
         UART_DESCRIPTOR(channel)->umode.set = _U1MODE_LPBACK_MASK;
 
-    UART_DESCRIPTOR(channel)->usta.set =  _U1STA_URXEN_MASK | _U1STA_UTXEN_MASK;
+//    UART_DESCRIPTOR(channel)->usta.set =  _U1STA_URXEN_MASK | _U1STA_UTXEN_MASK;
+    UART_DESCRIPTOR(channel)->usta.set = _U1STA_UTXEN_MASK;
 
     if((flags & UART_RX_INVERTED) == UART_RX_INVERTED)
         UART_DESCRIPTOR(channel)->umode.set = _U1MODE_RXINV_MASK;
@@ -169,6 +170,7 @@ size_t  UART_write(UART_Channel channel, uint8_t *txBuffer, size_t size)
 void UART_read_start(UART_Channel channel)
 {
     UART_error_clear(channel);
+    UART_DESCRIPTOR(channel)->usta.set = _U1STA_URXEN_MASK;
     EVIC_channel_set(UART_RX_INTERRUPT_CHANNEL(channel));
     EVIC_channel_set(UART_FAULT_INTERRUPT_CHANNEL(channel));
 }
@@ -181,6 +183,12 @@ size_t UART_read(UART_Channel channel, uint8_t *rxBuffer, size_t size)
         bytesRead++;
     }
     return bytesRead;
+}
+void        UART_read_abort(UART_Channel channel)
+{
+    UART_DESCRIPTOR(channel)->usta.clr = _U1STA_URXEN_MASK;
+    EVIC_channel_clr(UART_RX_INTERRUPT_CHANNEL(channel));
+    EVIC_channel_clr(UART_FAULT_INTERRUPT_CHANNEL(channel));
 }
 
 uint8_t UART_write_byte(UART_Channel channel, uint8_t data)

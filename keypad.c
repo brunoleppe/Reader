@@ -43,8 +43,10 @@ void keypad_task(void *params)
         GPIO_pin_toggle(LED4);
         key = QTouch_get_key();
 
+#ifdef HAL_DEBUG
         char s[17];
         sprintf(s,"%4x",key);
         LCD_draw_string(0,48, s, LCD_FONT_SMALL, LCD_COLOR_BLACK);
+#endif
     }
 }
