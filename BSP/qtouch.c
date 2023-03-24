@@ -101,9 +101,6 @@ int     QTouch_initialize(SPI_Channel channel, GPIO_PinMap cs, GPIO_PinMap rst, 
     vTaskDelay(10);
     GPIO_pin_write(qt.rst, GPIO_HIGH);
     vTaskDelay(200);
-
-    vTaskDelay(200);
-    QTouch_transfer(read_setups, setup_data, 43);
     return 0;
 }
 int     QTouch_get_key()
