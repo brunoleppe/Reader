@@ -16,7 +16,7 @@
 #include "pic32mz_registers.h"
 #include "evic.h"
 #include <xc.h>
-#include <system.h>
+#include "system.h"
 #include "dma.h"
 /**********************************************************************
 * Module Preprocessor Constants
