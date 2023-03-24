@@ -43,6 +43,7 @@ void        SYS_Unlock(uint32_t flags);
 void        SYS_Lock();
 void        SYS_peripheral_clock_config(uint32_t clockChannel, uint32_t flags);
 uint32_t    SYS_peripheral_clock_frequency_get(uint32_t clockChannel);
+void        SYS_soft_reset(uint32_t rconVal);
 
 #ifdef __cplusplus
 }

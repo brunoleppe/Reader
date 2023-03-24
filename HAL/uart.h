@@ -60,7 +60,7 @@ typedef enum
 
 typedef int UART_Channel;
 typedef uint32_t UART_Flags;
-typedef void (*UART_Callback)(UART_Channel, UART_CHANNEL_EVENT event);
+typedef void (*UART_Callback)(UART_Channel, UART_CHANNEL_EVENT event, uintptr_t context);
 typedef struct{
     int fault;
     int tx;
@@ -76,12 +76,16 @@ extern "C"{
 int         UART_initialize(UART_Channel channel, UART_Flags flags, int baudrate, uint8_t *rxBuffer, size_t bufferSize);
 int         UART_setup(UART_Channel channel, UART_Flags flags, int baudrate);
 size_t      UART_write(UART_Channel channel, uint8_t *txBuffer, size_t size);
+
 size_t      UART_read(UART_Channel channel, uint8_t *rxBuffer, size_t size);
+void        UART_read_start(UART_Channel channel);
+void        UART_read_abort(UART_Channel channel);
+
 uint8_t     UART_write_byte(UART_Channel channel, uint8_t data);
 uint8_t     UART_read_byte(UART_Channel channel);
 bool        UART_tx_ready(UART_Channel channel);
 UART_ERROR  UART_error_get(UART_Channel channel);
-void    UART_callback_register(UART_Channel channel, UART_Callback callback);
+void    UART_callback_register(UART_Channel channel, UART_Callback callback, uintptr_t context);
 
 #ifdef __cplusplus
 }

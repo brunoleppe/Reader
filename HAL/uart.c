@@ -47,8 +47,8 @@ typedef struct{
     uint8_t         *txBuffer;
     size_t          txCount;
     size_t          txSize;
-    UART_Callback    callback;
-
+    UART_Callback   callback;
+    uintptr_t       context;
     RingBuffer      rxBuffer;
 }UART_Object;
 /*********************************************************************
@@ -166,7 +166,14 @@ size_t  UART_write(UART_Channel channel, uint8_t *txBuffer, size_t size)
     return processedSize;
 }
 
-size_t  UART_read(UART_Channel channel, uint8_t *rxBuffer, size_t size)
+void UART_read_start(UART_Channel channel)
+{
+    UART_error_clear(channel);
+    EVIC_channel_set(UART_RX_INTERRUPT_CHANNEL(channel));
+    EVIC_channel_set(UART_FAULT_INTERRUPT_CHANNEL(channel));
+}
+
+size_t UART_read(UART_Channel channel, uint8_t *rxBuffer, size_t size)
 {
     size_t bytesRead = 0;
     while (ring_buffer_pull(&uartObjects[channel].rxBuffer,rxBuffer++) && (bytesRead < size))
@@ -245,9 +252,9 @@ void UART_rx_interrupt_handler (UART_Channel channel)
             if( uartObjects[channel].callback != NULL )
             {
                 if(ring_buffer_count(&uartObjects[channel].rxBuffer) == uartObjects[channel].rxBuffer.size)
-                    uartObjects[channel].callback(channel, UART_CHANNEL_EVENT_BUFFER_FULL);
+                    uartObjects[channel].callback(channel, UART_CHANNEL_EVENT_BUFFER_FULL, uartObjects[channel].context);
                 else
-                    uartObjects[channel].callback(channel, UART_CHANNEL_EVENT_BYTE_RECEIVED);
+                    uartObjects[channel].callback(channel, UART_CHANNEL_EVENT_BYTE_RECEIVED, uartObjects[channel].context);
             }
         }
         else{
@@ -267,13 +274,14 @@ void UART_fault_interrupt_handler (UART_Channel channel)
     /* Client must call UARTx_ErrorGet() function to clear the errors */
     if( uartObjects[channel].callback != NULL )
     {
-        uartObjects[channel].callback(channel, UART_CHANNEL_EVENT_READ_ERROR);
+        uartObjects[channel].callback(channel, UART_CHANNEL_EVENT_READ_ERROR, uartObjects[channel].context);
     }
 }
 
-void    UART_callback_register(UART_Channel channel, UART_Callback callback)
+void    UART_callback_register(UART_Channel channel, UART_Callback callback, uintptr_t context)
 {
     uartObjects[channel].callback = callback;
+    uartObjects[channel].context = context;
 }
 
 UART_Descriptor UART_get_descriptor(UART_Channel channel)

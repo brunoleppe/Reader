@@ -5,6 +5,7 @@
 #include "timer.h"
 #include "spi.h"
 #include "dma.h"
+#include "uart.h"
 
     .global PORTE_Change_Notice_IRQ
     .extern GPIO_interrupt_handler
@@ -34,6 +35,33 @@ DMA0_IRQ:
     portRESTORE_CONTEXT
     .end DMA0_IRQ
 
+    .global UART1_FAULT_IRQ
+    .extern UART_fault_interrupt_handler
+    .set nomips16
+    .set noreorder
+    .set noat
+    .ent UART1_FAULT_IRQ
+UART1_FAULT_IRQ:
+    portSAVE_CONTEXT
+    li a0, UART_CHANNEL_1
+    jal UART_fault_interrupt_handler
+    nop
+    portRESTORE_CONTEXT
+    .end UART1_FAULT_IRQ
+
+    .global UART1_RX_IRQ
+    .extern UART_rx_interrupt_handler
+    .set nomips16
+    .set noreorder
+    .set noat
+    .ent UART1_RX_IRQ
+UART1_RX_IRQ:
+    portSAVE_CONTEXT
+    li a0, UART_CHANNEL_1
+    jal UART_rx_interrupt_handler
+    nop
+    portRESTORE_CONTEXT
+    .end UART1_RX_IRQ
 //    .global SPI2_RX_IRQ
 //    .extern SPI_rx_interrupt_handler
 //    .set nomips16

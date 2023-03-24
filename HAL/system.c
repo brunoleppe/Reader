@@ -74,3 +74,21 @@ uint32_t    SYS_peripheral_clock_frequency_get(uint32_t clockChannel)
         return 0;
     return HAL_SYSTEM_CLOCK / ((SYS_PBCLK(clockChannel)->pbxdiv.reg & _PB2DIV_PBDIV_MASK)+1);
 }
+
+void SYS_soft_reset(uint32_t val)
+{
+    SYSKEY = 0x00000000; //write invalid key to force lock
+    SYSKEY = 0xAA996655; //write key1 to SYSKEY
+    SYSKEY = 0x556699AA; //write key2 to SYSKEY
+
+    RCON = val;
+// OSCCON is now unlocked
+/* set SWRST bit to arm reset */
+    RSWRSTSET = 1;
+/* read RSWRST register to trigger reset */
+    unsigned int dummy;
+    dummy = RSWRST;
+    (void)dummy;
+/* prevent any unwanted code execution until reset occurs*/
+    while(1);
+}
