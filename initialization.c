@@ -76,6 +76,7 @@ void Initialize(void)
     BSP_interrupts_initialize();
     DMA_init();
     BSP_gpio_initialize();
+    BSP_drivers_initialize();
 
     __builtin_enable_interrupts();
 }

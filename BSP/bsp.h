@@ -122,7 +122,7 @@ extern "C"{
 void BSP_gpio_initialize(void );
 void BSP_interrupts_initialize(void );
 void BSP_gpio_callback_register(GPIO_PinMap pinMap, GPIO_Callback callback, uintptr_t context);
-
+void BSP_drivers_initialize( void );
 
 #ifdef __cplusplus
 }

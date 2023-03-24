@@ -88,11 +88,16 @@ void BSP_gpio_initialize(void )
 
     DMA_channel_init(LCD_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_3 | DMA_CHANNEL_START_IRQ);
 
+
+
+}
+
+void BSP_drivers_initialize( void )
+{
     int r = SpiDriver_initialize(0, &spiDriverInstance0_init);
     DEBUG_PRINT("r = %d\n\r", r);
     r = SpiDriver_initialize(1, &spiDriverInstance1_init);
     DEBUG_PRINT("r = %d\n\r", r);
-
 }
 
 void BSP_interrupts_initialize(void )
