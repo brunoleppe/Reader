@@ -3,7 +3,6 @@
 //
 
 #include "keypad.h"
-#include "hal.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "BSP/bsp.h"

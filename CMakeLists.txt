@@ -53,8 +53,10 @@ include_directories(LCD/)
 include_directories(.)
 
 add_subdirectory(FreeRTOS)
-add_subdirectory(HAL/PIC32MZEFM100)
 add_subdirectory(LCD)
+IF(${PIC} EQUAL 32MZEFM100)
+add_subdirectory(HAL/PIC32MZEFM100)
+ENDIF()
 
 add_executable(${PROJECT_NAME}.elf ${SOURCES})
 
