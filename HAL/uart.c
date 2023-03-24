@@ -95,7 +95,11 @@ int     UART_initialize(UART_Channel channel, UART_Flags flags, int baudrate, ui
     uartObjects[channel].txBusy = false;
     uartObjects[channel].rxBusy = false;
 
-    return UART_setup(channel, flags, baudrate);
+    UART_setup(channel, flags, baudrate);
+
+    UART_DESCRIPTOR(channel)->umode.set = _U1MODE_ON_MASK;
+
+    return 0;
 }
 int     UART_setup(UART_Channel channel, UART_Flags flags, int baudrate)
 {

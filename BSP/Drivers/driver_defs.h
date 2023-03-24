@@ -5,8 +5,10 @@
 #ifndef DRIVER_DEFS_H
 #define DRIVER_DEFS_H
 
-#define DRIVER_HANDLE_INVALID 0xFFFFFFFF
+#include <stdint.h>
 
+#define DRIVER_HANDLE_INVALID 0
+typedef uintptr_t DriverHandle;
 
 
 #endif //DRIVER_DEFS_H

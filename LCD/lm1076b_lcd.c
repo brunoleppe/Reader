@@ -10,6 +10,7 @@
 #include "BSP/Drivers/SPI/spi_driver.h"
 #include <string.h>
 #include <stdint.h>
+#include "debug.h"
 /**********************************************************************
 * Module Preprocessor Constants
 **********************************************************************/
@@ -33,7 +34,7 @@ struct LCD{
     GPIO_PinMap bla_pin;
     GPIO_PinMap dc_pin;
     GPIO_PinMap rst_pin;
-
+    uintptr_t   handle;
 };
 typedef struct{
     uint8_t     bytes;      ///< Cantidad de bytes por caracter.
@@ -402,8 +403,6 @@ static const LCD_Font *fonts[]={
 **********************************************************************/
 static unsigned char* LCD_get_char(unsigned char c, const LCD_Font *font);
 static LCD_COLOR LCD_color_inverse(LCD_COLOR color);
-static void SPI_callback(SPI_Channel channel, uintptr_t context);
-//static void DMA_callback(DMA_Channel channel, DMA_IRQ_CAUSE cause);
 /**********************************************************************
 * Function Definitions
 **********************************************************************/
@@ -430,21 +429,21 @@ int LCD_init (uint32_t spiChannel, uint32_t dma, GPIO_PinMap cs, GPIO_PinMap bla
     vTaskDelay(10);
 
     GPIO_pin_write(lcd.dc_pin, GPIO_LOW);
-    GPIO_pin_write(lcd.cs_pin, GPIO_LOW);
-    SPI_transfer(lcd.spiChannel, config_buffer, NULL, sizeof(config_buffer));
-    GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
 
-//    uintptr_t handle = SpiDriver_open(1);
-//    SpiDriverSetup setup = {
-//            .csPin = cs,
-//            .baudRate = 20000000,
-//            .spiMode = SPI_MODE_3,
-//    };
-//    SpiDriver_setup(handle, &setup);
-//    SpiDriver_transfer(handle, config_buffer, NULL, sizeof(config_buffer));
+    DEBUG_PRINT("----LCD----\n\r");
+    lcd.handle = SpiDriver_open(1);
+    DEBUG_PRINT("handle = %x\n\r",lcd.handle);
+    SpiDriverSetup setup = {
+            .csPin = cs,
+            .baudRate = 20000000,
+            .spiMode = SPI_MODE_3,
+    };
 
+    int r = SpiDriver_setup(lcd.handle, &setup);
+    DEBUG_PRINT("r = %x\n\r",r);
+    SpiDriver_transfer(lcd.handle, config_buffer, NULL, sizeof(config_buffer));
+    DEBUG_PRINT("----LCD----\n\r");
 
-    SPI_callback_register(lcd.spiChannel, SPI_callback, 0);
 
     vTaskDelay(10);
     return 0;
@@ -532,8 +531,8 @@ void    LCD_print       ( void )
 
     GPIO_pin_write(lcd.dc_pin, GPIO_HIGH);
     GPIO_pin_write(lcd.cs_pin, GPIO_LOW);
-    SPI_write_dma(lcd.spiChannel, lcd.dmaChannel, lcd.lcd_buffer, LCD_BUFFER_SIZE);
-//    GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
+    SpiDriver_write_dma(lcd.handle, lcd.lcd_buffer, LCD_BUFFER_SIZE);
+
 
 }
 
@@ -570,8 +569,4 @@ static unsigned char* LCD_get_char(unsigned char c, const LCD_Font *font){
 LCD_COLOR LCD_color_inverse(LCD_COLOR color)
 {
     return LCD_COLOR_BLACK^color;
-}
-void SPI_callback(SPI_Channel channel, uintptr_t context)
-{
-    GPIO_pin_write(lcd.cs_pin, GPIO_HIGH);
 }

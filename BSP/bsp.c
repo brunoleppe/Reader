@@ -2,6 +2,7 @@
 #include "bsp.h"
 #include "hal.h"
 #include "Drivers/SPI/spi_driver.h"
+#include "debug.h"
 
 static GPIO_CALLBACK_OBJECT pinCallbackObj[] = {
         {.pin = QT_CHANGE, 0, 0}
@@ -19,6 +20,7 @@ static SpiDriverInit   spiDriverInstance1_init = {
         .nClientsMax = SPI_DRIVER_INSTANCE_1_CLIENTS,
         .spiChannel = LCD_SPI_CHANNEL,
         .clientArray = spiDriverInstance1_clientArray,
+        .txDmaChannel = DMA_CHANNEL_0,
 };
 
 void BSP_gpio_initialize(void )
@@ -49,6 +51,9 @@ void BSP_gpio_initialize(void )
     GPIO_pin_write(QT_RST, GPIO_HIGH);
     GPIO_pin_write(QT_SS, GPIO_HIGH);
 
+    GPIO_pin_initialize(UART_TX_PIN, GPIO_OUTPUT);
+    GPIO_pin_initialize(UART_RX_PIN, GPIO_INPUT);
+
     SYS_Unlock(SYS_UNLOCK_IO);
     /* LCD SPI */
     PPS_pin_mapping(LCD_SPI_OUTPUT_REG, LCD_SPI_OUTPUT_MAP);
@@ -57,8 +62,20 @@ void BSP_gpio_initialize(void )
     PPS_pin_mapping(QT_SPI_INPUT_REG, QT_SPI_INPUT_MAP);
     /*BUZZER*/
     PPS_pin_mapping(BUZZER_OUTPUT_REG, BUZZER_OUTPUT_MAP);
+    /*UART*/
+    PPS_pin_mapping(UART_RX_INPUT_REG, UART_RX_INPUT_MAP);
+    PPS_pin_mapping(UART_TX_OUTPUT_REG, UART_TX_OUTPUT_MAP);
 
     SYS_Lock();
+
+    static uint8_t uartRxBuffer[256];
+    UART_initialize(UART, UART_PARITY_NONE | UART_DATA_BITS_8, 115200, uartRxBuffer, 256);
+    char s[]="\n\r";
+    UART_write(UART, (uint8_t*)s, 2);
+
+    DEBUG_INIT(UART);
+    DEBUG_PRINT("\n\r----Init----\n\r");
+
 
     SPI_initialize(
         LCD_SPI_CHANNEL,
@@ -71,8 +88,11 @@ void BSP_gpio_initialize(void )
 
     DMA_channel_init(LCD_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_3 | DMA_CHANNEL_START_IRQ);
 
-    SpiDriver_initialize(0, &spiDriverInstance0_init);
-    SpiDriver_initialize(1, &spiDriverInstance1_init);
+    int r = SpiDriver_initialize(0, &spiDriverInstance0_init);
+    DEBUG_PRINT("r = %d\n\r", r);
+    r = SpiDriver_initialize(1, &spiDriverInstance1_init);
+    DEBUG_PRINT("r = %d\n\r", r);
+
 }
 
 void BSP_interrupts_initialize(void )

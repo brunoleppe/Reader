@@ -15,12 +15,12 @@
 * Preprocessor Constants
 **********************************************************************/
 
-#define UART_CHANNEL_1                                      1
-#define UART_CHANNEL_2                                      2
-#define UART_CHANNEL_3                                      3
-#define UART_CHANNEL_4                                      4
-#define UART_CHANNEL_5                                      5
-#define UART_CHANNEL_6                                      6
+#define UART_CHANNEL_1                                      0
+#define UART_CHANNEL_2                                      1
+#define UART_CHANNEL_3                                      2
+#define UART_CHANNEL_4                                      3
+#define UART_CHANNEL_5                                      4
+#define UART_CHANNEL_6                                      5
 
 
 #define UART_PARITY_NONE                                    0x0000

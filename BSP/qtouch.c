@@ -9,6 +9,7 @@
 #include "lcd.h"
 #include "linux_keys.h"
 #include "Drivers/SPI/spi_driver.h"
+#include "debug.h"
 
 enum QT_CONTROL_COMMANDS{
     QT_CALIBRATE = 0x03,///<Comando para realizar auto calibración
@@ -30,6 +31,7 @@ enum QT_KEY{
 };
 
 typedef struct{
+    DriverHandle handle;
     SPI_Channel spi;
     GPIO_PinMap cs;
     GPIO_PinMap rst;
@@ -62,7 +64,7 @@ static void QTouch_transfer(uint8_t *txBuffer, uint8_t *rxBuffer, size_t size)
     uint8_t receivedData;
     while(size--){
 //        receivedData = SPI_byte_transfer(qt.spi, *txBuffer);
-        SpiDriver_byte_transfer(qt.spi, *txBuffer, &receivedData);
+        SpiDriver_byte_transfer(qt.handle, *txBuffer, &receivedData);
         HAL_delay_us(160);
         if(rxBuffer != NULL)
             *rxBuffer++ = receivedData;
@@ -74,12 +76,17 @@ static void QTouch_transfer(uint8_t *txBuffer, uint8_t *rxBuffer, size_t size)
 
 int     QTouch_initialize(SPI_Channel channel, GPIO_PinMap cs, GPIO_PinMap rst, GPIO_PinMap change, GPIO_PinMap drdy)
 {
-//    qt.spi = channel;
-    qt.spi = SpiDriver_open(0);
+    qt.spi = channel;
+//    qt.spi = SpiDriver_open(0);
     qt.change = change;
     qt.cs = cs;
     qt.drdy = drdy;
     qt.rst = rst;
+
+    DEBUG_PRINT("----QTOUCH----\n\r");
+
+    qt.handle = SpiDriver_open(0);
+    DEBUG_PRINT("handle = %x\n\r", qt.handle);
 
     SpiDriverSetup setup = {
             .csPin = GPIO_PIN_INVALID,
@@ -88,8 +95,9 @@ int     QTouch_initialize(SPI_Channel channel, GPIO_PinMap cs, GPIO_PinMap rst, 
             .sample = SPI_SAMPLE_END
     };
 
-    SpiDriver_setup(qt.spi, &setup);
-
+    int r = SpiDriver_setup(qt.handle, &setup);
+    DEBUG_PRINT("setup = %x\n\r", r);
+    DEBUG_PRINT("----QTOUCH----\n\r");
     GPIO_pin_write(qt.rst, GPIO_LOW);
     vTaskDelay(10);
     GPIO_pin_write(qt.rst, GPIO_HIGH);

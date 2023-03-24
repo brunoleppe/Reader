@@ -10,6 +10,8 @@
 //#include "hal.h"
 #include "gpio.h"
 #include "dma.h"
+#include "uart.h"
+#include "pps.h"
 #endif
 
 #define STRGIZE(x)              #x
@@ -63,6 +65,14 @@
 
 #define SPI_DRIVER_INSTANCE_1   1
 #define SPI_DRIVER_INSTANCE_1_CLIENTS   1
+
+#define UART                    UART_CHANNEL_1
+#define UART_RX_PIN             GPIO_PIN_MAP(GPIO_PORT_G, GPIO_PIN_1)
+#define UART_TX_PIN             GPIO_PIN_MAP(GPIO_PORT_G, GPIO_PIN_0)
+#define UART_RX_INPUT_REG       PPS_INPUT_REG_U1RX
+#define UART_RX_INPUT_MAP       PPS_U1RX_RPG1
+#define UART_TX_OUTPUT_REG      PPS_OUTPUT_REG_RPG0
+#define UART_TX_OUTPUT_MAP      PPS_RPG0_U1TX
 
 #else
 /*LEDs*/

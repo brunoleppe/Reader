@@ -5,9 +5,9 @@
 * Includes
 ***********************************************************************************************************************/
 #include "spi_driver.h"
-#include "HAL/dma.h"
 #include "FreeRTOS.h"
 #include "semphr.h"
+#include "debug.h"
 /***********************************************************************************************************************
 * Module Preprocessor Constants
 ***********************************************************************************************************************/
@@ -80,7 +80,7 @@ int SpiDriver_initialize(uint32_t driverIndex, SpiDriverInit *driverInit)
     dObj->inUse = true;
     return 0;
 }
-SpiDriverHandle SpiDriver_open(uint32_t driverIndex)
+DriverHandle SpiDriver_open(uint32_t driverIndex)
 {
     if(driverIndex >= SPI_DRIVER_INSTANCES)
         return 0;
@@ -88,7 +88,7 @@ SpiDriverHandle SpiDriver_open(uint32_t driverIndex)
     if(!dObj->inUse)
         return (uintptr_t)NULL;
 
-    if(dObj->nClientsMax == dObj->nClients)
+    if(dObj->nClients >= dObj->nClientsMax)
         return 0;
 
     if(xSemaphoreTake(dObj->clientMutex, portMAX_DELAY) == pdFALSE)
@@ -117,16 +117,17 @@ SpiDriverHandle SpiDriver_open(uint32_t driverIndex)
     xSemaphoreGive(dObj->clientMutex);
     return clientHandle;
 }
-int SpiDriver_setup(SpiDriverHandle handle, SpiDriverSetup *setup)
+int SpiDriver_setup(DriverHandle handle, SpiDriverSetup *setup)
 {
     SpiClientObject *obj = SPI_Driver_handle_validate(handle);
     if(obj == NULL)
         return -1;
     obj->setupChanged = true;
     obj->setup = *setup;
+    obj->csPin = setup->csPin;
     return 0;
 }
-size_t SpiDriver_transfer(SpiDriverHandle handle, void *txBuffer, void *rxBuffer, size_t size)
+size_t SpiDriver_transfer(DriverHandle handle, void *txBuffer, void *rxBuffer, size_t size)
 {
     SpiClientObject *client = SPI_Driver_handle_validate(handle);
     if(client == NULL)
@@ -155,11 +156,14 @@ size_t SpiDriver_transfer(SpiDriverHandle handle, void *txBuffer, void *rxBuffer
 
     return result;
 }
-bool SpiDriver_byte_transfer(SpiDriverHandle handle, uint8_t data, uint8_t *outData)
+bool SpiDriver_byte_transfer(DriverHandle handle, uint8_t data, uint8_t *outData)
 {
     SpiClientObject *client = SPI_Driver_handle_validate(handle);
     if(client == NULL)
         return false;
+
+//    DEBUG_PRINT("validated\n\r");
+
     SpiDriverObject *dObj = client->driverObject;
 
     if(xSemaphoreTake(dObj->hardwareMutex, portMAX_DELAY) == pdFALSE)
@@ -184,7 +188,7 @@ bool SpiDriver_byte_transfer(SpiDriverHandle handle, uint8_t data, uint8_t *outD
 
     return true;
 }
-bool SpiDriver_write_dma(SpiDriverHandle handle, void *txBuffer, size_t size)
+bool SpiDriver_write_dma(DriverHandle handle, void *txBuffer, size_t size)
 {
     SpiClientObject *client = SPI_Driver_handle_validate(handle);
     if(client == NULL)
@@ -217,6 +221,7 @@ bool SpiDriver_write_dma(SpiDriverHandle handle, void *txBuffer, size_t size)
 
 static void SPI_callback_function(SPI_Channel channel, uintptr_t context)
 {
+    (void)channel;
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     SpiDriverObject *dObj = (SpiDriverObject*)context;
     if(dObj->activeClient->setup.csPin != GPIO_PIN_INVALID){

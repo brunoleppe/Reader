@@ -141,7 +141,8 @@ int SPI_initialize(uint32_t spiChannel, uint32_t configFlags, uint32_t baudrate)
 
 void SPI_setup (SPI_Channel spiChannel, uint32_t configFlags, uint32_t baudrate)
 {
-
+    bool status = (SPI_DESCRIPTOR(spiChannel)->spicon1.reg & _SPI1CON_ON_MASK) == _SPI1CON_ON_MASK;
+    SPI_DESCRIPTOR(spiChannel)->spicon1.clr = _SPI1CON_ON_MASK;
     uint32_t brg = SPI_Baudrate_Get_(baudrate);
     SPI_DESCRIPTOR(spiChannel)->spibrg.reg = brg;
 
@@ -163,6 +164,8 @@ void SPI_setup (SPI_Channel spiChannel, uint32_t configFlags, uint32_t baudrate)
     }
     SPI_DESCRIPTOR(spiChannel)->spicon1.clr = _SPI1CON_CKP_MASK | _SPI1CON_CKE_MASK;
     SPI_DESCRIPTOR(spiChannel)->spicon1.set = (cke << _SPI1CON_CKE_POSITION) | (ckp << _SPI1CON_CKP_POSITION);
+    if(status)
+        SPI_DESCRIPTOR(spiChannel)->spicon1.set = _SPI1CON_ON_MASK;
 }
 
 size_t SPI_transfer(uint32_t spiChannel, void *txBuffer, void *rxBuffer, size_t size)

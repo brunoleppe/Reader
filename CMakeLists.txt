@@ -38,7 +38,7 @@ set(SOURCES
         BSP/linux_keys.h
         BSP/Drivers/SPI/spi_driver.c BSP/Drivers/SPI/spi_driver.h BSP/Drivers/SPI/spi_driver_config.h
 
-        BSP/Drivers/driver_defs.h)
+        BSP/Drivers/driver_defs.h BSP/debug.c BSP/debug.h)
 
 project(Reader CXX C ASM)
 
@@ -109,3 +109,9 @@ IF(READERV2)
 ELSE()
     add_compile_definitions(__READER_V1__)
 ENDIF(READERV2)
+
+IF(DEBUG)
+#    add_compile_definitions(HAL_DEBUG)
+    add_definitions(-DHAL_DEBUG)
+    target_compile_definitions(LCD PUBLIC HAL_DEBUG)
+ENDIF()
