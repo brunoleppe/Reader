@@ -26,14 +26,13 @@ set(READER_TYPE     __DesktopReaderV2__)
 set(SOURCES
         main.c
         FreeRTOSConfig.h
-        initialization.c initialization.h
+        BSP/initialization.h
         bitmap.c bitmap.h
-        interrupts.c
-        interrupts_as.S
+
 #        main.cpp
 #        TestClass.cpp TestClass.h
         keypad.c keypad.h
-        BSP/bsp.c BSP/bsp.h
+        BSP/bsp.h
         BSP/qtouch.c BSP/qtouch.h
         BSP/linux_keys.h
         BSP/Drivers/SPI/spi_driver.c BSP/Drivers/SPI/spi_driver.h BSP/Drivers/SPI/spi_driver_config.h
@@ -44,19 +43,31 @@ project(Reader CXX C ASM)
 
 # FreeRTOS Directories
 include_directories(FreeRTOS/Source/include)
-include_directories(FreeRTOS/Source/portable/MPLAB/PIC32MZ)
 include_directories(HAL/)
 include_directories(BSP/)
 include_directories(LCD/)
+
+IF(${PIC} EQUAL 32MZEFM100)
+    include_directories(FreeRTOS/Source/portable/MPLAB/PIC32MZ)
+    include_directories(HAL/PIC32MZEFM100)
+ELSEIF(${PIC} EQUAL 32MX795F512H)
+    include_directories(FreeRTOS/Source/portable/MPLAB/PIC32MX)
+    include_directories(HAL/PIC32MX795F512H)
+ENDIF()
 
 # FreeRTOSConfig.h is located here
 include_directories(.)
 
 add_subdirectory(FreeRTOS)
 add_subdirectory(LCD)
-IF(${PIC} EQUAL 32MZEFM100)
-add_subdirectory(HAL/PIC32MZEFM100)
-ENDIF()
+add_subdirectory(BSP/Reader)
+add_subdirectory(HAL/PIC32MX795F512H)
+
+#IF(${PIC} EQUAL 32MZEFM100)
+#    add_subdirectory(HAL/PIC32MZEFM100)
+#ELSEIF(${PIC} EQUAL 32MX795F512H)
+#    add_subdirectory(HAL/PIC32MX795F512H)
+#ENDIF()
 
 add_executable(${PROJECT_NAME}.elf ${SOURCES})
 
@@ -64,6 +75,8 @@ add_executable(${PROJECT_NAME}.elf ${SOURCES})
 target_link_libraries(${PROJECT_NAME}.elf   FreeRTOS)
 target_link_libraries(${PROJECT_NAME}.elf   HAL)
 target_link_libraries(${PROJECT_NAME}.elf   LCD)
+target_link_libraries(${PROJECT_NAME}.elf   BSP)
+
 #Assembly options
 set(CMAKE_ASM_FLAGS "${CFLAGS} -Wa,--defsym=__MPLAB_BUILD=1,--gdwarf-2")
 #Compiler flags and options
@@ -81,6 +94,20 @@ set(XC32_LINK_FLAGS
         )
 
 
+option(READERV2 "Version 2 del lector de escritorio" OFF)
+IF(READERV2)
+    add_compile_definitions(__READER_V2__)
+    set(DEFINES ${DEFINES} __READER_V2__)
+ELSE()
+    add_compile_definitions(__READER_V1__)
+    set(DEFINES ${DEFINES} __READER_V1__)
+ENDIF(READERV2)
+
+IF(DEBUG)
+    set(DEFINES ${DEFINES} HAL_DEBUG)
+ENDIF()
+
+
 #HEX file build command
 add_custom_command(
         OUTPUT  ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex
@@ -91,29 +118,24 @@ add_custom_target(${PROJECT_NAME}_hex ALL
         DEPENDS ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex
         )
 
+set_target_properties(BSP PROPERTIES LINKER_LANGUAGE C)
+target_compile_definitions(BSP PUBLIC XPRJ_default=default ${DEFINES})
+target_compile_options(BSP PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP})
+
 set_target_properties(HAL PROPERTIES LINKER_LANGUAGE C)
-target_compile_options(HAL PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc)
+target_compile_definitions(HAL PUBLIC XPRJ_default=default ${DEFINES})
+target_compile_options(HAL PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP})
 
 set_target_properties(LCD PROPERTIES LINKER_LANGUAGE C)
-target_compile_options(LCD PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc)
+target_compile_definitions(LCD PUBLIC XPRJ_default=default ${DEFINES})
+target_compile_options(LCD PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP} )
 
-target_compile_options(FreeRTOS PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc)
+set_target_properties(FreeRTOS PROPERTIES LINKER_LANGUAGE C)
+target_compile_definitions(FreeRTOS PUBLIC XPRJ_default=default ${DEFINES})
+target_compile_options(FreeRTOS PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP})
+
+
 target_compile_options(${PROJECT_NAME}.elf PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP})
-
 target_compile_definitions(${PROJECT_NAME}.elf PUBLIC XPRJ_default=default ${DEFINES})
 target_link_options(${PROJECT_NAME}.elf PUBLIC ${MPROCESSOR} ${MOPTIMIZATION} )
 target_link_libraries(${PROJECT_NAME}.elf "-Wl,${XC32_LINK_FLAGS}")
-
-
-option(READERV2 "Version 2 del lector de escritorio" OFF)
-IF(READERV2)
-    add_compile_definitions(__READER_V2__)
-ELSE()
-    add_compile_definitions(__READER_V1__)
-ENDIF(READERV2)
-
-IF(DEBUG)
-#    add_compile_definitions(HAL_DEBUG)
-    add_definitions(-DHAL_DEBUG)
-    target_compile_definitions(LCD PUBLIC HAL_DEBUG)
-ENDIF()

@@ -1,11 +1,11 @@
-#include <xc.h>
-#include "ISR_Support.h"
-#include "BSP/bsp.h"
-#include "gpio.h"
-#include "timer.h"
-#include "spi.h"
-#include "dma.h"
-#include "uart.h"
+#include "../../../../../../opt/microchip/xc32/v4.21/pic32mx/include/xc.h"
+#include "../../FreeRTOS/Source/portable/MPLAB/PIC32MZ/ISR_Support.h"
+#include "../bsp.h"
+#include "../../HAL/gpio.h"
+#include "../../HAL/timer.h"
+#include "../../HAL/spi.h"
+#include "../../HAL/dma.h"
+#include "../../HAL/uart.h"
 
     .global PORTE_Change_Notice_IRQ
     .extern GPIO_interrupt_handler

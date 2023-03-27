@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "lcd.h"
+#include "debug.h"
 
 static TaskHandle_t thisTask;
 
@@ -46,6 +47,7 @@ void keypad_task(void *params)
         char s[17];
         sprintf(s,"%4x",key);
         LCD_draw_string(0,48, s, LCD_FONT_SMALL, LCD_COLOR_BLACK);
+        DEBUG_PRINT("%s",s);
 #endif
     }
 }
