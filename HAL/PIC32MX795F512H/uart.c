@@ -14,7 +14,7 @@
 **********************************************************************/
 #include <xc.h>
 #include "uart.h"
-#include "pic32mz_registers.h"
+#include "pic32mx_registers.h"
 #include "evic.h"
 #include "system.h"
 #include "hal_ring_buffer.h"

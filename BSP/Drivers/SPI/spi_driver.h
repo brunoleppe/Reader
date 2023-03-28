@@ -10,6 +10,7 @@
 ***********************************************************************************************************************/
 #include "HAL/spi.h"
 #include "HAL/gpio.h"
+#include "HAL/dma.h"
 #include "spi_driver_config.h"
 #include "Drivers/driver_defs.h"
 

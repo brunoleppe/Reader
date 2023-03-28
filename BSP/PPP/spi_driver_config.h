@@ -5,7 +5,7 @@
 #ifndef SPI_DRIVER_CONFIG_H
 #define SPI_DRIVER_CONFIG_H
 
-#include "../../bsp.h"
+#define SPI_DRIVER_INSTANCES        1
 
 
 #ifndef SPI_DRIVER_INSTANCES

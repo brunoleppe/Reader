@@ -1,5 +1,6 @@
 include_directories(Source/include)
 IF(ARCH STREQUAL MZ)
+    message(ARCH="${ARCH}")
     include_directories(Source/portable/MPLAB/PIC32MZ)
     set(PORTABLE_SOURCES
             Source/portable/MPLAB/PIC32MZ/ISR_Support.h
@@ -7,6 +8,9 @@ IF(ARCH STREQUAL MZ)
             Source/portable/MPLAB/PIC32MZ/port_asm.S
             Source/portable/MPLAB/PIC32MZ/portmacro.h)
 ELSEIF(ARCH STREQUAL MX)
+
+    message(ARCH="${ARCH}")
+
     include_directories(Source/portable/MPLAB/PIC32MX)
     set(PORTABLE_SOURCES
             Source/portable/MPLAB/PIC32MX/ISR_Support.h

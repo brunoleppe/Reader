@@ -64,7 +64,7 @@
 #pragma config CSEQ =       0x0
 
 
-void Initialize(void)
+void initialize(void)
 {
     __builtin_disable_interrupts();
 
@@ -77,6 +77,8 @@ void Initialize(void)
     DMA_init();
     BSP_gpio_initialize();
     BSP_drivers_initialize();
-
     __builtin_enable_interrupts();
+
+    BSP_task_initialize();
+
 }

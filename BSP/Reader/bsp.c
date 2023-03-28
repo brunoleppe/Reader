@@ -1,8 +1,30 @@
 #include <xc.h>
 #include "bsp.h"
+#include "board_defs.h"
 #include "hal.h"
 #include "Drivers/SPI/spi_driver.h"
 #include "debug.h"
+
+#include "bitmap.h"
+
+#include "lcd.h"
+#include "FreeRTOS.h"
+#include "task.h"
+
+typedef struct{
+    GPIO_PinMap pinMap;
+    int delay_ms;
+}PinParams;
+
+static const PinParams pinParamsLed1 = {
+        .pinMap = LED1,
+        .delay_ms = 500
+};
+static const PinParams pinParamsLed2 = {
+        .pinMap = LED2,
+        .delay_ms = 500
+};
+
 
 static GPIO_CALLBACK_OBJECT pinCallbackObj[] = {
         {.pin = QT_CHANGE, 0, 0}
@@ -22,6 +44,9 @@ static SpiDriverInit   spiDriverInstance1_init = {
         .clientArray = spiDriverInstance1_clientArray,
         .txDmaChannel = DMA_CHANNEL_0,
 };
+
+static void blink(void *params);
+static void lcd_task(void *params);
 
 void BSP_gpio_initialize(void )
 {
@@ -115,6 +140,13 @@ void BSP_interrupts_initialize(void )
 //    EVIC_channel_priority(EVIC_CHANNEL_SPI2_TX, EVIC_PRIORITY_2, EVIC_SUB_PRIORITY_2);
 }
 
+void BSP_task_initialize(void)
+{
+    xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed1,1,NULL);
+    xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed2,1,NULL);
+    xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
+}
+
 
 void BSP_gpio_callback_register(GPIO_PinMap pinMap, GPIO_Callback callback, uintptr_t context)
 {
@@ -133,5 +165,28 @@ void    GPIO_pin_interrupt_callback     (uint32_t pin)
         if((pinCallbackObj[i].pin & pin) && (pinCallbackObj[i].callback != NULL) ){
             pinCallbackObj[i].callback(pinCallbackObj[i].pin, pinCallbackObj[i].context);
         }
+    }
+}
+
+void blink(void *params)
+{
+    PinParams *p = (PinParams*)params;
+    while(1){
+        GPIO_pin_toggle(p->pinMap);
+        vTaskDelay(p->delay_ms);
+    }
+}
+
+void lcd_task(void *params)
+{
+    (void)params;
+    LCD_init(1, LCD_DMA_CHANNEL, LCD_SS, LCD_BLA, LCD_DC, LCD_RST);
+
+    LCD_draw_bitmap(0,0,bitmap,sizeof(bitmap));
+    char *s = "Hola Mundo";
+    LCD_draw_string(0,1,(char*)s,LCD_FONT_MEDIUM,LCD_COLOR_BLACK);
+    while(true){
+        LCD_print();
+        vTaskDelay(17);
     }
 }

@@ -8,7 +8,7 @@ add_library(HAL
         hal_delay.c ../hal_delay.h
         dma.c ../dma.h
         pps.c ../pps.h
-        ../hal_defs.h ../hal_config.h
+        ../hal_defs.h
         timer.c ../timer.h
         oc.c ../oc.h
         ../uart.h uart.c

@@ -9,7 +9,7 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
-void Initialize(void);
+void initialize(void);
 #ifdef __cplusplus
 }
 #endif

@@ -13,7 +13,7 @@
 * Includes
 **********************************************************************/
 #include "spi.h"
-#include "pic32mz_registers.h"
+#include "pic32mx_registers.h"
 #include "evic.h"
 #include <xc.h>
 #include "system.h"

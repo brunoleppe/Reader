@@ -8,7 +8,6 @@
 #include <stddef.h>
 #include "hal_config.h"
 
-#define HAL_SYSTEM_CLOCK                    (200000000UL)
 #define HAL_SPI_PERIPHERAL_CLOCK            (HAL_SYSTEM_CLOCK/2)
 #define HAL_UART_PERIPHERAL_CLOCK           (HAL_SYSTEM_CLOCK/2)
 #define HAL_GPIO_PERIPHERAL_CLOCK           (HAL_SYSTEM_CLOCK/2)

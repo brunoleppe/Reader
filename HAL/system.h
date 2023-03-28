@@ -38,7 +38,7 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
-void        SYS_Initialize();
+void        SYS_initialize();
 void        SYS_Unlock(uint32_t flags);
 void        SYS_Lock();
 void        SYS_peripheral_clock_config(uint32_t clockChannel, uint32_t flags);

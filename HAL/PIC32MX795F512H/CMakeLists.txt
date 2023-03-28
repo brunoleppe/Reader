@@ -1,13 +1,15 @@
 add_library(HAL
-        ../hal_defs.h
+        ../hal.h
         pic32mx_registers.h
-        evic.c evic.h
-        dma.c
-        gpio.c
-        hal_delay.c
-        hal_ring_buffer.c
-        oc.c
-        timer.c
-        spi.c
-        uart.c
-        system.c)
+        ../gpio.h gpio.c
+        spi.c ../spi.h
+        system.c ../system.h
+        evic.h evic.c
+        hal_delay.c ../hal_delay.h
+        dma.c ../dma.h
+        ../pps.h
+        ../hal_defs.h
+        timer.c ../timer.h
+        oc.c ../oc.h
+        ../uart.h uart.c
+        ../hal_ring_buffer.h hal_ring_buffer.c)

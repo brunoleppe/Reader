@@ -19,23 +19,20 @@ set(USER_FLAGS -Wall)
 set(USER_DEFINITIONS )
 set(HEAP 1024)
 
-set(READER_TYPE     __DesktopReaderV2__)
-
-# set(CMAKE_VERBOSE_MAKEFILE True)
+ set(CMAKE_VERBOSE_MAKEFILE True)
 
 set(SOURCES
         main.c
-        FreeRTOSConfig.h
         BSP/initialization.h
         bitmap.c bitmap.h
 
 #        main.cpp
 #        TestClass.cpp TestClass.h
-        keypad.c keypad.h
+        keypad.h
         BSP/bsp.h
         BSP/qtouch.c BSP/qtouch.h
         BSP/linux_keys.h
-        BSP/Drivers/SPI/spi_driver.c BSP/Drivers/SPI/spi_driver.h BSP/Drivers/SPI/spi_driver_config.h
+        BSP/Drivers/SPI/spi_driver.c BSP/Drivers/SPI/spi_driver.h
 
         BSP/Drivers/driver_defs.h BSP/debug.c BSP/debug.h)
 
@@ -47,12 +44,14 @@ include_directories(HAL/)
 include_directories(BSP/)
 include_directories(LCD/)
 
-IF(${PIC} EQUAL 32MZEFM100)
+IF(READERV2)
     include_directories(FreeRTOS/Source/portable/MPLAB/PIC32MZ)
     include_directories(HAL/PIC32MZEFM100)
-ELSEIF(${PIC} EQUAL 32MX795F512H)
+    include_directories(BSP/Reader)
+ELSEIF(PPPLUS)
     include_directories(FreeRTOS/Source/portable/MPLAB/PIC32MX)
     include_directories(HAL/PIC32MX795F512H)
+    include_directories(BSP/PPP)
 ENDIF()
 
 # FreeRTOSConfig.h is located here
@@ -60,14 +59,14 @@ include_directories(.)
 
 add_subdirectory(FreeRTOS)
 add_subdirectory(LCD)
-add_subdirectory(BSP/Reader)
-add_subdirectory(HAL/PIC32MX795F512H)
 
-#IF(${PIC} EQUAL 32MZEFM100)
-#    add_subdirectory(HAL/PIC32MZEFM100)
-#ELSEIF(${PIC} EQUAL 32MX795F512H)
-#    add_subdirectory(HAL/PIC32MX795F512H)
-#ENDIF()
+IF(READERV2)
+    add_subdirectory(HAL/PIC32MZEFM100)
+    add_subdirectory(BSP/Reader)
+ELSEIF(PPPLUS)
+    add_subdirectory(BSP/PPP)
+    add_subdirectory(HAL/PIC32MX795F512H)
+ENDIF()
 
 add_executable(${PROJECT_NAME}.elf ${SOURCES})
 
@@ -90,7 +89,8 @@ set(LINKER_MAP -Map=${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.map)
 set(MEMORY_FILE --memorysummary,${CMAKE_CURRENT_BINARY_DIR}/memoryfile.xml)
 set(LINKER_SCRIPT --script=${CMAKE_SOURCE_DIR}/Linker/p32MZ1024EFM100.ld)
 set(XC32_LINK_FLAGS
-        ${SYM_HEAP},${LINKER_SCRIPT},${SYM_BUILD},${LINKER_OPTS},${LINKER_MAP},${MEMORY_FILE}
+#        ${SYM_HEAP},${LINKER_SCRIPT},${SYM_BUILD},${LINKER_OPTS},${LINKER_MAP},${MEMORY_FILE}
+        ${SYM_HEAP},${SYM_BUILD},${LINKER_OPTS},${LINKER_MAP},${MEMORY_FILE}
         )
 
 

@@ -3,7 +3,7 @@
 **********************************************************************/
 #include "system.h"
 #include <xc.h>
-#include "pic32mz_registers.h"
+#include "pic32mx_registers.h"
 /**********************************************************************
 * Module Preprocessor Constants
 **********************************************************************/
@@ -29,6 +29,8 @@
 **********************************************************************/
 void SYS_initialize()
 {
+    while(!OSCCONbits.SLOCK);
+
     __builtin_mtc0(16, 0,(__builtin_mfc0(16, 0) | 0x3));
 
     /* Configure Flash Wait States and Prefetch */
@@ -46,13 +48,13 @@ void SYS_Unlock(uint32_t flags)
     SYSKEY = 0xAA996655;
     SYSKEY = 0x556699AA;
 
-    if(flags & SYS_UNLOCK_IO)
-        CFGCONbits.IOLOCK = 0;
+//    if(flags & SYS_UNLOCK_IO)
+//        CFGCONbits.IOLOCK = 0;
 
 }
 void SYS_Lock()
 {
-    CFGCONbits.IOLOCK = 1;
+//    CFGCONbits.IOLOCK = 1;
     SYSKEY = 0x00000000;
 }
 

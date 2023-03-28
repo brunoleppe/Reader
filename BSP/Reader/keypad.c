@@ -12,6 +12,8 @@
 #include <string.h>
 #include "lcd.h"
 #include "debug.h"
+#include "Reader/board_defs.h"
+
 
 static TaskHandle_t thisTask;
 

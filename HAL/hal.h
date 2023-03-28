@@ -22,7 +22,7 @@
 
 #include "hal_delay.h"
 #include "dma.h"
-#include "PIC32MZEFM100/evic.h"
+#include "evic.h"
 #include "gpio.h"
 #include "hal_delay.h"
 #include "hal_ring_buffer.h"

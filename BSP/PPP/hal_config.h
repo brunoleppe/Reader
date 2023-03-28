@@ -9,6 +9,6 @@
 * FreeRTOS
 **********************************************************************/
 #define HAL_USE_FREERTOS                    1
-
+#define HAL_SYSTEM_CLOCK                    (80000000UL)
 
 #endif //READER_HAL_CONFIG_H
