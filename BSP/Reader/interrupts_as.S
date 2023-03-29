@@ -1,5 +1,5 @@
-#include "../../../../../../opt/microchip/xc32/v4.21/pic32mx/include/xc.h"
-#include "../../FreeRTOS/Source/portable/MPLAB/PIC32MZ/ISR_Support.h"
+#include <xc.h>
+#include "ISR_Support.h"
 #include "../../HAL/gpio.h"
 #include "../../HAL/timer.h"
 #include "../../HAL/spi.h"

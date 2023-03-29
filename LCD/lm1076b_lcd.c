@@ -439,8 +439,8 @@ int LCD_init (uint32_t spiChannel, uint32_t dma, GPIO_PinMap cs, GPIO_PinMap bla
             .spiMode = SPI_MODE_3,
     };
 
-//    int r = SpiDriver_setup(lcd.handle, &setup);
-    SpiDriver_setup(lcd.handle, &setup);
+    int r = SpiDriver_setup(lcd.handle, &setup);
+//    SpiDriver_setup(lcd.handle, &setup);
     DEBUG_PRINT("r = %x\n\r",r);
     SpiDriver_transfer(lcd.handle, config_buffer, NULL, sizeof(config_buffer));
     DEBUG_PRINT("----LCD----\n\r");

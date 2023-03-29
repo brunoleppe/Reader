@@ -35,7 +35,7 @@
 #define LCD_DMA_CHANNEL                         DMA_CHANNEL_0
 
 /*UART*/
-#define DEBUG_UART                              UART_CHANNEL_2
+#define DEBUG_UART                              UART_CHANNEL_1
 
 /*SPI DRIVER*/
 #define SPI_DRIVER_INSTANCES    1

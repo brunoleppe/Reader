@@ -4,4 +4,16 @@
 #include <xc.h>
 #include <sys/attribs.h>
 
-void __ISR(_DMA0_VECTOR, ipl2AUTO) DMA0_IRQ( void );
+void UART_interrupt_handler(uint32_t channel);
+void DMA_interrupt_handler(uint32_t channel);
+
+void __ISR(_DMA_0_VECTOR, ipl2AUTO) DMA0_IRQ( void );
+void __ISR(_UART_1_VECTOR, ipl4AUTO) UART1_IRQ( void );
+
+void UART_1_HANDLER(void){
+    UART_interrupt_handler(0);
+}
+
+void DMA_0_HANDLER(void){
+    DMA_interrupt_handler(0);
+}

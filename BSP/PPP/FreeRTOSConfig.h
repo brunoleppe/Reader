@@ -81,10 +81,10 @@
 #define configMAX_CO_ROUTINE_PRIORITIES         2
 
 /* Software timer related definitions. */
-#define configUSE_TIMERS                        0
-#define configTIMER_TASK_PRIORITY               0
-#define configTIMER_QUEUE_LENGTH                0
-#define configTIMER_TASK_STACK_DEPTH            0
+#define configUSE_TIMERS                        1
+#define configTIMER_TASK_PRIORITY               4
+#define configTIMER_QUEUE_LENGTH                10
+#define configTIMER_TASK_STACK_DEPTH            256
 #define configUSE_DAEMON_TASK_STARTUP_HOOK      0
 
 /* Misc */
@@ -108,17 +108,17 @@
 #define INCLUDE_vTaskDelayUntil                 1
 #define INCLUDE_vTaskDelay                      1
 #define INCLUDE_xTaskGetSchedulerState          0
-#define INCLUDE_xTaskGetCurrentTaskHandle       0
-#define INCLUDE_uxTaskGetStackHighWaterMark     0
-#define INCLUDE_xTaskGetIdleTaskHandle          0
+#define INCLUDE_xTaskGetCurrentTaskHandle       1
+#define INCLUDE_uxTaskGetStackHighWaterMark     1
+#define INCLUDE_xTaskGetIdleTaskHandle          1
 #define INCLUDE_eTaskGetState                   0
 #define INCLUDE_xTimerPendFunctionCall          0
 #define INCLUDE_xTaskAbortDelay                 0
-#define INCLUDE_xTaskGetHandle                  0
-#define INCLUDE_xQueueGetMutexHolder            0
-#define INCLUDE_xSemaphoreGetMutexHolder        0
+#define INCLUDE_xTaskGetHandle                  1
+#define INCLUDE_xQueueGetMutexHolder            1
+#define INCLUDE_xSemaphoreGetMutexHolder        1
 #define INCLUDE_uxTaskGetStackHighWaterMark2    0
-#define INCLUDE_xTaskResumeFromISR              0
+#define INCLUDE_xTaskResumeFromISR              1
 
 
 #endif /* FREERTOS_H */

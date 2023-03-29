@@ -9,6 +9,8 @@
 #include "Drivers/SPI/spi_driver.h"
 #include "lcd.h"
 #include "bitmap.h"
+#include "debug.h"
+#include <xc.h>
 
 static void blink(void *params);
 static void lcd_task(void *params);
@@ -47,14 +49,24 @@ void BSP_gpio_initialize(void )
 
     SPI_initialize(SPI_CHANNEL, SPI_DEFAULT, 20000000);
 
+    static uint8_t uartRxBuffer[256];
+    UART_initialize(DEBUG_UART, UART_PARITY_NONE | UART_DATA_BITS_8, 9600, uartRxBuffer, 256);
+    char s[]="\n\r";
+    UART_write(DEBUG_UART, (uint8_t*)s, 2);
+    DEBUG_INIT(DEBUG_UART);
+    DEBUG_PRINT("Hola Mundo\n\r");
+
 }
 void BSP_interrupts_initialize(void )
 {
+    EVIC_init(NULL);
 
     EVIC_channel_priority(EVIC_CHANNEL_DMA0, EVIC_PRIORITY_2, EVIC_SUB_PRIORITY_2);
     EVIC_channel_set(EVIC_CHANNEL_DMA0);
 
-    EVIC_init(NULL);
+    EVIC_channel_priority(EVIC_CHANNEL_UART1_ERR, EVIC_PRIORITY_4, EVIC_SUB_PRIORITY_2);
+    EVIC_channel_priority(EVIC_CHANNEL_UART1_RX, EVIC_PRIORITY_4, EVIC_SUB_PRIORITY_2);
+
     EVIC_enable_interrupts();
 }
 void BSP_gpio_callback_register(GPIO_PinMap pinMap, GPIO_Callback callback, uintptr_t context)
@@ -63,12 +75,16 @@ void BSP_gpio_callback_register(GPIO_PinMap pinMap, GPIO_Callback callback, uint
 }
 void BSP_drivers_initialize( void )
 {
+    DMA_init();
+    DMA_channel_init(LCD_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_3 | DMA_CHANNEL_START_IRQ);
     SpiDriver_initialize(SPI_DRIVER_INSTANCE_0, &spiDriverInstance0_init);
 }
 void BSP_task_initialize(void)
 {
     xTaskCreate(blink, "blink", 256, NULL, 2, NULL);
     xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
+
+
 
 }
 
@@ -86,7 +102,7 @@ void lcd_task(void *params)
     (void)params;
     LCD_init(0, LCD_DMA_CHANNEL, LCD_SS_PIN, LCD_BLA_PIN, LCD_DC_PIN, LCD_RST_PIN);
 
-//    LCD_draw_bitmap(0,0,bitmap,sizeof(bitmap));
+    LCD_draw_bitmap(0,0,bitmap,sizeof(bitmap));
     char *s = "Hola Mundo";
     LCD_draw_string(0,1,(char*)s,LCD_FONT_MEDIUM,LCD_COLOR_BLACK);
     while(true){
