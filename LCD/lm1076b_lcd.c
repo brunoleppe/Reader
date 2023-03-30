@@ -47,7 +47,7 @@ typedef struct{
 /**********************************************************************
 * Module Variable Definitions
 **********************************************************************/
-static uint8_t __attribute__ ((coherent, aligned(16))) lcd_buffer[LCD_BUFFER_SIZE];
+static uint8_t __attribute__((coherent, aligned(16))) lcd_buffer[LCD_BUFFER_SIZE];
 static struct LCD lcd = {
     .lcd_size = LCD_BUFFER_SIZE,
     .lcd_buffer = lcd_buffer
@@ -531,9 +531,9 @@ void    LCD_print       ( void )
 {
 
     GPIO_pin_write(lcd.dc_pin, GPIO_HIGH);
-    GPIO_pin_write(lcd.cs_pin, GPIO_LOW);
+//    GPIO_pin_write(lcd.cs_pin, GPIO_LOW);
     SpiDriver_write_dma(lcd.handle, lcd.lcd_buffer, LCD_BUFFER_SIZE);
-
+//    SpiDriver_transfer(lcd.handle, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
 
 }
 

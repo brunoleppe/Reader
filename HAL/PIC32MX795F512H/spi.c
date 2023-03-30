@@ -50,10 +50,10 @@ typedef struct{
 * Module Variable Definitions
 **********************************************************************/
 static SPI_Object spiObjects[SPI_NUMBER_OF_CHANNELS];
-static const EVIC_CHANNEL spiIRQBase[SPI_NUMBER_OF_CHANNELS]={
-        EVIC_CHANNEL_SPI2_ERR,
-        EVIC_CHANNEL_SPI3_ERR,
-        EVIC_CHANNEL_SPI4_ERR,
+static const EVIC_CHANNEL spiIRQBase[]={
+        [SPI_CHANNEL_2] = EVIC_CHANNEL_SPI2_ERR,
+        [SPI_CHANNEL_3] = EVIC_CHANNEL_SPI3_ERR,
+        [SPI_CHANNEL_4] = EVIC_CHANNEL_SPI4_ERR,
 };
 static const SPI_Descriptor descriptors[] = {
     [SPI_CHANNEL_2] = (SPI_Descriptor)&SPI2CON,

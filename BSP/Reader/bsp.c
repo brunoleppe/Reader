@@ -4,12 +4,11 @@
 #include "hal.h"
 #include "Drivers/SPI/spi_driver.h"
 #include "debug.h"
-
 #include "bitmap.h"
-
 #include "lcd.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "keypad.h"
 
 typedef struct{
     GPIO_PinMap pinMap;
@@ -145,6 +144,7 @@ void BSP_task_initialize(void)
     xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed1,1,NULL);
     xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed2,1,NULL);
     xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
+    xTaskCreate(keypad_task, "qt_task", 2048, NULL, 1, NULL);
 }
 
 

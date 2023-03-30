@@ -28,9 +28,7 @@ set(SOURCES
 
 #        main.cpp
 #        TestClass.cpp TestClass.h
-        keypad.h
         BSP/bsp.h
-        BSP/qtouch.c BSP/qtouch.h
         BSP/linux_keys.h
         BSP/Drivers/SPI/spi_driver.c BSP/Drivers/SPI/spi_driver.h
 

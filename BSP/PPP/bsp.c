@@ -10,6 +10,7 @@
 #include "lcd.h"
 #include "bitmap.h"
 #include "debug.h"
+#include "keypad.h"
 #include <xc.h>
 
 static void blink(void *params);
@@ -31,12 +32,25 @@ void BSP_system_initialize(void)
 void BSP_gpio_initialize(void )
 {
     GPIO_pin_initialize(LED_M_COL0_PIN, GPIO_OUTPUT);
+    GPIO_pin_initialize(LED_M_COL1_PIN, GPIO_OUTPUT);
+    GPIO_pin_initialize(LED_M_COL2_PIN, GPIO_OUTPUT);
+    GPIO_pin_initialize(LED_M_COL3_PIN, GPIO_OUTPUT);
     GPIO_pin_initialize(LED_M_ROW0_PIN, GPIO_OUTPUT);
+    GPIO_pin_initialize(LED_M_ROW1_PIN, GPIO_OUTPUT);
+    GPIO_pin_initialize(LED_M_ROW2_PIN, GPIO_OUTPUT);
+    GPIO_pin_initialize(LED_M_ROW3_PIN, GPIO_OUTPUT);
+    GPIO_pin_initialize(LED_M_ROW4_PIN, GPIO_OUTPUT);
 
     GPIO_pin_initialize(LCD_BLA_PIN, GPIO_OUTPUT);
     GPIO_pin_initialize(LCD_DC_PIN, GPIO_OUTPUT);
     GPIO_pin_initialize(LCD_RST_PIN, GPIO_OUTPUT);
     GPIO_pin_initialize(LCD_SS_PIN, GPIO_OUTPUT);
+
+    GPIO_pin_initialize(QT_DRDY_PIN, GPIO_INPUT);
+    GPIO_pin_initialize(QT_RST_PIN, GPIO_OUTPUT);
+    GPIO_pin_initialize(QT_SS_PIN, GPIO_OUTPUT);
+    GPIO_pin_initialize(QT_CHANGE_PIN, GPIO_INPUT | GPIO_PULLUP);
+
 
     GPIO_pin_write(LCD_BLA_PIN, GPIO_HIGH);
     GPIO_pin_write(LCD_DC_PIN, GPIO_HIGH);
@@ -44,10 +58,17 @@ void BSP_gpio_initialize(void )
     GPIO_pin_write(LCD_SS_PIN, GPIO_HIGH);
 
 
-    GPIO_pin_write(LED_M_COL0_PIN, GPIO_LOW);
-    GPIO_pin_write(LED_M_ROW0_PIN, GPIO_LOW);
+    GPIO_pin_initialize(LED_M_COL0_PIN, GPIO_HIGH);
+    GPIO_pin_initialize(LED_M_COL1_PIN, GPIO_HIGH);
+    GPIO_pin_initialize(LED_M_COL2_PIN, GPIO_HIGH);
+    GPIO_pin_initialize(LED_M_COL3_PIN, GPIO_HIGH);
+    GPIO_pin_initialize(LED_M_ROW0_PIN, GPIO_LOW);
+    GPIO_pin_initialize(LED_M_ROW1_PIN, GPIO_LOW);
+    GPIO_pin_initialize(LED_M_ROW2_PIN, GPIO_LOW);
+    GPIO_pin_initialize(LED_M_ROW3_PIN, GPIO_LOW);
+    GPIO_pin_initialize(LED_M_ROW4_PIN, GPIO_LOW);
 
-    SPI_initialize(SPI_CHANNEL, SPI_DEFAULT, 20000000);
+    SPI_initialize(SPI_CHANNEL, SPI_MASTER | SPI_SDI_DISABLE | SPI_MODE_3, 20000000);
 
     static uint8_t uartRxBuffer[256];
     UART_initialize(DEBUG_UART, UART_PARITY_NONE | UART_DATA_BITS_8, 9600, uartRxBuffer, 256);
@@ -81,10 +102,9 @@ void BSP_drivers_initialize( void )
 }
 void BSP_task_initialize(void)
 {
-    xTaskCreate(blink, "blink", 256, NULL, 2, NULL);
+//    xTaskCreate(blink, "blink", 256, NULL, 2, NULL);
     xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
-
-
+    xTaskCreate(keypad_task, "keypad", 1024, NULL, 2, NULL);
 
 }
 
@@ -107,6 +127,6 @@ void lcd_task(void *params)
     LCD_draw_string(0,1,(char*)s,LCD_FONT_MEDIUM,LCD_COLOR_BLACK);
     while(true){
         LCD_print();
-        vTaskDelay(17);
+        vTaskDelay(30);
     }
 }

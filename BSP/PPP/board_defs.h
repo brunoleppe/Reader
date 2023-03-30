@@ -13,8 +13,9 @@
 #define SPI_CHANNEL                             SPI_CHANNEL_2
 /*QTOUCH*/
 #define QT_SS_PIN                               GPIO_PIN_MAP(GPIO_PORT_B, GPIO_PIN_1)
-#define QT_RESET_PIN                            GPIO_PIN_MAP(GPIO_PORT_B, GPIO_PIN_0)
+#define QT_RST_PIN                              GPIO_PIN_MAP(GPIO_PORT_B, GPIO_PIN_0)
 #define QT_DRDY_PIN                             GPIO_PIN_MAP(GPIO_PORT_D, GPIO_PIN_10)
+#define QT_CHANGE_PIN                           GPIO_PIN_MAP(GPIO_PORT_B, GPIO_PIN_14)
 
 /*LED MATRIX*/
 #define LED_M_COL0_PIN                          GPIO_PIN_MAP(GPIO_PORT_F, GPIO_PIN_0)
