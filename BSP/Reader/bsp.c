@@ -9,6 +9,61 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "keypad.h"
+#include "ui.h"
+// <editor-fold defaultstate="collapsed" desc="Configuration Bits">
+#pragma config DEBUG =      OFF
+#pragma config JTAGEN =     OFF
+#pragma config ICESEL =     ICS_PGx1
+#pragma config TRCEN =      OFF
+#pragma config BOOTISA =    MIPS32
+#pragma config FECCCON =    OFF_UNLOCKED
+#pragma config FSLEEP =     OFF
+#pragma config DBGPER =     PG_ALL
+#pragma config SMCLR =      MCLR_NORM
+#pragma config SOSCGAIN =   GAIN_LEVEL_3
+#pragma config SOSCBOOST =  ON
+#pragma config POSCGAIN =   GAIN_LEVEL_3
+#pragma config POSCBOOST =  ON
+#pragma config EJTAGBEN =   NORMAL
+#pragma config CP =         OFF
+
+/*** DEVCFG1 ***/
+#pragma config FNOSC =      SPLL
+#pragma config DMTINTV =    WIN_127_128
+#pragma config FSOSCEN =    OFF
+#pragma config IESO =       OFF
+#pragma config POSCMOD =    OFF
+#pragma config OSCIOFNC =   OFF
+#pragma config FCKSM =      CSECME
+#pragma config WDTPS =      PS1048576
+#pragma config WDTSPGM =    STOP
+#pragma config FWDTEN =     OFF
+#pragma config WINDIS =     NORMAL
+#pragma config FWDTWINSZ =  WINSZ_25
+#pragma config DMTCNT =     DMT31
+#pragma config FDMTEN =     OFF
+
+/*** DEVCFG2 ***/
+#pragma config FPLLIDIV =   DIV_1
+#pragma config FPLLRNG =    RANGE_5_10_MHZ
+#pragma config FPLLICLK =   PLL_FRC
+#pragma config FPLLMULT =   MUL_50
+#pragma config FPLLODIV =   DIV_2
+#pragma config UPLLFSEL =   FREQ_24MHZ
+
+/*** DEVCFG3 ***/
+#pragma config USERID =     0xffff
+#pragma config FMIIEN =     ON
+#pragma config FETHIO =     ON
+#pragma config PGL1WAY =    ON
+#pragma config PMDL1WAY =   ON
+#pragma config IOL1WAY =    ON
+#pragma config FUSBIDIO =   ON
+
+/*** BF1SEQ0 ***/
+
+#pragma config TSEQ =       0xffff
+#pragma config CSEQ =       0x0
 
 typedef struct{
     GPIO_PinMap pinMap;
@@ -110,6 +165,7 @@ void BSP_gpio_initialize(void )
     TMR_initialize(TMR_CHANNEL_2, TMR_PRESCALER_64, 5971);
     OC_initialize(OC_CHANNEL_1, OC_MODE_PWM | OC_MODE_USE_TMR2, 2985);
 
+    DMA_init();
     DMA_channel_init(LCD_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_3 | DMA_CHANNEL_START_IRQ);
 
 
@@ -118,6 +174,8 @@ void BSP_gpio_initialize(void )
 
 void BSP_drivers_initialize( void )
 {
+
+
     int r = SpiDriver_initialize(0, &spiDriverInstance0_init);
     DEBUG_PRINT("r = %d\n\r", r);
     r = SpiDriver_initialize(1, &spiDriverInstance1_init);
@@ -134,9 +192,7 @@ void BSP_interrupts_initialize(void )
     EVIC_channel_priority(EVIC_CHANNEL_UART1_FAULT, EVIC_PRIORITY_4, EVIC_SUB_PRIORITY_1);
     EVIC_channel_priority(EVIC_CHANNEL_UART1_RX, EVIC_PRIORITY_4, EVIC_SUB_PRIORITY_2);
 
-
-//    EVIC_channel_priority(EVIC_CHANNEL_SPI2_RX, EVIC_PRIORITY_2, EVIC_SUB_PRIORITY_2);
-//    EVIC_channel_priority(EVIC_CHANNEL_SPI2_TX, EVIC_PRIORITY_2, EVIC_SUB_PRIORITY_2);
+    EVIC_enable_interrupts();
 }
 
 void BSP_task_initialize(void)
@@ -145,6 +201,7 @@ void BSP_task_initialize(void)
     xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed2,1,NULL);
     xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
     xTaskCreate(keypad_task, "qt_task", 2048, NULL, 1, NULL);
+    xTaskCreate(ui_task, "ui", 512, NULL, 2, NULL);
 }
 
 
@@ -189,4 +246,15 @@ void lcd_task(void *params)
         LCD_print();
         vTaskDelay(17);
     }
+}
+void BSP_system_initialize()
+{
+    __builtin_disable_interrupts();
+
+    PRECONbits.PREFEN = 3;
+    PRECONbits.PFMWS = 3;
+    CFGCONbits.ECCCON = 3;
+
+    INTCONSET = _INTCON_MVEC_MASK;
+    BSP_interrupts_initialize();
 }

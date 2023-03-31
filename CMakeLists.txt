@@ -24,8 +24,6 @@ set(HEAP 1024)
 set(SOURCES
         main.c
         BSP/initialization.h
-        bitmap.c bitmap.h
-
 #        main.cpp
 #        TestClass.cpp TestClass.h
         BSP/bsp.h

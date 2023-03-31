@@ -6,14 +6,14 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "BSP/bsp.h"
-#include "qtouch.h"
+#include "qt1110.h"
 
 #include <stdio.h>
 #include <string.h>
 #include "lcd.h"
 #include "debug.h"
 #include "Reader/board_defs.h"
-
+#include "input.h"
 
 static TaskHandle_t thisTask;
 
@@ -38,18 +38,20 @@ void keypad_task(void *params)
     QTouch_initialize(QT_SPI_CHANNEL, QT_SS, QT_RST, QT_CHANGE, 0);
 
     int key = 0;
+    int prev_key = 0;
 
     while(true) {
 
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
         GPIO_pin_toggle(LED4);
         key = QTouch_get_key();
-
-#ifdef HAL_DEBUG
-        char s[17];
-        sprintf(s,"%4x",key);
-        LCD_draw_string(0,48, s, LCD_FONT_SMALL, LCD_COLOR_BLACK);
-        DEBUG_PRINT("%s",s);
-#endif
+        if(key != 0) {
+            prev_key = key;
+            input_report_key(prev_key, 1);
+        }
+        else{
+            input_report_key(prev_key, 0);
+            prev_key = 0;
+        }
     }
 }

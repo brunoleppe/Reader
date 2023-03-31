@@ -3,7 +3,7 @@
 #include "task.h"
 #include "bsp.h"
 #include "lcd.h"
-#include "bitmap.h"
+#include "Reader/bitmap.h"
 #include "hal_delay.h"
 
 int main(){

@@ -2,7 +2,7 @@
 // Created by bleppe on 29/03/23.
 //
 
-#include "qtouch.h"
+#include "qt1245.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "hal.h"

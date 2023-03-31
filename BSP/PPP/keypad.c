@@ -8,7 +8,7 @@
 #include "timers.h"
 
 #include "BSP/bsp.h"
-#include "qtouch.h"
+#include "qt1245.h"
 
 #include <stdio.h>
 #include <string.h>

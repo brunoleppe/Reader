@@ -2,7 +2,7 @@
 // Created by bleppe on 20/03/23.
 //
 
-#include "qtouch.h"
+#include "qt1110.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "hal.h"
@@ -56,6 +56,19 @@ static uint8_t setup_data[43] = {
     0x7A, 0x7A,
 };
 
+static int QTouch_key_map(enum QT_KEY k)
+{
+    switch(k){
+        case QT_KEY_NONE:       return 0;
+        case QT_KEY_OPTION:     return 1;
+        case QT_KEY_RETURN:     return 2;
+        case QT_KEY_ENTER:      return 3;
+        case QT_KEY_DOWN:       return 4;
+        case QT_KEY_UP:         return 5;
+        case QT_KEY_READER:     return 6;
+        case QT_KEY_INVALID:    return 7;
+    }
+}
 
 static void QTouch_transfer(uint8_t *txBuffer, uint8_t *rxBuffer, size_t size)
 {
@@ -118,7 +131,7 @@ int     QTouch_get_key()
     key.key_0 = rxBuffer[1];
     key.key_1 = rxBuffer[2];
 
-    return key.key;
+    return QTouch_key_map(key.key);
 }
 int     QTouch_calibrate_all()
 {
