@@ -6,10 +6,12 @@
 
 cmake_minimum_required(VERSION 3.24.2)
 
+#set(CMAKE_VERBOSE_MAKEFILE True)
+
 #Compiler
 set(CMAKE_C_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-gcc")
 set(CMAKE_CXX_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-g++")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti -Wno-write-strings")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-unwind-tables -fno-rtti -Wno-write-strings -fpermissive")
 #Device Family Pack
 #set(DFP /opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-EF_DFP/1.3.58)
 
@@ -17,20 +19,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti -Wno-write-str
 set(OPTIMIZATION 1)
 set(USER_FLAGS -Wall)
 set(USER_DEFINITIONS )
-set(HEAP 1024)
+set(HEAP 0)
 
- set(CMAKE_VERBOSE_MAKEFILE True)
 
 set(SOURCES
-        main.c
-        BSP/initialization.h
-#        main.cpp
-#        TestClass.cpp TestClass.h
-        BSP/bsp.h
-        BSP/linux_keys.h
-        BSP/Drivers/SPI/spi_driver.c BSP/Drivers/SPI/spi_driver.h
-
-        BSP/Drivers/driver_defs.h BSP/debug.c BSP/debug.h)
+#        main.c
+        main.cpp
+        DynamicAlloc/dynamic_alloc.cpp States/State.cpp States/State.h ui.cpp ui.h States/StateMainMenu.h States/StateMainMenu.cpp)
 
 project(Reader CXX C ASM)
 
@@ -39,6 +34,7 @@ include_directories(FreeRTOS/Source/include)
 include_directories(HAL/)
 include_directories(BSP/)
 include_directories(LCD/)
+include_directories(States/)
 
 IF(READERV2 OR READERV1)
     include_directories(FreeRTOS/Source/portable/MPLAB/PIC32MZ)

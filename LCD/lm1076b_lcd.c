@@ -526,6 +526,10 @@ void    LCD_draw_bitmap (int x, int y, const uint8_t *bitmap, size_t bitmap_size
     memcpy(lcd.lcd_buffer, bitmap, bitmap_size);
 
 }
+void    LCD_clear       ()
+{
+    memset(lcd.lcd_buffer, 0x00, LCD_BUFFER_SIZE);
+}
 
 void    LCD_print       ( void )
 {

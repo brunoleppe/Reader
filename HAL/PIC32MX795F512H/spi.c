@@ -247,6 +247,26 @@ bool        SPI_write_dma               (SPI_Channel spiChannel, uint32_t dmaCha
     DMA_channel_transfer(dmaChannel);
     return true;
 }
+bool        SPI_read_dma                (SPI_Channel spiChannel, uint32_t dmaChannel, void *rxBuffer, size_t size)
+{
+    if(size == 0 || (rxBuffer == NULL) || spiObjects[spiChannel].busy)
+        return false;
+
+    spiObjects[spiChannel].busy = true;
+
+    DMA_CHANNEL_Config dmaConfig = {
+            .startIrq = SPI_TX_INTERRUPT_CHANNEL(spiChannel),
+            .cellSize = 1,
+            .dstSize = size,
+            .dstAddress = (uint32_t)(rxBuffer),
+            .srcSize = 1,
+            .srcAddress = (uint32_t)(&SPI_DESCRIPTOR(spiChannel)->spibuf.reg),
+    };
+    DMA_channel_config(dmaChannel, &dmaConfig);
+    DMA_callback_register(dmaChannel, DMA_callback, (uintptr_t)spiChannel);
+    DMA_channel_transfer(dmaChannel);
+    return true;
+}
 
 bool SPI_transfer_isr (uint32_t spiChannel, void* pTransmitData, void* pReceiveData, size_t size)
 {

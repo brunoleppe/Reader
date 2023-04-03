@@ -9,8 +9,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "keypad.h"
-#include "ui.h"
-// <editor-fold defaultstate="collapsed" desc="Configuration Bits">
+
+// <editor-fold desc="Configuration Bits">
 #pragma config DEBUG =      OFF
 #pragma config JTAGEN =     OFF
 #pragma config ICESEL =     ICS_PGx1
@@ -64,6 +64,7 @@
 
 #pragma config TSEQ =       0xffff
 #pragma config CSEQ =       0x0
+// </editor-fold>
 
 typedef struct{
     GPIO_PinMap pinMap;
@@ -201,7 +202,6 @@ void BSP_task_initialize(void)
     xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed2,1,NULL);
     xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
     xTaskCreate(keypad_task, "qt_task", 2048, NULL, 1, NULL);
-    xTaskCreate(ui_task, "ui", 512, NULL, 2, NULL);
 }
 
 
@@ -239,9 +239,9 @@ void lcd_task(void *params)
     (void)params;
     LCD_init(1, LCD_DMA_CHANNEL, LCD_SS, LCD_BLA, LCD_DC, LCD_RST);
 
-    LCD_draw_bitmap(0,0,bitmap,sizeof(bitmap));
-    char *s = "Hola Mundo";
-    LCD_draw_string(0,1,(char*)s,LCD_FONT_MEDIUM,LCD_COLOR_BLACK);
+//    LCD_draw_bitmap(0,0,bitmap,sizeof(bitmap));
+//    char *s = "Hola Mundo";
+//    LCD_draw_string(0,1,(char*)s,LCD_FONT_MEDIUM,LCD_COLOR_BLACK);
     while(true){
         LCD_print();
         vTaskDelay(17);

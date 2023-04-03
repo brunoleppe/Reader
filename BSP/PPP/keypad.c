@@ -5,17 +5,12 @@
 #include "keypad.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "timers.h"
-
-#include "BSP/bsp.h"
 #include "qt1245.h"
 
-#include <stdio.h>
-#include <string.h>
 #include "lcd.h"
-#include "debug.h"
 #include "board_defs.h"
 #include "led_matrix.h"
+#include "input.h"
 
 enum  KEYS{
     KEYS_1          = 0,
@@ -37,8 +32,6 @@ enum  KEYS{
     KEYS_PUMP       = 16,
     KEYS_RELEASE    = -1,
 };
-
-static TaskHandle_t thisTask;
 
 static int qt_key_map(enum QT_KEY qtKey)
 {
@@ -62,31 +55,28 @@ static int qt_key_map(enum QT_KEY qtKey)
         case QT_KEY_PUMP        : return KEYS_PUMP;
         case QT_KEY_RELEASE     : return KEYS_RELEASE;
     }
+    return 0;
 }
 
 void keypad_task(void *params)
 {
     (void)params;
-    thisTask = xTaskGetCurrentTaskHandle();
-    QTouch_initialize(0, QT_SS_PIN, QT_RST_PIN, QT_CHANGE_PIN, QT_DRDY_PIN);
+    QTouch_initialize(QT_SPI_DRIVER_INDEX, QT_SS_PIN, QT_RST_PIN, QT_CHANGE_PIN, QT_DRDY_PIN);
     int key = 0;
     int currentKey = 0;
     while(true) {
         vTaskDelay(20);
         if(GPIO_pin_read(QT_CHANGE_PIN) == GPIO_LOW && QTouch_get_key(&key)) {
             led_matrix_led_clr_all();
-            if(key == QT_KEY_RELEASE)
-                led_matrix_led_number_clr(currentKey);
-            else {
-                currentKey = qt_key_map(key);
-                led_matrix_led_number_set(currentKey);
+            if(key != 0) {
+                currentKey = key;
+                led_matrix_led_number_set(qt_key_map(currentKey));
+                input_report_key(currentKey, 1);
             }
-#ifdef HAL_DEBUG
-            char s[17];
-            sprintf(s, "%6x", currentKey);
-            LCD_draw_string(0, 48, s, LCD_FONT_SMALL, LCD_COLOR_BLACK);
-            DEBUG_PRINT("%s", s);
-#endif
+            else{
+                input_report_key(currentKey, 0);
+                currentKey = 0;
+            }
         }
     }
 }

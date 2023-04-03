@@ -10,9 +10,10 @@
 #include "lcd.h"
 #include "debug.h"
 #include "keypad.h"
-#include <xc.h>
-#include "ui.h"
 
+#include "sst26.h"
+#include <xc.h>
+// <editor-fold desc="Configuration Bits">
 /*** DEVCFG0 ***/
 #pragma config DEBUG =      OFF
 #pragma config ICESEL =     ICS_PGx2
@@ -48,9 +49,9 @@
 #pragma config FMIIEN =     OFF
 #pragma config FETHIO =     OFF
 #pragma config FCANIO =     OFF
+//</editor-fold>
 
-
-static void blink(void *params);
+//static void blink(void *params);
 static void lcd_task(void *params);
 
 static SpiClientObject spiDriverInstance0_clientArray[SPI_DRIVER_INSTANCE_0_CLIENTS];
@@ -58,7 +59,8 @@ static SpiDriverInit   spiDriverInstance0_init = {
         .nClientsMax = SPI_DRIVER_INSTANCE_0_CLIENTS,
         .spiChannel = SPI_CHANNEL,
         .clientArray = spiDriverInstance0_clientArray,
-        .txDmaChannel = LCD_DMA_CHANNEL
+        .txDmaChannel = LCD_TX_DMA_CHANNEL,
+        .rxDmaChannel = LCD_RX_DMA_CHANNEL,
 };
 
 void BSP_system_initialize(void)
@@ -94,6 +96,8 @@ void BSP_gpio_initialize(void )
     GPIO_pin_write(LCD_RST_PIN, GPIO_HIGH);
     GPIO_pin_write(LCD_SS_PIN, GPIO_HIGH);
 
+    GPIO_pin_initialize(FLASH_SS_PIN, GPIO_OUTPUT);
+    GPIO_pin_write(FLASH_SS_PIN, GPIO_HIGH);
 
     GPIO_pin_initialize(LED_M_COL0_PIN, GPIO_HIGH);
     GPIO_pin_initialize(LED_M_COL1_PIN, GPIO_HIGH);
@@ -121,6 +125,8 @@ void BSP_interrupts_initialize(void )
 
     EVIC_channel_priority(EVIC_CHANNEL_DMA0, EVIC_PRIORITY_2, EVIC_SUB_PRIORITY_2);
     EVIC_channel_set(EVIC_CHANNEL_DMA0);
+    EVIC_channel_priority(EVIC_CHANNEL_DMA1, EVIC_PRIORITY_2, EVIC_SUB_PRIORITY_2);
+    EVIC_channel_set(EVIC_CHANNEL_DMA1);
 
     EVIC_channel_priority(EVIC_CHANNEL_UART1_ERR, EVIC_PRIORITY_4, EVIC_SUB_PRIORITY_2);
     EVIC_channel_priority(EVIC_CHANNEL_UART1_RX, EVIC_PRIORITY_4, EVIC_SUB_PRIORITY_2);
@@ -134,30 +140,38 @@ void BSP_gpio_callback_register(GPIO_PinMap pinMap, GPIO_Callback callback, uint
 void BSP_drivers_initialize( void )
 {
     DMA_init();
-    DMA_channel_init(LCD_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_3 | DMA_CHANNEL_START_IRQ);
+    DMA_channel_init(LCD_TX_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_3 | DMA_CHANNEL_START_IRQ);
+    DMA_channel_init(LCD_RX_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_3 | DMA_CHANNEL_START_IRQ);
     SpiDriver_initialize(SPI_DRIVER_INSTANCE_0, &spiDriverInstance0_init);
+
+    sst26_initialize(FLASH_SPI_DRIVER_INDEX, FLASH_SS_PIN);
+
 }
 void BSP_task_initialize(void)
 {
 //    xTaskCreate(blink, "blink", 256, NULL, 2, NULL);
     xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
     xTaskCreate(keypad_task, "keypad", 1024, NULL, 2, NULL);
-    xTaskCreate(ui_task, "ui", 512, NULL, 2, NULL);
 }
 
-void blink(void *params)
-{
-    while(true)
-    {
-        GPIO_pin_toggle(LED_M_ROW0_PIN);
-        vTaskDelay(500);
-    }
-}
+//void blink(void *params)
+//{
+//    int r=0;
+//    while(true)
+//    {
+//        led_matrix_led_number_set(r);
+//        vTaskDelay(500);
+//        led_matrix_led_clr_all();
+//        vTaskDelay(500);
+//        if(++r == 17)
+//            r=0;
+//    }
+//}
 
 void lcd_task(void *params)
 {
     (void)params;
-    LCD_init(0, LCD_DMA_CHANNEL, LCD_SS_PIN, LCD_BLA_PIN, LCD_DC_PIN, LCD_RST_PIN);
+    LCD_init(LCD_SPI_DRIVER_INDEX, LCD_TX_DMA_CHANNEL, LCD_SS_PIN, LCD_BLA_PIN, LCD_DC_PIN, LCD_RST_PIN);
 
     char *s = "Hola Mundo";
     LCD_draw_string(0,1,(char*)s,LCD_FONT_MEDIUM,LCD_COLOR_BLACK);

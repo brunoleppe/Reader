@@ -33,7 +33,11 @@
 #define LCD_BLA_PIN                             GPIO_PIN_MAP(GPIO_PORT_D, GPIO_PIN_7)
 #define LCD_RST_PIN                             GPIO_PIN_MAP(GPIO_PORT_D, GPIO_PIN_5)
 #define LCD_SS_PIN                              GPIO_PIN_MAP(GPIO_PORT_D, GPIO_PIN_6)
-#define LCD_DMA_CHANNEL                         DMA_CHANNEL_0
+#define LCD_TX_DMA_CHANNEL                      DMA_CHANNEL_0
+#define LCD_RX_DMA_CHANNEL                      DMA_CHANNEL_1
+
+/*FLASH*/
+#define FLASH_SS_PIN                            GPIO_PIN_MAP(GPIO_PORT_C, GPIO_PIN_14)
 
 /*UART*/
 #define DEBUG_UART                              UART_CHANNEL_1
@@ -43,4 +47,9 @@
 
 #define SPI_DRIVER_INSTANCE_0   0
 #define SPI_DRIVER_INSTANCE_0_CLIENTS   3
+
+#define QT_SPI_DRIVER_INDEX             0
+#define LCD_SPI_DRIVER_INDEX            0
+#define FLASH_SPI_DRIVER_INDEX          0
+
 #endif //BOARD_DEFS_H

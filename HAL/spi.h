@@ -102,6 +102,7 @@ bool        SPI_transfer_isr            (uint32_t spiChannel, void* txBuffer, vo
 void        SPI_rx_interrupt_handler    (SPI_Channel spiChannel);
 void        SPI_tx_interrupt_handler    (SPI_Channel spiChannel);
 bool        SPI_write_dma               (SPI_Channel spiChannel, uint32_t dmaChannel, void *txBuffer, size_t size);
+bool        SPI_read_dma                (SPI_Channel spiChannel, uint32_t dmaChannel, void *rxBuffer, size_t size);
 void        SPI_setup                   (SPI_Channel spiChannel, uint32_t configFlags, uint32_t baudrate);
 
 

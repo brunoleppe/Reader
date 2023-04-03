@@ -12,6 +12,14 @@ typedef struct{
     int value;
 }InputEvent;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 bool input_report_key(int code, int value);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //READER_INPUT_H

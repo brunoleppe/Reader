@@ -219,6 +219,37 @@ bool SpiDriver_write_dma(DriverHandle handle, void *txBuffer, size_t size)
     return result;
 }
 
+bool SpiDriver_read_dma(DriverHandle handle, void *rxBuffer, size_t size)
+{
+    SpiClientObject *client = SPI_Driver_handle_validate(handle);
+    if(client == NULL)
+        return 0;
+    SpiDriverObject *dObj = client->driverObject;
+
+    if(xSemaphoreTake(dObj->hardwareMutex, portMAX_DELAY) == pdFALSE)
+        return 0;
+
+    if(dObj->activeClient != client || client->setupChanged)
+    {
+        SPI_setup(dObj->spiChannel, client->setup.sample | client->setup.spiMode, client->setup.baudRate);
+        client->setupChanged = false;
+    }
+
+    dObj->activeClient = client;
+    if(client->csPin != GPIO_PIN_INVALID)
+        GPIO_pin_write(client->csPin, GPIO_LOW);
+
+    bool result = SPI_read_dma(dObj->spiChannel, dObj->rxDmaChannel, rxBuffer, size);
+
+    if (result && xSemaphoreTake(dObj->transferSemaphore, portMAX_DELAY) == pdTRUE){
+        result = true;
+    }
+
+    xSemaphoreGive(dObj->hardwareMutex);
+
+    return result;
+}
+
 static void SPI_callback_function(SPI_Channel channel, uintptr_t context)
 {
     (void)channel;

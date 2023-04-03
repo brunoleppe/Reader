@@ -75,8 +75,6 @@ int     QTouch_initialize(int spiDriverIndex, GPIO_PinMap cs, GPIO_PinMap rst, G
             .sample = SPI_SAMPLE_END
     };
     int r = SpiDriver_setup(qt.handle, &setup);
-    DEBUG_PRINT("setup = %x\n\r", r);
-    DEBUG_PRINT("----QTOUCH----\n\r");
     GPIO_pin_write(qt.rst, GPIO_LOW);
     vTaskDelay(10);
     GPIO_pin_write(qt.rst, GPIO_HIGH);
@@ -84,13 +82,14 @@ int     QTouch_initialize(int spiDriverIndex, GPIO_PinMap cs, GPIO_PinMap rst, G
 
 //    QTouch_calibrate_all();
 //    vTaskDelay(1000);
-
+    return 0;
 }
 
 int     QTouch_calibrate_all()
 {
     uint8_t data[] = {140, 1, 0xFF};
     QTouch_transfer(data, NULL, sizeof(data));
+    return 0;
 }
 bool     QTouch_get_key(int *outKey)
 {

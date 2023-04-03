@@ -28,6 +28,27 @@ _DMA_0_HANDLER:
     portRESTORE_CONTEXT
     .end _DMA_0_HANDLER
 
+    .global DMA1_IRQ
+    .extern DMA_q_HANDLER
+    .set nomicromips
+    .set nomips16
+    .set noreorder
+    .set noat
+    .ent DMA1_IRQ
+DMA1_IRQ:
+    la $26, _DMA_1_HANDLER
+    jr $26
+    nop
+    .end DMA1_IRQ
+
+_DMA_1_HANDLER:
+    portSAVE_CONTEXT
+    la s6, _DMA_1_HANDLER
+    jalr s6
+    nop
+    portRESTORE_CONTEXT
+    .end _DMA_1_HANDLER
+
     .global UART1_IRQ
     .extern UART_1_HANDLER
     .set nomicromips

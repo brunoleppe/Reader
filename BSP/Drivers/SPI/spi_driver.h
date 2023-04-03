@@ -55,6 +55,6 @@ int SpiDriver_setup(DriverHandle handle, SpiDriverSetup *setup);
 size_t SpiDriver_transfer(DriverHandle handle, void *txBuffer, void *rxBuffer, size_t size);
 bool SpiDriver_byte_transfer(DriverHandle handle, uint8_t data, uint8_t *outData);
 bool SpiDriver_write_dma(DriverHandle handle, void *txBuffer, size_t size);
-
+bool SpiDriver_read_dma(DriverHandle handle, void *rxBuffer, size_t size);
 
 #endif //READER_SPI_DRIVER_H
