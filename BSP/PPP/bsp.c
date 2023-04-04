@@ -51,7 +51,6 @@
 #pragma config FCANIO =     OFF
 //</editor-fold>
 
-//static void blink(void *params);
 static void lcd_task(void *params);
 
 static SpiClientObject spiDriverInstance0_clientArray[SPI_DRIVER_INSTANCE_0_CLIENTS];
@@ -115,8 +114,6 @@ void BSP_gpio_initialize(void )
     UART_initialize(DEBUG_UART, UART_PARITY_NONE | UART_DATA_BITS_8, 9600, uartRxBuffer, 256);
     char s[]="\n\r";
     UART_write(DEBUG_UART, (uint8_t*)s, 2);
-    DEBUG_INIT(DEBUG_UART);
-    DEBUG_PRINT("Hola Mundo\n\r");
 
 }
 void BSP_interrupts_initialize(void )
@@ -149,32 +146,14 @@ void BSP_drivers_initialize( void )
 }
 void BSP_task_initialize(void)
 {
-//    xTaskCreate(blink, "blink", 256, NULL, 2, NULL);
     xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
     xTaskCreate(keypad_task, "keypad", 1024, NULL, 2, NULL);
 }
-
-//void blink(void *params)
-//{
-//    int r=0;
-//    while(true)
-//    {
-//        led_matrix_led_number_set(r);
-//        vTaskDelay(500);
-//        led_matrix_led_clr_all();
-//        vTaskDelay(500);
-//        if(++r == 17)
-//            r=0;
-//    }
-//}
 
 void lcd_task(void *params)
 {
     (void)params;
     LCD_init(LCD_SPI_DRIVER_INDEX, LCD_TX_DMA_CHANNEL, LCD_SS_PIN, LCD_BLA_PIN, LCD_DC_PIN, LCD_RST_PIN);
-
-    char *s = "Hola Mundo";
-    LCD_draw_string(0,1,(char*)s,LCD_FONT_MEDIUM,LCD_COLOR_BLACK);
     while(true){
         LCD_print();
         vTaskDelay(30);

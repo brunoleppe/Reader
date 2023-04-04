@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 3.24.2)
 #Compiler
 set(CMAKE_C_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-gcc")
 set(CMAKE_CXX_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-g++")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-unwind-tables -fno-rtti -Wno-write-strings -fpermissive")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-unwind-tables -fno-rtti -Wno-write-strings -fpermissive -fdata-sections -ffunction-sections")
 #Device Family Pack
 #set(DFP /opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-EF_DFP/1.3.58)
 
@@ -25,7 +25,10 @@ set(HEAP 0)
 set(SOURCES
 #        main.c
         main.cpp
-        DynamicAlloc/dynamic_alloc.cpp States/State.cpp States/State.h ui.cpp ui.h States/StateMainMenu.h States/StateMainMenu.cpp)
+        DynamicAlloc/dynamic_alloc.cpp
+        States/State.cpp States/State.h ui.cpp ui.h
+        States/StateMainMenu.h States/StateMainMenu.cpp
+        )
 
 project(Reader CXX C ASM)
 

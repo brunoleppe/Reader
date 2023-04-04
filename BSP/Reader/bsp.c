@@ -188,9 +188,6 @@ void BSP_gpio_initialize(void )
     DMA_channel_init(FLASH_TX_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_2 | DMA_CHANNEL_START_IRQ);
     DMA_channel_init(LCD_TX_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_3 | DMA_CHANNEL_START_IRQ);
     DMA_channel_init(FLASH_RX_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_1 | DMA_CHANNEL_START_IRQ);
-
-
-
 }
 
 void BSP_drivers_initialize( void )
@@ -272,7 +269,7 @@ void lcd_task(void *params)
 //    LCD_draw_bitmap(0,0,bitmap,sizeof(bitmap));
 //    char *s = "Hola Mundo";
 //    LCD_draw_string(0,1,(char*)s,LCD_FONT_MEDIUM,LCD_COLOR_BLACK);
-    vTaskDelay(portMAX_DELAY);
+//    vTaskDelay(portMAX_DELAY);
     while(true){
         LCD_print();
         GPIO_pin_toggle(LED3);

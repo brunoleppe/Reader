@@ -43,8 +43,6 @@
 #define DEBUG_UART                              UART_CHANNEL_1
 
 /*SPI DRIVER*/
-#define SPI_DRIVER_INSTANCES    1
-
 #define SPI_DRIVER_INSTANCE_0   0
 #define SPI_DRIVER_INSTANCE_0_CLIENTS   3
 

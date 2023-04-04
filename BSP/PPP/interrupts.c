@@ -1,6 +1,4 @@
-//
-// Created by bleppe on 28/03/23.
-//
+
 #include <xc.h>
 #include <sys/attribs.h>
 

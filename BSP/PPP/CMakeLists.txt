@@ -17,5 +17,7 @@ add_library(BSP OBJECT
         led_matrix.c led_matrix.h
         ../input.h
         ../music.h
-        ../sst26.c ../sst26.h)
+        sst26.c sst26.h
+        ../printf.c ../printf.h ../printf_config.h
+        )
 target_link_libraries(BSP PUBLIC HAL)

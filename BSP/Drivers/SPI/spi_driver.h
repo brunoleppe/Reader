@@ -13,7 +13,8 @@
 #include "HAL/dma.h"
 #include "spi_driver_config.h"
 #include "Drivers/driver_defs.h"
-
+#include "FreeRTOS.h"
+#include "semphr.h"
 /***********************************************************************************************************************
 * Preprocessor Constants
 ***********************************************************************************************************************/
@@ -45,6 +46,21 @@ typedef struct SpiClientObject{
     GPIO_PinMap                     csPin;
 }SpiClientObject;
 
+typedef struct SpiDriverObject{
+    bool                        inUse;
+    SPI_Channel                 spiChannel;
+    DMA_Channel                 txDmaChannel;
+    DMA_Channel                 rxDmaChannel;
+    int                         nClients;
+    int                         clientToken;
+    int                         nClientsMax;
+    SpiClientObject*            clientArray;
+    SpiClientObject*            activeClient;
+    SemaphoreHandle_t           clientMutex;
+    SemaphoreHandle_t           hardwareMutex;
+    SemaphoreHandle_t           transferSemaphore;
+}SpiDriverObject;
+
 /***********************************************************************************************************************
 * Function Prototypes
 ***********************************************************************************************************************/
@@ -57,5 +73,5 @@ bool SpiDriver_byte_transfer(DriverHandle handle, uint8_t data, uint8_t *outData
 bool SpiDriver_write_dma(DriverHandle handle, void *txBuffer, size_t size);
 bool SpiDriver_read_dma(DriverHandle handle, void *rxBuffer, size_t size);
 bool SpiDriver_write_read(DriverHandle handle, void *txBuffer, size_t txSize, void *rxBuffer, size_t rxSize);
-
+SpiClientObject* SpiDriver_get_object(DriverHandle handle);
 #endif //READER_SPI_DRIVER_H

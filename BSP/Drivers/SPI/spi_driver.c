@@ -5,9 +5,6 @@
 * Includes
 ***********************************************************************************************************************/
 #include "spi_driver.h"
-#include "FreeRTOS.h"
-#include "semphr.h"
-#include "debug.h"
 /***********************************************************************************************************************
 * Module Preprocessor Constants
 ***********************************************************************************************************************/
@@ -19,21 +16,7 @@
 /***********************************************************************************************************************
 * Module Typedefs
 ***********************************************************************************************************************/
-typedef struct SpiDriverObject{
-    bool                        inUse;
-    SPI_Channel                 spiChannel;
-    DMA_Channel                 txDmaChannel;
-    DMA_Channel                 rxDmaChannel;
-    int                         nClients;
-    int                         clientToken;
-    int                         nClientsMax;
-    SpiClientObject*            clientArray;
-    SpiClientObject*            activeClient;
-    SemaphoreHandle_t           clientMutex;
-    SemaphoreHandle_t           hardwareMutex;
-    SemaphoreHandle_t           transferSemaphore;
 
-}SpiDriverObject;
 /**********************************************************************************************************************
 * Module Variable Definitions
 ***********************************************************************************************************************/
@@ -162,7 +145,6 @@ bool SpiDriver_byte_transfer(DriverHandle handle, uint8_t data, uint8_t *outData
     if(client == NULL)
         return false;
 
-//    DEBUG_PRINT("validated\n\r");
 
     SpiDriverObject *dObj = client->driverObject;
 
@@ -207,7 +189,6 @@ bool SpiDriver_write_dma(DriverHandle handle, void *txBuffer, size_t size)
     dObj->activeClient = client;
     if(client->csPin != GPIO_PIN_INVALID)
         GPIO_pin_write(client->csPin, GPIO_LOW);
-    DEBUG_PRINT("dma1");
     bool result = SPI_write_dma(dObj->spiChannel, dObj->txDmaChannel, txBuffer, size);
     if (result && xSemaphoreTake(dObj->transferSemaphore, portMAX_DELAY) == pdTRUE){
         result = true;
@@ -280,6 +261,13 @@ bool SpiDriver_write_read(DriverHandle handle, void *txBuffer, size_t txSize, vo
     return result;
 }
 
+SpiClientObject* SpiDriver_get_object(DriverHandle handle)
+{
+    SpiClientObject *client = SPI_Driver_handle_validate(handle);
+    if(client == NULL)
+        return NULL;
+    return client;
+}
 
 static void SPI_callback_function(SPI_Channel channel, uintptr_t context)
 {

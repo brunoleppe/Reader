@@ -17,5 +17,8 @@ add_library(BSP OBJECT
         hal_config.h
         ../input.h
 #        bitmap.c bitmap.h
-        ../music.h ../sst26.c ../sst26.h)
+        ../music.h
+        sst26.c sst26.h
+        ../printf.c ../printf.h ../printf_config.h
+        )
 target_link_libraries(BSP PUBLIC HAL)

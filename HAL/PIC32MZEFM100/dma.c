@@ -54,6 +54,15 @@ int DMA_channel_init(DMA_Channel channel, int configFlags)
         DMA_DESCRIPTOR(channel)->dchecon.set = _DCH0ECON_SIRQEN_MASK;
         DMA_DESCRIPTOR(channel)->dchint.set = _DCH0INT_CHBCIE_MASK;
     }
+    if((configFlags & DMA_CHANNEL_CHAINED) == DMA_CHANNEL_CHAINED){
+        DMA_DESCRIPTOR(channel)->dchcon.set = _DCH1CON_CHCHNS_MASK;
+    }
+    if((configFlags & DMA_CHANNEL_CHAIN_LOWER) == DMA_CHANNEL_CHAIN_LOWER){
+        DMA_DESCRIPTOR(channel)->dchcon.set = _DCH1CON_CHCHNS_MASK;
+    }
+    else if((configFlags & DMA_CHANNEL_CHAIN_UPPER) == DMA_CHANNEL_CHAIN_UPPER){
+        DMA_DESCRIPTOR(channel)->dchcon.clr = _DCH1CON_CHCHNS_MASK;
+    }
     DMA_DESCRIPTOR(channel)->dchint.set = _DCH0INT_CHERIE_MASK;
     dmaObjs[channel].callback = NULL;
     return 0;

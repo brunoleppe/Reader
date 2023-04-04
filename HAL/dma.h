@@ -29,6 +29,9 @@
 
 #define DMA_CHANNEL_ABORT_IRQ                               (0x0004)
 #define DMA_CHANNEL_START_IRQ                               (0x0008)
+#define DMA_CHANNEL_CHAIN_LOWER                             (0x0010)
+#define DMA_CHANNEL_CHAIN_UPPER                             (0x0020)
+#define DMA_CHANNEL_CHAINED                                 (0x0040)
 /**********************************************************************
 * Typedefs
 **********************************************************************/

@@ -10,7 +10,9 @@
 #include <stdbool.h>
 #include "gpio.h"
 
-#define     MAX_WRITE_BUFFER    256 ///<Máxima cantidad de bytes que pueden ser escritos en una operación
+#define     MAX_WRITE_BUFFER        256 ///<Máxima cantidad de bytes que pueden ser escritos en una operación
+#define     FLASH_SPEED             40000000
+
 
 #ifdef	__cplusplus
 extern "C" {
@@ -28,11 +30,11 @@ typedef enum{
 
 typedef union {
     struct __attribute__((packed)){
-        uint8_t mID;  ///< ID del fabricante
-        uint8_t memType;   ///< Tipo de memoria
-        uint8_t memID; ///< ID de la memoria
+        uint8_t manufacturerId;  ///< ID del fabricante
+        uint8_t memoryType;   ///< Tipo de memoria
+        uint8_t memoryId; ///< ID de la memoria
     };
-    uint32_t word;
+    uint32_t jedecWord;
 }FlashMemID;
 
 // <editor-fold defaultstate="collapsed" desc="COMANDOS ">
@@ -111,9 +113,6 @@ bool sst26_write(void* data, int length, unsigned int address);
  * @return verdadero si la lectura fue exitosa, falso si no.
  */
 bool sst26_read(void* data, int length, unsigned int address);
-
-bool sst26_sector_erase(int address);
-bool sst26_page_program(void *data, int length, int address);
 /**
  * Retorna el tipo de memoria que se encuentra en el dispositivo.
  * @return MEM_TYPE tipo de memoria.
