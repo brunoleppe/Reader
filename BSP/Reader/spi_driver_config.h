@@ -5,7 +5,7 @@
 #ifndef SPI_DRIVER_CONFIG_H
 #define SPI_DRIVER_CONFIG_H
 
-#define SPI_DRIVER_INSTANCES        2
+#define SPI_DRIVER_INSTANCES        3
 
 #ifndef SPI_DRIVER_INSTANCES
     #define SPI_DRIVER_INSTANCES    0

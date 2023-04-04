@@ -54,6 +54,7 @@ int DMA_channel_init(DMA_Channel channel, int configFlags)
         DMA_DESCRIPTOR(channel)->dchecon.set = _DCH0ECON_SIRQEN_MASK;
         DMA_DESCRIPTOR(channel)->dchint.set = _DCH0INT_CHBCIE_MASK;
     }
+    DMA_DESCRIPTOR(channel)->dchint.set = _DCH0INT_CHERIE_MASK;
     dmaObjs[channel].callback = NULL;
     return 0;
 }
@@ -66,10 +67,12 @@ int DMA_channel_config(DMA_Channel channel, DMA_CHANNEL_Config *config)
     DMA_DESCRIPTOR(channel)->dchcsiz.reg = config->cellSize;
     DMA_DESCRIPTOR(channel)->dchecon.set = config->startIrq << _DCH0ECON_CHSIRQ_POSITION;
     DMA_DESCRIPTOR(channel)->dchecon.set = config->abortIrq << _DCH0ECON_CHAIRQ_POSITION;
+    DMA_DESCRIPTOR(channel)->dchint.clr = 0x000000ff;
     return 0;
 }
 int DMA_channel_transfer(DMA_Channel channel)
 {
+
     DMA_DESCRIPTOR(channel)->dchcon.set = _DCH0CON_CHEN_MASK;
     if((DMA_DESCRIPTOR(channel)->dchcon.reg & _DCH0CON_CHBUSY_MASK) != _DCH0CON_CHBUSY_MASK){
         DMA_DESCRIPTOR(channel)->dchecon.set = _DCH0ECON_CFORCE_MASK;
@@ -94,7 +97,10 @@ void DMA_interrupt_handler(DMA_Channel channel){
         cause = DMA_IRQ_CAUSE_ABORT;
         DMA_DESCRIPTOR(channel)->dchint.clr = _DCH0INT_CHTAIF_MASK;
     }
-
+    else if((DMA_DESCRIPTOR(channel)->dchint.reg & _DCH0INT_CHERIF_MASK) == _DCH0INT_CHERIF_MASK){
+        cause = DMA_IRQ_CAUSE_ERROR;
+        DMA_DESCRIPTOR(channel)->dchint.clr = _DCH0INT_CHERIF_MASK;
+    }
     if(dmaObjs[channel].callback != NULL){
         dmaObjs[channel].callback(channel, cause, dmaObjs[channel].context);
     }

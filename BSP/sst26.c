@@ -6,7 +6,9 @@
 #include "Drivers/SPI/spi_driver.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "hal.h"
 #include <string.h>
+
 
 typedef struct{
     DriverHandle spi;
@@ -25,7 +27,7 @@ static inline bool _Flash_WriteCommand(uint8_t cmd)
 {
     uint8_t dummy;
     GPIO_pin_write(mem.ssPin, GPIO_LOW);
-    bool res = SpiDriver_byte_transfer(mem.spi,cmd,&dummy);
+    bool res = SpiDriver_transfer(mem.spi,&cmd,NULL,1);
     GPIO_pin_write(mem.ssPin, GPIO_HIGH);
     return res;
 }
@@ -69,23 +71,60 @@ static bool _Flash_Unlock()
 static bool _Flash_Lock()
 {
     if(mem.memID.mID == Microchip)
-        return SpiDriver_write_dma(mem.spi,locks,sizeof(locks));
+        return _Flash_WriteData(locks,sizeof(locks));
     return true;
 }
 static bool _Flash_PageProgram(void* buffer, size_t len, unsigned int address)
 {
     if(!_Flash_WriteCommand(WREN))
         return false;
-    uint8_t op[4];
+    uint8_t *op = pvPortMalloc(len+4);
     op[0] = 0x02;
     op[1] = address >> 16;
     op[2] = address >> 8;
     op[3] = address;
+    memcpy(op+4, buffer, len);
     GPIO_pin_write(mem.ssPin, GPIO_LOW);
-    bool res = SpiDriver_write_dma(mem.ssPin, op, 4);
-    res = SpiDriver_write_dma(mem.ssPin, buffer,len);
+    bool res =SpiDriver_write_dma(mem.spi, op, len+4);
+//    bool res = SpiDriver_write_dma(mem.spi, op, 4);
+//    res = SpiDriver_write_dma(mem.spi, buffer,len);
     GPIO_pin_write(mem.ssPin, GPIO_HIGH);
+    vPortFree(op);
+    return res;
+}
 
+bool sst26_sector_erase(int address)
+{
+    _Flash_WriteCommand(WREN);
+    _Flash_WriteCommand(ULBPR);
+    vTaskDelay(25);
+    _Flash_WriteCommand(WREN);
+    uint8_t buffer[4];
+    buffer[0]=SE;
+    buffer[1]=address>>16;
+    buffer[2]=address>>8;
+    buffer[3]=address;
+    GPIO_pin_write(mem.ssPin, GPIO_LOW);
+    bool res = SpiDriver_transfer(mem.spi, buffer, NULL, 4);
+    GPIO_pin_write(mem.ssPin, GPIO_HIGH);
+    vTaskDelay(50);
+    return res;
+}
+
+static unsigned char __attribute__ ((coherent, aligned(16))) buffer[260];
+bool sst26_page_program(void *data, int length, int address)
+{
+    buffer[0] = 0x02;
+    buffer[1] = address >> 16;
+    buffer[2] = address >> 8;
+    buffer[3] = address;
+    memcpy(buffer+4, data, length);
+    _Flash_WriteCommand(WREN);
+    GPIO_pin_write(mem.ssPin, GPIO_LOW);
+//    bool res = SpiDriver_transfer(mem.spi, op, NULL, length+4);
+    bool res = SpiDriver_write_dma(mem.spi, buffer, length + 4);
+    GPIO_pin_write(mem.ssPin, GPIO_HIGH);
+    vTaskDelay(2);
     return res;
 }
 
@@ -100,7 +139,7 @@ void sst26_initialize(uint32_t spiDriverIndex, GPIO_PinMap ssPin)
             .baudRate = 40000000
     };
     SpiDriver_setup(mem.spi, &setup);
-    mem.memID.mID = ISSI;
+    mem.memID.mID = Microchip;
 }
 
 MEM_TYPE sst26_get_type(){
@@ -119,8 +158,8 @@ FlashMemID* sst26_read_id()
 }
 bool sst26_write(void* data, int length, unsigned int address)
 {
-    if(!_Flash_Unlock())
-        return false;
+//    if(!_Flash_Unlock())
+//        return false;
     uint8_t rep = length/0x1000 + ((length%0x1000) != 0);
     int i;
     for(i = 0;i<rep;i++)
@@ -145,8 +184,8 @@ bool sst26_write(void* data, int length, unsigned int address)
             return false;
     }
 
-    if(!_Flash_Lock())
-        return false;
+//    if(!_Flash_Lock())
+//        return false;
 
     return true;
 
@@ -159,8 +198,9 @@ bool sst26_read(void* data, int length, unsigned int address)
     op[2] = address >> 8;
     op[3] = address;
     GPIO_pin_write(mem.ssPin, GPIO_LOW);
-    bool res = SpiDriver_write_dma(mem.ssPin, op, 4);
-    res = SpiDriver_transfer(mem.ssPin, NULL, data,length);
+    bool res = SpiDriver_write_read(mem.spi, op, 4, data, length);
+//    bool res = SpiDriver_transfer(mem.spi, op, NULL, 4);
+//    res = SpiDriver_transfer(mem.spi, NULL, data,length);
     GPIO_pin_write(mem.ssPin, GPIO_HIGH);
     return res;
 }

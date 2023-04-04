@@ -4,11 +4,11 @@
 #include "hal.h"
 #include "Drivers/SPI/spi_driver.h"
 #include "debug.h"
-#include "bitmap.h"
 #include "lcd.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "keypad.h"
+#include "sst26.h"
 
 // <editor-fold desc="Configuration Bits">
 #pragma config DEBUG =      OFF
@@ -97,7 +97,16 @@ static SpiDriverInit   spiDriverInstance1_init = {
         .nClientsMax = SPI_DRIVER_INSTANCE_1_CLIENTS,
         .spiChannel = LCD_SPI_CHANNEL,
         .clientArray = spiDriverInstance1_clientArray,
-        .txDmaChannel = DMA_CHANNEL_0,
+        .txDmaChannel = LCD_TX_DMA_CHANNEL,
+};
+
+static SpiClientObject spiDriverInstance2_clientArray[SPI_DRIVER_INSTANCE_2_CLIENTS];
+static SpiDriverInit   spiDriverInstance2_init = {
+        .nClientsMax = SPI_DRIVER_INSTANCE_2_CLIENTS,
+        .spiChannel = FLASH_SPI_CHANNEL,
+        .clientArray = spiDriverInstance2_clientArray,
+        .txDmaChannel = FLASH_TX_DMA_CHANNEL,
+        .rxDmaChannel = FLASH_RX_DMA_CHANNEL,
 };
 
 static void blink(void *params);
@@ -134,6 +143,11 @@ void BSP_gpio_initialize(void )
     GPIO_pin_initialize(UART_TX_PIN, GPIO_OUTPUT);
     GPIO_pin_initialize(UART_RX_PIN, GPIO_INPUT);
 
+    GPIO_pin_initialize(FLASH_SS, GPIO_OUTPUT);
+    GPIO_pin_initialize(FLASH_SDO, GPIO_OUTPUT);
+    GPIO_pin_initialize(FLASH_SDI, GPIO_INPUT);
+    GPIO_pin_write(FLASH_SS, GPIO_HIGH);
+
     SYS_Unlock(SYS_UNLOCK_IO);
     /* LCD SPI */
     PPS_pin_mapping(LCD_SPI_OUTPUT_REG, LCD_SPI_OUTPUT_MAP);
@@ -145,6 +159,9 @@ void BSP_gpio_initialize(void )
     /*UART*/
     PPS_pin_mapping(UART_RX_INPUT_REG, UART_RX_INPUT_MAP);
     PPS_pin_mapping(UART_TX_OUTPUT_REG, UART_TX_OUTPUT_MAP);
+    /*FLASH SPI*/
+    PPS_pin_mapping(FLASH_SPI_INPUT_REG, FLASH_SPI_INPUT_MAP);
+    PPS_pin_mapping(FLASH_SPI_OUTPUT_REG, FLASH_SPI_OUTPUT_MAP);
 
     SYS_Lock();
 
@@ -162,12 +179,15 @@ void BSP_gpio_initialize(void )
         SPI_MASTER | SPI_SDI_DISABLE | SPI_MODE_3 ,
         20000000);
     SPI_initialize(QT_SPI_CHANNEL, SPI_MASTER | SPI_MODE_3 | SPI_SAMPLE_END, 1000000);
+    SPI_initialize(FLASH_SPI_CHANNEL, SPI_MASTER | SPI_MODE_3 | SPI_SAMPLE_END, 40000000);
 
     TMR_initialize(TMR_CHANNEL_2, TMR_PRESCALER_64, 5971);
     OC_initialize(OC_CHANNEL_1, OC_MODE_PWM | OC_MODE_USE_TMR2, 2985);
 
     DMA_init();
-    DMA_channel_init(LCD_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_3 | DMA_CHANNEL_START_IRQ);
+    DMA_channel_init(FLASH_TX_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_2 | DMA_CHANNEL_START_IRQ);
+    DMA_channel_init(LCD_TX_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_3 | DMA_CHANNEL_START_IRQ);
+    DMA_channel_init(FLASH_RX_DMA_CHANNEL, DMA_CHANNEL_PRIORITY_1 | DMA_CHANNEL_START_IRQ);
 
 
 
@@ -181,6 +201,11 @@ void BSP_drivers_initialize( void )
     DEBUG_PRINT("r = %d\n\r", r);
     r = SpiDriver_initialize(1, &spiDriverInstance1_init);
     DEBUG_PRINT("r = %d\n\r", r);
+    SpiDriver_initialize(2, &spiDriverInstance2_init);
+
+
+    sst26_initialize(2, FLASH_SS);
+
 }
 
 void BSP_interrupts_initialize(void )
@@ -189,6 +214,11 @@ void BSP_interrupts_initialize(void )
     EVIC_channel_set(EVIC_CHANNEL_CHANGE_NOTICE_E);
     EVIC_channel_priority(EVIC_CHANNEL_DMA0, EVIC_PRIORITY_2, EVIC_SUB_PRIORITY_2);
     EVIC_channel_set(EVIC_CHANNEL_DMA0);
+
+    EVIC_channel_priority(EVIC_CHANNEL_DMA1, EVIC_PRIORITY_2, EVIC_SUB_PRIORITY_2);
+    EVIC_channel_set(EVIC_CHANNEL_DMA1);
+    EVIC_channel_priority(EVIC_CHANNEL_DMA2, EVIC_PRIORITY_2, EVIC_SUB_PRIORITY_2);
+    EVIC_channel_set(EVIC_CHANNEL_DMA2);
 
     EVIC_channel_priority(EVIC_CHANNEL_UART1_FAULT, EVIC_PRIORITY_4, EVIC_SUB_PRIORITY_1);
     EVIC_channel_priority(EVIC_CHANNEL_UART1_RX, EVIC_PRIORITY_4, EVIC_SUB_PRIORITY_2);
@@ -237,13 +267,15 @@ void blink(void *params)
 void lcd_task(void *params)
 {
     (void)params;
-    LCD_init(1, LCD_DMA_CHANNEL, LCD_SS, LCD_BLA, LCD_DC, LCD_RST);
+    LCD_init(1, LCD_TX_DMA_CHANNEL, LCD_SS, LCD_BLA, LCD_DC, LCD_RST);
 
 //    LCD_draw_bitmap(0,0,bitmap,sizeof(bitmap));
 //    char *s = "Hola Mundo";
 //    LCD_draw_string(0,1,(char*)s,LCD_FONT_MEDIUM,LCD_COLOR_BLACK);
+    vTaskDelay(portMAX_DELAY);
     while(true){
         LCD_print();
+        GPIO_pin_toggle(LED3);
         vTaskDelay(17);
     }
 }

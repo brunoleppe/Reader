@@ -56,5 +56,6 @@ size_t SpiDriver_transfer(DriverHandle handle, void *txBuffer, void *rxBuffer, s
 bool SpiDriver_byte_transfer(DriverHandle handle, uint8_t data, uint8_t *outData);
 bool SpiDriver_write_dma(DriverHandle handle, void *txBuffer, size_t size);
 bool SpiDriver_read_dma(DriverHandle handle, void *rxBuffer, size_t size);
+bool SpiDriver_write_read(DriverHandle handle, void *txBuffer, size_t txSize, void *rxBuffer, size_t rxSize);
 
 #endif //READER_SPI_DRIVER_H

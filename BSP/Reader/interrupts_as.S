@@ -34,6 +34,34 @@ DMA0_IRQ:
     portRESTORE_CONTEXT
     .end DMA0_IRQ
 
+    .global DMA1_IRQ
+    .extern DMA_interrupt_handler
+    .set nomips16
+    .set noreorder
+    .set noat
+    .ent DMA1_IRQ
+DMA1_IRQ:
+    portSAVE_CONTEXT
+    li a0, DMA_CHANNEL_1
+    jal DMA_interrupt_handler
+    nop
+    portRESTORE_CONTEXT
+    .end DMA1_IRQ
+
+    .global DMA2_IRQ
+    .extern DMA_interrupt_handler
+    .set nomips16
+    .set noreorder
+    .set noat
+    .ent DMA2_IRQ
+DMA2_IRQ:
+    portSAVE_CONTEXT
+    li a0, DMA_CHANNEL_2
+    jal DMA_interrupt_handler
+    nop
+    portRESTORE_CONTEXT
+    .end DMA2_IRQ
+
     .global UART1_FAULT_IRQ
     .extern UART_fault_interrupt_handler
     .set nomips16

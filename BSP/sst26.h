@@ -26,11 +26,14 @@ typedef enum{
     ISSI,           ///< Memoria de ISSI
 }MEM_TYPE;
 
-typedef struct{
-    uint8_t mID;  ///< ID del fabricante
-    uint8_t memType;   ///< Tipo de memoria
-    uint8_t memID; ///< ID de la memoria
-}__attribute__((packed))FlashMemID;
+typedef union {
+    struct __attribute__((packed)){
+        uint8_t mID;  ///< ID del fabricante
+        uint8_t memType;   ///< Tipo de memoria
+        uint8_t memID; ///< ID de la memoria
+    };
+    uint32_t word;
+}FlashMemID;
 
 // <editor-fold defaultstate="collapsed" desc="COMANDOS ">
 /**
@@ -109,6 +112,8 @@ bool sst26_write(void* data, int length, unsigned int address);
  */
 bool sst26_read(void* data, int length, unsigned int address);
 
+bool sst26_sector_erase(int address);
+bool sst26_page_program(void *data, int length, int address);
 /**
  * Retorna el tipo de memoria que se encuentra en el dispositivo.
  * @return MEM_TYPE tipo de memoria.

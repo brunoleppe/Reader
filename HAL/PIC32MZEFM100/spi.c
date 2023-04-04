@@ -18,6 +18,7 @@
 #include <xc.h>
 #include "system.h"
 #include "dma.h"
+#include "debug.h"
 /**********************************************************************
 * Module Preprocessor Constants
 **********************************************************************/
@@ -254,6 +255,7 @@ uint8_t SPI_byte_transfer(uint32_t spiChannel, uint8_t data)
 
 static void DMA_callback(DMA_Channel dma, DMA_IRQ_CAUSE cause, SPI_Channel channel){
     spiObjects[channel].busy = false;
+    DEBUG_PRINT("cause %d\n\r", cause);
     if(spiObjects[channel].callback != NULL){
         spiObjects[channel].callback(channel, spiObjects[channel].context);
     }
@@ -263,6 +265,17 @@ bool        SPI_write_dma               (SPI_Channel spiChannel, uint32_t dmaCha
 {
     if(size == 0 || (txBuffer == NULL) || spiObjects[spiChannel].busy)
         return false;
+    uint32_t receivedData;
+    /*Overflow-bit clear*/
+    SPI_DESCRIPTOR(spiChannel)->spistat.clr = _SPI1STAT_SPIROV_MASK;
+
+    /*Empty RX FIFO*/
+    while ((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPIRBE_MASK) == false) {
+        receivedData = SPI_DESCRIPTOR(spiChannel)->spibuf.reg;
+        (void)receivedData;
+    }
+    /*Wait for TX FIFO to empty*/
+    while((bool)(SPI_DESCRIPTOR(spiChannel)->spistat.reg & _SPI1STAT_SPITBE_MASK) == false);
 
     spiObjects[spiChannel].busy = true;
 
@@ -273,6 +286,27 @@ bool        SPI_write_dma               (SPI_Channel spiChannel, uint32_t dmaCha
             .dstAddress = (uint32_t)(&SPI_DESCRIPTOR(spiChannel)->spibuf.reg),
             .srcSize = size,
             .srcAddress = (uint32_t)(txBuffer),
+    };
+    DMA_channel_config(dmaChannel, &dmaConfig);
+    DMA_callback_register(dmaChannel, DMA_callback, (uintptr_t)spiChannel);
+    DMA_channel_transfer(dmaChannel);
+    return true;
+}
+
+bool        SPI_read_dma                (SPI_Channel spiChannel, uint32_t dmaChannel, void *rxBuffer, size_t size)
+{
+    if(size == 0 || (rxBuffer == NULL) || spiObjects[spiChannel].busy)
+        return false;
+
+    spiObjects[spiChannel].busy = true;
+
+    DMA_CHANNEL_Config dmaConfig = {
+            .startIrq = SPI_TX_INTERRUPT_CHANNEL(spiChannel),
+            .cellSize = 1,
+            .dstSize = size,
+            .dstAddress = (uint32_t)(rxBuffer),
+            .srcSize = 1,
+            .srcAddress = (uint32_t)(&SPI_DESCRIPTOR(spiChannel)->spibuf.reg),
     };
     DMA_channel_config(dmaChannel, &dmaConfig);
     DMA_callback_register(dmaChannel, DMA_callback, (uintptr_t)spiChannel);

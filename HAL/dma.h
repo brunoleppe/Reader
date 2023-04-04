@@ -48,6 +48,7 @@ typedef struct{
 typedef enum{
     DMA_IRQ_CAUSE_TRANSFER_COMPLETE,
     DMA_IRQ_CAUSE_ABORT,
+    DMA_IRQ_CAUSE_ERROR
 }DMA_IRQ_CAUSE;
 
 typedef void (*DMA_Callback)(DMA_Channel, DMA_IRQ_CAUSE, uintptr_t);
