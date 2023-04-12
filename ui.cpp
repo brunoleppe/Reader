@@ -11,7 +11,7 @@
 #include "queue.h"
 #include "lcd.h"
 #include "State.h"
-#include "StateMainMenu.h"
+#include "StateDeviceEnter.h"
 
 static QueueHandle_t inputQueue = nullptr;
 static StateMachine machine;
@@ -28,7 +28,7 @@ void ui_task(void *params)
 {
 
     inputQueue = xQueueCreate(10, sizeof(InputEvent));
-    machine.initialize(StateMainMenu::state());
+    machine.initialize(StateDeviceEnter::get_state());
 
     while(1){
 

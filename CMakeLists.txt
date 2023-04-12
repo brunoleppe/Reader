@@ -28,7 +28,7 @@ set(SOURCES
         DynamicAlloc/dynamic_alloc.cpp
         States/State.cpp States/State.h ui.cpp ui.h
         States/StateMainMenu.h States/StateMainMenu.cpp
-        )
+        States/StateIdle.cpp States/StateIdle.h States/StateDeviceEnter.cpp States/StateDeviceEnter.h)
 
 project(Reader CXX C ASM)
 

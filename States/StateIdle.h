@@ -1,18 +1,17 @@
 //
-// Created by bleppe on 03/04/23.
+// Created by bleppe on 05/04/23.
 //
 
-#ifndef STATE_MAIN_MENU_H
-#define STATE_MAIN_MENU_H
+#ifndef STATE_IDLE_H
+#define STATE_IDLE_H
 
 #include "State.h"
 
-class StateMainMenu : public State{
+class StateIdle : State{
 public:
     static State* get_state();
 private:
-
-    static StateMainMenu instance;
+    static StateIdle instance;
 
     void on_enter() override;
     void on_exit() override;
@@ -20,4 +19,4 @@ private:
 };
 
 
-#endif //STATE_MAIN_MENU_H
+#endif //STATE_IDLE_H

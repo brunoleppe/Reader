@@ -45,7 +45,7 @@
 #define KEY_K			        37
 #define KEY_L			        38
 #define KEY_SEMICOLON		    39
-#define KEY_APOSTROPHE		    40
+#define KEY_HASH		        40
 #define KEY_GRAVE		        41
 #define KEY_LEFTSHIFT		    42
 #define KEY_BACKSLASH		    43
@@ -126,5 +126,17 @@
 #define KEY_KPPLUSMINUS		    118
 #define KEY_PAUSE		        119
 #define KEY_SCALE		        120	/* AL Compiz Scale (Expose) */
+
+#define KEY_TILDE_A             121
+#define KEY_TILDE_E             122
+#define KEY_TILDE_I             123
+#define KEY_TILDE_O             124
+#define KEY_TILDE_U             125
+#define KEY_TILDE_N             126
+#define KEY_DOTTED_U            127
+
+#define KEY_UNDERSCORE          128
+#define KEY_ASPERAND            127
+
 
 #endif //LINUX_KEYS_H

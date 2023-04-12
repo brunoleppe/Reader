@@ -10,6 +10,8 @@
 class StateMachine;
 
 class State {
+public:
+
 protected:
     State *prev;
     StateMachine *machine;
@@ -17,8 +19,8 @@ protected:
     virtual void on_enter();
     virtual void on_exit();
     virtual void on_input(InputEvent &evt);
-
     friend StateMachine;
+
 };
 
 class StateMachine{

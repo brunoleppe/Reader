@@ -7,40 +7,48 @@
 #include "sst26.h"
 #include "printf.h"
 
+#include "vector"
+#include "list"
+#include "StateIdle.h"
+#include "linux_keys.h"
 
+
+static uint8_t *bitmap;
 
 void StateMainMenu::on_enter() {
 
 
-    LCD_clear();
-    LCD_draw_string(0, 0, "MainMenu", LCD_FONT_MEDIUM, LCD_COLOR_BLACK);
-
     unsigned int b;
     b = sst26_read_id()->jedecWord;
 
-    unsigned int key = 0x54321000;
 
-    sst26_write(&key, 4, 0x10000);
-    sst26_read(&b, 4, 0x10000);
+//    bitmap = new uint8_t[15360];
 
-    char s[16];
-    snprintf(s, 15, "0x%08x",b);
-    LCD_draw_string(10,30, s, LCD_FONT_SMALL, LCD_COLOR_BLACK);
+//    sst26_write((void*)bitmap, sizeof(bitmap), 0x10000);
+//    sst26_read((void*)bitmap, 15360, 0x10000);
+//    LCD_draw_bitmap(0,0,bitmap,15360);
+    LCD_clear();
+    LCD_draw_string(0, 0, "MainMenu", LCD_FONT_MEDIUM, LCD_COLOR_BLACK);
 
 
 }
 
 void StateMainMenu::on_input(InputEvent &evt) {
-
+    if(evt.code == KEY_F1 && evt.value == INPUT_EVENT_CLICKED){
+        machine->transition(StateIdle::get_state());
+    }
+    if(evt.code == KEY_BACKSPACE && evt.value == INPUT_EVENT_CLICKED){
+        machine->get_back();
+    }
 }
 
 void StateMainMenu::on_exit() {
-
+//    delete[] bitmap;
 }
 
 StateMainMenu StateMainMenu::instance;
 
-StateMainMenu *StateMainMenu::state() {
-   return &instance;
+State* StateMainMenu::get_state() {
+   return (State*)&instance;
 }
 

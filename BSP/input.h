@@ -7,6 +7,14 @@
 
 #include <stdbool.h>
 
+enum INPUT_EVENTS{
+    INPUT_EVENT_PRESSED = 1,
+    INPUT_EVENT_RELEASED = 0,
+    INPUT_EVENT_CLICKED = 2,
+    INPUT_EVENT_LONG_CLICKED = 3,
+    INPUT_EVENT_LONG_LONG_CLICKED = 4,
+};
+
 typedef struct{
     int code;
     int value;

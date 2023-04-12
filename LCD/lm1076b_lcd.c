@@ -503,7 +503,7 @@ void    LCD_draw_char   (int x, int y, char c, LCD_Fonts f, LCD_COLOR color)
         }
     }
 }
-void    LCD_draw_string (int x, int y, char *str, LCD_Fonts f, LCD_COLOR color)
+void    LCD_draw_string (int x, int y, const char *str, LCD_Fonts f, LCD_COLOR color)
 {
     const LCD_Font *font = fonts[f];
     uint8_t i,len = strlen(str);

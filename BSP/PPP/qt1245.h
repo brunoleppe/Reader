@@ -28,7 +28,6 @@ enum QT_KEY{
     QT_KEY_CANCEL   = 0x004000,
     QT_KEY_CLEAR    = 0x000040,
     QT_KEY_PUMP     = 0x010000,
-    QT_KEY_RELEASE  = 0,
 };
 
 int     QTouch_initialize(int spiDriverIndex, GPIO_PinMap cs, GPIO_PinMap rst, GPIO_PinMap change, GPIO_PinMap drdy);
