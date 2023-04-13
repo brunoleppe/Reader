@@ -42,6 +42,8 @@ enum  KEYS{
     KEYS_CANCEL     = 12,
     KEYS_CLEAR      = 13,
     KEYS_PUMP       = 16,
+    KEYS_RELEASE    = -1,
+    KEYS_INVALID    = -2,
 };
 
 typedef struct KeyObject{
@@ -55,6 +57,7 @@ typedef struct KeyObject{
 typedef struct KeyHandler{
     int prevKey;
     int currentKey;
+    int *ptr;
 }KeyHandler;
 
 /*********************************************************************
@@ -62,7 +65,7 @@ typedef struct KeyHandler{
 **********************************************************************/
 static uint32_t mode = KEYPAD_CONTROLS | KEYPAD_ALTERNATE;
 static TimerHandle_t timer;
-static KeyHandler keyHandler = {-2,-1};
+static KeyHandler keyHandler = {KEYS_INVALID, KEYS_RELEASE};
 static KeyObject keys[] = {
         {NULL, KEY_1, NULL, 0},
         {(int[]){KEY_A, KEY_B, KEY_C, KEY_TILDE_A, 0}, KEY_2, NULL, KEY_UP},
@@ -98,8 +101,8 @@ _Noreturn void keypad_task(void *params)
     QTouch_initialize(QT_SPI_DRIVER_INDEX, QT_SS_PIN, QT_RST_PIN, QT_CHANGE_PIN, QT_DRDY_PIN);
     int key = 0;
     int currentKey = 0;
-    int prevKey = -1;
-    int oldKey = -1;
+    int prevKey = KEYS_RELEASE;
+    int oldKey = KEYS_RELEASE;
     timer = xTimerCreate("t1", 2000, false, NULL, timer_callback);
     while(true) {
         vTaskDelay(20);
@@ -107,7 +110,7 @@ _Noreturn void keypad_task(void *params)
             if(key != oldKey){
                 led_matrix_led_clr_all();
                 currentKey = qt_key_map(key);
-                if(currentKey != -1)
+                if(currentKey != KEYS_RELEASE)
                     led_matrix_led_number_set(currentKey);
 
                 qt_process_key(currentKey);
@@ -142,32 +145,32 @@ _Noreturn void keypad_task(void *params)
 
 static void timer_callback(TimerHandle_t t)
 {
-    input_report_key((&keys[keyHandler.prevKey])->number, INPUT_EVENT_CLICKED);
+    input_report_key(*keyHandler.ptr, INPUT_EVENT_CLICKED);
+    keyHandler.prevKey = KEYS_INVALID;
 }
 
 static void qt_process_key(int key)
 {
     keyHandler.currentKey = key;
-    static int *ptr;
 
-    if(keyHandler.currentKey != -1) {
+    if(keyHandler.currentKey != KEYS_RELEASE) {
 
         if((&keys[keyHandler.currentKey])->characters != NULL){
             if(keyHandler.currentKey != keyHandler.prevKey){
-                ptr = (&keys[keyHandler.currentKey])->characters;
+                keyHandler.ptr = (&keys[keyHandler.currentKey])->characters;
                 if(keyHandler.prevKey >= 0){
                     xTimerStop(timer, 0);
                     input_report_key((&keys[keyHandler.currentKey])->option, INPUT_EVENT_CLICKED);
                 }
             }
             else{
-                ptr++;
-                if(*ptr == 0)
-                    ptr = (&keys[keyHandler.currentKey])->characters;
+                keyHandler.ptr++;
+                if(*keyHandler.ptr == 0)
+                    keyHandler.ptr = (&keys[keyHandler.currentKey])->characters;
             }
 
             xTimerReset(timer,0);
-            input_report_key(*ptr, INPUT_EVENT_PRESSED);
+            input_report_key(*keyHandler.ptr, INPUT_EVENT_PRESSED);
         }
         else if((&keys[keyHandler.currentKey])->option != 0) {
             input_report_key((&keys[keyHandler.currentKey])->option, INPUT_EVENT_PRESSED);
@@ -179,7 +182,7 @@ static void qt_process_key(int key)
             return;
         KeyObject *keyObj = &keys[keyHandler.prevKey];
         if(keyObj->characters != NULL) {
-            input_report_key(*ptr, INPUT_EVENT_RELEASED);
+            input_report_key(*keyHandler.ptr, INPUT_EVENT_RELEASED);
         }
         else if(keyObj->option != 0) {
             input_report_key(keyObj->option, INPUT_EVENT_PRESSED);
@@ -192,24 +195,24 @@ static void qt_process_key(int key)
 int qt_key_map(enum QT_KEY qtKey)
 {
     switch (qtKey) {
-        case QT_KEY_1           : return KEYS_1        ;
-        case QT_KEY_2           : return KEYS_2        ;
-        case QT_KEY_3           : return KEYS_3        ;
-        case QT_KEY_4           : return KEYS_4        ;
-        case QT_KEY_5           : return KEYS_5        ;
-        case QT_KEY_6           : return KEYS_6        ;
-        case QT_KEY_7           : return KEYS_7        ;
-        case QT_KEY_8           : return KEYS_8        ;
-        case QT_KEY_9           : return KEYS_9        ;
-        case QT_KEY_0           : return KEYS_0        ;
-        case QT_KEY_DOT         : return KEYS_DOT      ;
-        case QT_KEY_ENTER       : return KEYS_ENTER    ;
-        case QT_KEY_OPTION      : return KEYS_OPTION   ;
-        case QT_KEY_RETURN      : return KEYS_RETURN   ;
-        case QT_KEY_CANCEL      : return KEYS_CANCEL   ;
-        case QT_KEY_CLEAR       : return KEYS_CLEAR    ;
-        case QT_KEY_PUMP        : return KEYS_PUMP     ;
-        case 0                  : return -1;
+        case QT_KEY_1           : return KEYS_1         ;
+        case QT_KEY_2           : return KEYS_2         ;
+        case QT_KEY_3           : return KEYS_3         ;
+        case QT_KEY_4           : return KEYS_4         ;
+        case QT_KEY_5           : return KEYS_5         ;
+        case QT_KEY_6           : return KEYS_6         ;
+        case QT_KEY_7           : return KEYS_7         ;
+        case QT_KEY_8           : return KEYS_8         ;
+        case QT_KEY_9           : return KEYS_9         ;
+        case QT_KEY_0           : return KEYS_0         ;
+        case QT_KEY_DOT         : return KEYS_DOT       ;
+        case QT_KEY_ENTER       : return KEYS_ENTER     ;
+        case QT_KEY_OPTION      : return KEYS_OPTION    ;
+        case QT_KEY_RETURN      : return KEYS_RETURN    ;
+        case QT_KEY_CANCEL      : return KEYS_CANCEL    ;
+        case QT_KEY_CLEAR       : return KEYS_CLEAR     ;
+        case QT_KEY_PUMP        : return KEYS_PUMP      ;
+        case QT_KEY_RELEASE     : return KEYS_RELEASE   ;
     }
     return 0;
 }
