@@ -7,6 +7,7 @@
 #include "keypad.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "timers.h"
 #include "qt1245.h"
 #include "linux_keys.h"
 #include "lcd.h"
@@ -51,19 +52,26 @@ typedef struct KeyObject{
     int         option;
 }KeyObject;
 
+typedef struct KeyHandler{
+    int prevKey;
+    int currentKey;
+}KeyHandler;
+
 /*********************************************************************
 * Module Variable Definitions
 **********************************************************************/
 static uint32_t mode = KEYPAD_CONTROLS | KEYPAD_ALTERNATE;
+static TimerHandle_t timer;
+static KeyHandler keyHandler = {-2,-1};
 static KeyObject keys[] = {
         {NULL, KEY_1, NULL, 0},
         {(int[]){KEY_A, KEY_B, KEY_C, KEY_TILDE_A, 0}, KEY_2, NULL, KEY_UP},
         {(int[]){KEY_D, KEY_E, KEY_F, KEY_TILDE_E, 0}, KEY_3, NULL, 0},
         {(int[]){KEY_G, KEY_H, KEY_I, KEY_TILDE_I, 0}, KEY_4, NULL, KEY_LEFT},
         {(int[]){KEY_J, KEY_K, KEY_L, 0}, KEY_5, NULL, KEY_ENTER},
-        {(int[]){KEY_M, KEY_N, KEY_O, KEY_TILDE_O, 0}, KEY_6, NULL, KEY_RIGHT},
+        {(int[]){KEY_M, KEY_N, KEY_O, KEY_TILDE_O, KEY_TILDE_N, 0}, KEY_6, NULL, KEY_RIGHT},
         {(int[]){KEY_P, KEY_Q, KEY_R, KEY_S, 0}, KEY_7, NULL, 0},
-        {(int[]){KEY_T, KEY_U, KEY_V, KEY_TILDE_U, 0}, KEY_8, NULL, KEY_DOWN},
+        {(int[]){KEY_T, KEY_U, KEY_V, KEY_TILDE_U, KEY_DOTTED_U, 0}, KEY_8, NULL, KEY_DOWN},
         {(int[]){KEY_W, KEY_X, KEY_Y, KEY_Z, 0}, KEY_9, NULL, 0},
         {NULL, 0, (int[]){KEY_KPASTERISK, 0}, 0, KEY_ENTER},
         {(int[]){KEY_SPACE, 0}, KEY_0, NULL, 0},
@@ -79,6 +87,7 @@ static KeyObject keys[] = {
 **********************************************************************/
 static int qt_key_map(enum QT_KEY qtKey);
 static void qt_process_key(int key);
+static void timer_callback(TimerHandle_t timer);
 /**********************************************************************
 * Function Definitions
 **********************************************************************/
@@ -90,39 +99,94 @@ _Noreturn void keypad_task(void *params)
     int key = 0;
     int currentKey = 0;
     int prevKey = -1;
-    bool handled = false;
+    int oldKey = -1;
+    timer = xTimerCreate("t1", 2000, false, NULL, timer_callback);
     while(true) {
         vTaskDelay(20);
         if(GPIO_pin_read(QT_CHANGE_PIN) == GPIO_LOW && QTouch_get_key(&key)) {
-            led_matrix_led_clr_all();
-            currentKey = qt_key_map(key);
-            if(currentKey != -1)
-                led_matrix_led_number_set(currentKey);
+            if(key != oldKey){
+                led_matrix_led_clr_all();
+                currentKey = qt_key_map(key);
+                if(currentKey != -1)
+                    led_matrix_led_number_set(currentKey);
 
-            if(currentKey != -1) {
-                KeyObject *keyObj = &keys[currentKey];
-                if(keyObj->number != 0) {
-                    input_report_key(keyObj->number, INPUT_EVENT_PRESSED);
-                }
-                else if(keyObj->option != 0) {
-                    input_report_key(keyObj->option, INPUT_EVENT_PRESSED);
-                }
-                prevKey = currentKey;
-            }
-            else{
-                KeyObject *keyObj = &keys[prevKey];
-                if(keyObj->number != 0) {
-                    input_report_key(keyObj->number, INPUT_EVENT_RELEASED);
-                    input_report_key(keyObj->number, INPUT_EVENT_CLICKED);
-
-                }
-                else if(keyObj->option != 0) {
-                    input_report_key(keyObj->option, INPUT_EVENT_PRESSED);
-                    input_report_key(keyObj->option, INPUT_EVENT_CLICKED);
-                }
+                qt_process_key(currentKey);
+//            prevKey = key;
+//                if(currentKey != -1) {
+//                    KeyObject *keyObj = &keys[currentKey];
+//                    if(keyObj->number != 0) {
+//                        input_report_key(keyObj->number, INPUT_EVENT_PRESSED);
+//                    }
+//                    else if(keyObj->option != 0) {
+//                        input_report_key(keyObj->option, INPUT_EVENT_PRESSED);
+//                    }
+//                    prevKey = currentKey;
+//                }
+//                else{
+//                    KeyObject *keyObj = &keys[prevKey];
+//                    if(keyObj->number != 0) {
+//                        input_report_key(keyObj->number, INPUT_EVENT_RELEASED);
+//                        input_report_key(keyObj->number, INPUT_EVENT_CLICKED);
+//
+//                    }
+//                    else if(keyObj->option != 0) {
+//                        input_report_key(keyObj->option, INPUT_EVENT_PRESSED);
+//                        input_report_key(keyObj->option, INPUT_EVENT_CLICKED);
+//                    }
+//                }
+                oldKey = key;
             }
         }
     }
+}
+
+static void timer_callback(TimerHandle_t t)
+{
+    input_report_key((&keys[keyHandler.prevKey])->number, INPUT_EVENT_CLICKED);
+}
+
+static void qt_process_key(int key)
+{
+    keyHandler.currentKey = key;
+    static int *ptr;
+
+    if(keyHandler.currentKey != -1) {
+
+        if((&keys[keyHandler.currentKey])->characters != NULL){
+            if(keyHandler.currentKey != keyHandler.prevKey){
+                ptr = (&keys[keyHandler.currentKey])->characters;
+                if(keyHandler.prevKey >= 0){
+                    xTimerStop(timer, 0);
+                    input_report_key((&keys[keyHandler.currentKey])->option, INPUT_EVENT_CLICKED);
+                }
+            }
+            else{
+                ptr++;
+                if(*ptr == 0)
+                    ptr = (&keys[keyHandler.currentKey])->characters;
+            }
+
+            xTimerReset(timer,0);
+            input_report_key(*ptr, INPUT_EVENT_PRESSED);
+        }
+        else if((&keys[keyHandler.currentKey])->option != 0) {
+            input_report_key((&keys[keyHandler.currentKey])->option, INPUT_EVENT_PRESSED);
+        }
+        keyHandler.prevKey = keyHandler.currentKey;
+    }
+    else{
+        if(keyHandler.prevKey < 0)
+            return;
+        KeyObject *keyObj = &keys[keyHandler.prevKey];
+        if(keyObj->characters != NULL) {
+            input_report_key(*ptr, INPUT_EVENT_RELEASED);
+        }
+        else if(keyObj->option != 0) {
+            input_report_key(keyObj->option, INPUT_EVENT_PRESSED);
+            input_report_key(keyObj->option, INPUT_EVENT_CLICKED);
+        }
+    }
+
 }
 
 int qt_key_map(enum QT_KEY qtKey)
