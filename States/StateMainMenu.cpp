@@ -12,6 +12,9 @@
 #include "StateIdle.h"
 #include "linux_keys.h"
 
+#include "qt1245.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 static uint8_t *bitmap;
 
@@ -20,7 +23,7 @@ void StateMainMenu::on_enter() {
 
     unsigned int b;
     b = sst26_read_id()->jedecWord;
-
+    (void)b;
 
 //    bitmap = new uint8_t[15360];
 
@@ -30,6 +33,8 @@ void StateMainMenu::on_enter() {
     LCD_clear();
     LCD_draw_string(0, 0, "MainMenu", LCD_FONT_MEDIUM, LCD_COLOR_BLACK);
 
+    QTouch_low_level_cal();
+    vTaskDelay(3000);
 
 }
 

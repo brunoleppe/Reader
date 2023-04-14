@@ -31,9 +31,22 @@ enum QT_KEY{
     QT_KEY_RELEASE  = 0,
 };
 
-int     QTouch_initialize(int spiDriverIndex, GPIO_PinMap cs, GPIO_PinMap rst, GPIO_PinMap change, GPIO_PinMap drdy);
+#ifdef __cplusplus
+extern "C"{
+#endif
 
-int     QTouch_calibrate_all();
-bool     QTouch_get_key(int *key);
+int QTouch_initialize(int spiDriverIndex, GPIO_PinMap cs, GPIO_PinMap rst, GPIO_PinMap change, GPIO_PinMap drdy);
+
+int QTouch_calibrate_all();
+
+void QTouch_calibrate_key(int key);
+
+void QTouch_low_level_cal(void);
+
+bool QTouch_get_key(int *key);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //QTOUCH_H

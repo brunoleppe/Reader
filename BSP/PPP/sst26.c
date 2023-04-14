@@ -158,7 +158,7 @@ bool sst26_read(void* data, int length, unsigned int address)
 
 static inline bool _Flash_WriteCommand(uint8_t cmd)
 {
-    uint8_t dummy;
+//    uint8_t dummy;
     bool res = SpiDriver_transfer(sst26.spi, &cmd, NULL, 1);
     return res;
 }
