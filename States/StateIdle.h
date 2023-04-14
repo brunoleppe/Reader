@@ -16,6 +16,9 @@ private:
     void on_enter() override;
     void on_exit() override;
     void on_input(InputEvent &evt) override;
+
+    char buffer[29];
+    int counter;
 };
 
 
