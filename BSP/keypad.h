@@ -12,9 +12,16 @@
 #define KEYPAD_ALPHA                    0x0002
 #define KEYPAD_CONTROLS                 0x0004
 #define KEYPAD_ALTERNATE                0x0008
-#define KEYPAD_ALPHANUMERIC             (KEYPAD_ALPHA | KEYPAD_NUMERIC)
+#define KEYPAD_ALPHANUMERIC             0x0010
+
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 _Noreturn void keypad_task(void *params);
 void keypad_set_mode(uint32_t mode);
 
+#ifdef __cplusplus
+}
+#endif
 #endif //KEYPAD_H
