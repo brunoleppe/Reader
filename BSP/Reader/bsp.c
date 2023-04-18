@@ -1,3 +1,6 @@
+#include <features.h>
+#include <assert.h>
+#include <features.h>
 #include <xc.h>
 #include "bsp.h"
 #include "board_defs.h"
@@ -110,7 +113,8 @@ static SpiDriverInit   spiDriverInstance2_init = {
 };
 
 static void blink(void *params);
-static void lcd_task(void *params);
+
+_Noreturn static void lcd_task(void *params);
 
 void BSP_gpio_initialize(void )
 {
@@ -252,7 +256,7 @@ void    GPIO_pin_interrupt_callback     (uint32_t pin)
     }
 }
 
-void blink(void *params)
+_Noreturn void blink(void *params)
 {
     PinParams *p = (PinParams*)params;
     while(1){
@@ -261,7 +265,7 @@ void blink(void *params)
     }
 }
 
-void lcd_task(void *params)
+_Noreturn void lcd_task(void *params)
 {
     (void)params;
     LCD_init(1, LCD_TX_DMA_CHANNEL, LCD_SS, LCD_BLA, LCD_DC, LCD_RST);

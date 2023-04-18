@@ -1,3 +1,5 @@
+#include <assert.h>
+#include <features.h>
 //
 // Created by bleppe on 28/03/23.
 //
@@ -51,7 +53,7 @@
 #pragma config FCANIO =     OFF
 //</editor-fold>
 
-static void lcd_task(void *params);
+_Noreturn static void lcd_task(void *params);
 
 static SpiClientObject spiDriverInstance0_clientArray[SPI_DRIVER_INSTANCE_0_CLIENTS];
 static SpiDriverInit   spiDriverInstance0_init = {
@@ -150,7 +152,7 @@ void BSP_task_initialize(void)
     xTaskCreate(keypad_task, "keypad", 1024, NULL, 2, NULL);
 }
 
-void lcd_task(void *params)
+_Noreturn void lcd_task(void *params)
 {
     (void)params;
     LCD_init(LCD_SPI_DRIVER_INDEX, LCD_TX_DMA_CHANNEL, LCD_SS_PIN, LCD_BLA_PIN, LCD_DC_PIN, LCD_RST_PIN);

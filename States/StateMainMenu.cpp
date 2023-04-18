@@ -12,7 +12,9 @@
 #include "StateIdle.h"
 #include "linux_keys.h"
 
+#ifndef __READER_V1__
 #include "qt1245.h"
+#endif
 #include "FreeRTOS.h"
 #include "task.h"
 
@@ -32,8 +34,9 @@ void StateMainMenu::on_enter() {
 //    LCD_draw_bitmap(0,0,bitmap,15360);
     LCD_clear();
     LCD_draw_string(0, 0, "MainMenu", LCD_FONT_MEDIUM, LCD_COLOR_BLACK);
-
+    #ifndef __READER_V1__
     QTouch_low_level_cal();
+    #endif
     vTaskDelay(3000);
 
 }

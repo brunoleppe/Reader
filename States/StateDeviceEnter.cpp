@@ -16,6 +16,7 @@ void StateDeviceEnter::on_enter() {
     LCD_clear();
     ptr = unlockKey;
     keyCount = 0;
+    LCD_draw_string(0,0,"HOLA MUNDO", LCD_FONT_MEDIUM, LCD_COLOR_BLACK);
 }
 
 void StateDeviceEnter::on_exit() {
