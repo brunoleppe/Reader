@@ -9,7 +9,7 @@
 #include "lcd.h"
 #include "linux_keys.h"
 #include "Drivers/SPI/spi_driver.h"
-#include "debug.h"
+#include "debug_bsp.h"
 
 enum QT_CONTROL_COMMANDS{
     QT_CALIBRATE = 0x03,///<Comando para realizar auto calibración

@@ -1,18 +1,3 @@
-#include <features.h>
-#include <assert.h>
-#include <features.h>
-#include <xc.h>
-#include "bsp.h"
-#include "board_defs.h"
-#include "hal.h"
-#include "Drivers/SPI/spi_driver.h"
-#include "debug.h"
-#include "lcd.h"
-#include "FreeRTOS.h"
-#include "task.h"
-#include "keypad.h"
-#include "sst26.h"
-
 // <editor-fold desc="Configuration Bits">
 #pragma config DEBUG =      OFF
 #pragma config JTAGEN =     OFF
@@ -56,7 +41,7 @@
 
 /*** DEVCFG3 ***/
 #pragma config USERID =     0xffff
-#pragma config FMIIEN =     ON
+#pragma config FMIIEN =     OFF
 #pragma config FETHIO =     ON
 #pragma config PGL1WAY =    ON
 #pragma config PMDL1WAY =   ON
@@ -68,6 +53,25 @@
 #pragma config TSEQ =       0xffff
 #pragma config CSEQ =       0x0
 // </editor-fold>
+
+#include <xc.h>
+#include "bsp.h"
+#include "board_defs.h"
+#include "hal.h"
+#include "Drivers/SPI/spi_driver.h"
+#include "debug_bsp.h"
+#include "lcd.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "keypad.h"
+#include "sst26.h"
+
+#include "core/net.h"
+#include "drivers/mac/pic32mz_eth_driver.h"
+#include "drivers/phy/ksz8041_driver.h"
+#include "drivers/switch/lan9303_driver.h"
+
+
 
 typedef struct{
     GPIO_PinMap pinMap;
@@ -152,6 +156,23 @@ void BSP_gpio_initialize(void )
     GPIO_pin_initialize(FLASH_SDI, GPIO_INPUT);
     GPIO_pin_write(FLASH_SS, GPIO_HIGH);
 
+    GPIO_pin_initialize(ETXD0_PIN,  GPIO_INPUT);
+    GPIO_pin_initialize(ETXD1_PIN,  GPIO_INPUT);
+    GPIO_pin_initialize(ERXD0_PIN,  GPIO_INPUT);
+    GPIO_pin_initialize(ERXD1_PIN,  GPIO_INPUT);
+    GPIO_pin_initialize(ETXEN_PIN,  GPIO_INPUT);
+    GPIO_pin_initialize(ECRSDV_PIN, GPIO_INPUT);
+    GPIO_pin_initialize(ERXERR_PIN, GPIO_INPUT);
+    GPIO_pin_initialize(EREFCLK_PIN,GPIO_INPUT);
+    GPIO_pin_initialize(EMDC_PIN,   GPIO_INPUT);
+    GPIO_pin_initialize(EMDIO_PIN,  GPIO_INPUT);
+
+    ANSELB = 0;
+    ANSELD = 0;
+    ANSELF = 0;
+    ANSELG = 0;
+
+
     SYS_Unlock(SYS_UNLOCK_IO);
     /* LCD SPI */
     PPS_pin_mapping(LCD_SPI_OUTPUT_REG, LCD_SPI_OUTPUT_MAP);
@@ -205,12 +226,49 @@ void BSP_drivers_initialize( void )
     SpiDriver_initialize(2, &spiDriverInstance2_init);
 
 
+
     sst26_initialize(2, FLASH_SS);
+
+
+    MacAddr macAddr;
+    NetInterface *interface;
+    Ipv4Addr ipv4Addr;
+
+    netInit();
+    interface = &netInterface[0];
+    netSetInterfaceName(interface, "eth0");
+    netSetHostname(interface, "TEST");
+    macStringToAddr("00-00-00-00-00-00", &macAddr);
+    netSetMacAddr(interface, &macAddr);
+    netSetDriver(interface, &pic32mzEthDriver);
+    netSetPhyDriver(interface, &ksz8041PhyDriver);
+
+//    netSetSwitchDriver(interface, &lan9303SwitchDriver);
+//    netSetSwitchPort(interface,LAN9303_PORT1);
+
+    netConfigInterface(interface);
+
+    ipv4StringToAddr("10.1.1.244", &ipv4Addr);
+    ipv4SetHostAddr(interface, ipv4Addr);
+
+    ipv4StringToAddr("255.255.255.0", &ipv4Addr);
+    ipv4SetSubnetMask(interface, ipv4Addr);
+
+    ipv4StringToAddr("10.1.1.1", &ipv4Addr);
+    ipv4SetDefaultGateway(interface, ipv4Addr);
+
+    //Set primary and secondary DNS servers
+    ipv4StringToAddr("0.0.0.0", &ipv4Addr);
+    ipv4SetDnsServer(interface, 0, ipv4Addr);
+    ipv4StringToAddr("0.0.0.0", &ipv4Addr);
+    ipv4SetDnsServer(interface, 1, ipv4Addr);
 
 }
 
 void BSP_interrupts_initialize(void )
 {
+    INTCONSET = _INTCON_MVEC_MASK;
+
     EVIC_channel_priority(EVIC_CHANNEL_CHANGE_NOTICE_E, EVIC_PRIORITY_4, EVIC_SUB_PRIORITY_2);
     EVIC_channel_set(EVIC_CHANNEL_CHANGE_NOTICE_E);
     EVIC_channel_priority(EVIC_CHANNEL_DMA0, EVIC_PRIORITY_2, EVIC_SUB_PRIORITY_2);
@@ -235,6 +293,17 @@ void BSP_task_initialize(void)
     xTaskCreate(keypad_task, "qt_task", 2048, NULL, 1, NULL);
 }
 
+void BSP_system_initialize()
+{
+    __builtin_disable_interrupts();
+
+    PRECONbits.PREFEN = 3;
+    PRECONbits.PFMWS = 3;
+    CFGCONbits.ECCCON = 3;
+
+
+//    BSP_interrupts_initialize();
+}
 
 void BSP_gpio_callback_register(GPIO_PinMap pinMap, GPIO_Callback callback, uintptr_t context)
 {
@@ -276,18 +345,13 @@ _Noreturn void lcd_task(void *params)
 //    vTaskDelay(portMAX_DELAY);
     while(true){
         LCD_print();
-        GPIO_pin_toggle(LED3);
         vTaskDelay(17);
     }
 }
-void BSP_system_initialize()
+
+
+void ETHERNET_handler_bsp(void)
 {
-    __builtin_disable_interrupts();
-
-    PRECONbits.PREFEN = 3;
-    PRECONbits.PFMWS = 3;
-    CFGCONbits.ECCCON = 3;
-
-    INTCONSET = _INTCON_MVEC_MASK;
-    BSP_interrupts_initialize();
+    GPIO_pin_toggle(LED3);
+    pic32mzEthIrqHandler();
 }

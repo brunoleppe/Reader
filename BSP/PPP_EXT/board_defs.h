@@ -57,4 +57,17 @@
 #define LCD_SPI_DRIVER_INDEX            0
 #define FLASH_SPI_DRIVER_INDEX          0
 
+
+/*ETHERNET*/
+#define ETXD0_PIN                               GPIO_PIN_MAP(GPIO_PORT_J, GPIO_PIN_8)
+#define ETXD1_PIN                               GPIO_PIN_MAP(GPIO_PORT_J, GPIO_PIN_9)
+#define ERXD0_PIN                               GPIO_PIN_MAP(GPIO_PORT_H, GPIO_PIN_8)
+#define ERXD1_PIN                               GPIO_PIN_MAP(GPIO_PORT_H, GPIO_PIN_5)
+#define ETXEN_PIN                               GPIO_PIN_MAP(GPIO_PORT_D, GPIO_PIN_6)
+#define ECRSDV_PIN                              GPIO_PIN_MAP(GPIO_PORT_H, GPIO_PIN_13)
+#define ERXERR_PIN                              GPIO_PIN_MAP(GPIO_PORT_H, GPIO_PIN_4)
+#define EREFCLK_PIN                             GPIO_PIN_MAP(GPIO_PORT_J, GPIO_PIN_11)
+#define EMDC_PIN                                GPIO_PIN_MAP(GPIO_PORT_D, GPIO_PIN_11)
+#define EMDIO_PIN                               GPIO_PIN_MAP(GPIO_PORT_J, GPIO_PIN_1)
+
 #endif //BOARD_DEFS_H

@@ -18,7 +18,7 @@
 #include <xc.h>
 #include "system.h"
 #include "dma.h"
-#include "debug.h"
+#include "debug_bsp.h"
 /**********************************************************************
 * Module Preprocessor Constants
 **********************************************************************/

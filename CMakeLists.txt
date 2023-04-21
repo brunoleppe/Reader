@@ -43,6 +43,10 @@ IF(READERV2 OR READERV1)
     include_directories(FreeRTOS/Source/portable/MPLAB/PIC32MZ)
     include_directories(HAL/PIC32MZEFM100)
     include_directories(BSP/Reader)
+
+    include_directories(BSP/Reader/Ethernet)
+    include_directories(BSP/Reader/Ethernet/common)
+    include_directories(BSP/Reader/Ethernet/cyclone_tcp/)
 ELSEIF(PPPLUS)
     include_directories(FreeRTOS/Source/portable/MPLAB/PIC32MX)
     include_directories(HAL/PIC32MX795F512H)
@@ -51,6 +55,11 @@ ELSEIF (PPP_EXT)
     include_directories(FreeRTOS/Source/portable/MPLAB/PIC32MZ)
     include_directories(HAL/PIC32MZEFM100)
     include_directories(BSP/PPP_EXT)
+    include_directories(BSP/PPP_EXT/Ethernet)
+
+    include_directories(BSP/PPP_EXT/Ethernet/common)
+    include_directories(BSP/PPP_EXT/Ethernet/cyclone_tcp/)
+
 ENDIF()
 
 # FreeRTOSConfig.h is located here
@@ -62,12 +71,15 @@ add_subdirectory(LCD)
 IF(READERV2 OR READERV1)
     add_subdirectory(HAL/PIC32MZEFM100)
     add_subdirectory(BSP/Reader)
+    add_subdirectory(BSP/Reader/Ethernet)
 ELSEIF(PPPLUS)
     add_subdirectory(BSP/PPP)
     add_subdirectory(HAL/PIC32MX795F512H)
 ELSEIF (PPP_EXT)
     add_subdirectory(BSP/PPP_EXT)
     add_subdirectory(HAL/PIC32MZEFM100)
+    add_subdirectory(BSP/PPP_EXT/Ethernet)
+
 ENDIF()
 
 add_executable(${PROJECT_NAME}.elf ${SOURCES})
@@ -77,6 +89,7 @@ target_link_libraries(${PROJECT_NAME}.elf   FreeRTOS)
 target_link_libraries(${PROJECT_NAME}.elf   HAL)
 target_link_libraries(${PROJECT_NAME}.elf   LCD)
 target_link_libraries(${PROJECT_NAME}.elf   BSP)
+target_link_libraries(${PROJECT_NAME}.elf   CycloneTCP)
 
 #Assembly options
 set(CMAKE_ASM_FLAGS "${CFLAGS} -Wa,--defsym=__MPLAB_BUILD=1,--gdwarf-2")
@@ -136,6 +149,9 @@ set_target_properties(FreeRTOS PROPERTIES LINKER_LANGUAGE C)
 target_compile_definitions(FreeRTOS PUBLIC XPRJ_default=default ${DEFINES})
 target_compile_options(FreeRTOS PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP})
 
+set_target_properties(CycloneTCP PROPERTIES LINKER_LANGUAGE C)
+target_compile_definitions(CycloneTCP PUBLIC XPRJ_default=default ${DEFINES})
+target_compile_options(CycloneTCP PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP})
 
 target_compile_options(${PROJECT_NAME}.elf PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP})
 target_compile_definitions(${PROJECT_NAME}.elf PUBLIC XPRJ_default=default ${DEFINES})

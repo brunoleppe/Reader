@@ -140,6 +140,19 @@
 
 #endif /*__READER_V2__*/
 
+
+/*ETHERNET*/
+#define ETXD0_PIN                               GPIO_PIN_MAP(GPIO_PORT_F, GPIO_PIN_1)
+#define ETXD1_PIN                               GPIO_PIN_MAP(GPIO_PORT_F, GPIO_PIN_0)
+#define ERXD0_PIN                               GPIO_PIN_MAP(GPIO_PORT_B, GPIO_PIN_12)
+#define ERXD1_PIN                               GPIO_PIN_MAP(GPIO_PORT_B, GPIO_PIN_13)
+#define ETXEN_PIN                               GPIO_PIN_MAP(GPIO_PORT_D, GPIO_PIN_2)
+#define ECRSDV_PIN                              GPIO_PIN_MAP(GPIO_PORT_G, GPIO_PIN_8)
+#define ERXERR_PIN                              GPIO_PIN_MAP(GPIO_PORT_B, GPIO_PIN_8)
+#define EREFCLK_PIN                             GPIO_PIN_MAP(GPIO_PORT_G, GPIO_PIN_9)
+#define EMDC_PIN                                GPIO_PIN_MAP(GPIO_PORT_D, GPIO_PIN_11)
+#define EMDIO_PIN                               GPIO_PIN_MAP(GPIO_PORT_D, GPIO_PIN_0)
+
 #define LCD_TX_DMA_CHANNEL          DMA_CHANNEL_0
 #define FLASH_TX_DMA_CHANNEL        DMA_CHANNEL_1
 #define FLASH_RX_DMA_CHANNEL        DMA_CHANNEL_2

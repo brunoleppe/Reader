@@ -223,6 +223,19 @@ void keypad_set_mode(uint32_t _mode)
     mode = _mode;
 }
 
+void keypad_calibrate( void )
+{
+    QTouch_calibrate_all();
+}
+void keypad_calibrate_key(int key)
+{
+    QTouch_calibrate_key(key);
+}
+void keypad_get_key_signal(int key)
+{
+
+}
+
 int qt_key_map(enum QT_KEY qtKey)
 {
     switch (qtKey) {

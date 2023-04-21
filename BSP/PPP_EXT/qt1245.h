@@ -45,6 +45,9 @@ void QTouch_low_level_cal(void);
 
 bool QTouch_get_key(int *key);
 
+uint8_t QTouch_report_status( void );
+
+uint16_t QTouch_key_data(int key);
 #ifdef __cplusplus
 }
 #endif

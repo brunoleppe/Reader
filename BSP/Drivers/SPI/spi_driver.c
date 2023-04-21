@@ -261,6 +261,38 @@ bool SpiDriver_write_read(DriverHandle handle, void *txBuffer, size_t txSize, vo
     return result;
 }
 
+bool SpiDriver_transfer_custom(DriverHandle handle, void (*custom)(void))
+{
+    SpiClientObject *client = SPI_Driver_handle_validate(handle);
+    if(client == NULL)
+        return false;
+
+
+    SpiDriverObject *dObj = client->driverObject;
+
+    if(xSemaphoreTake(dObj->hardwareMutex, portMAX_DELAY) == pdFALSE)
+        return false;
+
+    if(dObj->activeClient != client || client->setupChanged)
+    {
+        SPI_setup(dObj->spiChannel, client->setup.sample | client->setup.spiMode, client->setup.baudRate);
+        client->setupChanged = false;
+    }
+
+    dObj->activeClient = client;
+    if(client->csPin != GPIO_PIN_INVALID)
+        GPIO_pin_write(client->csPin, GPIO_LOW);
+
+    custom();
+
+    if(client->csPin != GPIO_PIN_INVALID)
+        GPIO_pin_write(client->csPin, GPIO_HIGH);
+
+    xSemaphoreGive(dObj->hardwareMutex);
+
+    return true;
+}
+
 SpiClientObject* SpiDriver_get_object(DriverHandle handle)
 {
     SpiClientObject *client = SPI_Driver_handle_validate(handle);
@@ -301,4 +333,25 @@ static SpiClientObject*  SPI_Driver_handle_validate(uintptr_t handle)
     if(!client->inUse || client->clientHandle != handle)
         return NULL;
     return client;
+}
+
+bool SpiDriver_mutex_take(DriverHandle handle)
+{
+    SpiClientObject *client = SPI_Driver_handle_validate(handle);
+    if(client == NULL)
+        return false;
+    SpiDriverObject *dObj = client->driverObject;
+
+    if(xSemaphoreTake(dObj->hardwareMutex, portMAX_DELAY) == pdFALSE)
+        return false;
+    return true;
+}
+bool SpiDriver_mutex_release(DriverHandle handle)
+{
+    SpiClientObject *client = SPI_Driver_handle_validate(handle);
+    if(client == NULL)
+        return false;
+    SpiDriverObject *dObj = client->driverObject;
+    xSemaphoreGive(dObj->hardwareMutex);
+    return true;
 }

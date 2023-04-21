@@ -17,7 +17,8 @@ private:
     void on_exit() override;
     void on_input(InputEvent &evt) override;
 
-    char buffer[29];
+    static const int size = 28;
+    char buffer[size + 1];
     int counter;
 };
 

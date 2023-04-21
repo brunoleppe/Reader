@@ -10,7 +10,7 @@
 #include "BSP/Drivers/SPI/spi_driver.h"
 #include <string.h>
 #include <stdint.h>
-#include "debug.h"
+#include "debug_bsp.h"
 /**********************************************************************
 * Module Preprocessor Constants
 **********************************************************************/
@@ -532,8 +532,8 @@ void    LCD_print       ( void )
 
     GPIO_pin_write(lcd.dc_pin, GPIO_HIGH);
 //    GPIO_pin_write(lcd.cs_pin, GPIO_LOW);
-    SpiDriver_write_dma(lcd.handle, lcd.lcd_buffer, LCD_BUFFER_SIZE);
-//    SpiDriver_transfer(lcd.handle, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
+//    SpiDriver_write_dma(lcd.handle, lcd.lcd_buffer, LCD_BUFFER_SIZE);
+    SpiDriver_transfer(lcd.handle, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
 
 }
 

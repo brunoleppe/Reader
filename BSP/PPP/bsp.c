@@ -10,7 +10,7 @@
 #include "task.h"
 #include "Drivers/SPI/spi_driver.h"
 #include "lcd.h"
-#include "debug.h"
+#include "debug_bsp.h"
 #include "keypad.h"
 
 #include "sst26.h"
@@ -100,15 +100,15 @@ void BSP_gpio_initialize(void )
     GPIO_pin_initialize(FLASH_SS_PIN, GPIO_OUTPUT);
     GPIO_pin_write(FLASH_SS_PIN, GPIO_HIGH);
 
-    GPIO_pin_initialize(LED_M_COL0_PIN, GPIO_HIGH);
-    GPIO_pin_initialize(LED_M_COL1_PIN, GPIO_HIGH);
-    GPIO_pin_initialize(LED_M_COL2_PIN, GPIO_HIGH);
-    GPIO_pin_initialize(LED_M_COL3_PIN, GPIO_HIGH);
-    GPIO_pin_initialize(LED_M_ROW0_PIN, GPIO_LOW);
-    GPIO_pin_initialize(LED_M_ROW1_PIN, GPIO_LOW);
-    GPIO_pin_initialize(LED_M_ROW2_PIN, GPIO_LOW);
-    GPIO_pin_initialize(LED_M_ROW3_PIN, GPIO_LOW);
-    GPIO_pin_initialize(LED_M_ROW4_PIN, GPIO_LOW);
+    GPIO_pin_write(LED_M_COL0_PIN, GPIO_HIGH);
+    GPIO_pin_write(LED_M_COL1_PIN, GPIO_HIGH);
+    GPIO_pin_write(LED_M_COL2_PIN, GPIO_HIGH);
+    GPIO_pin_write(LED_M_COL3_PIN, GPIO_HIGH);
+    GPIO_pin_write(LED_M_ROW0_PIN, GPIO_LOW);
+    GPIO_pin_write(LED_M_ROW1_PIN, GPIO_LOW);
+    GPIO_pin_write(LED_M_ROW2_PIN, GPIO_LOW);
+    GPIO_pin_write(LED_M_ROW3_PIN, GPIO_LOW);
+    GPIO_pin_write(LED_M_ROW4_PIN, GPIO_LOW);
 
     SPI_initialize(SPI_CHANNEL, SPI_MASTER | SPI_SDI_DISABLE | SPI_MODE_3, 20000000);
 

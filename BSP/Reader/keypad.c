@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "lcd.h"
-#include "debug.h"
+#include "debug_bsp.h"
 #include "Reader/board_defs.h"
 #include "input.h"
 

@@ -6,7 +6,7 @@ add_library(BSP OBJECT
         ../linux_keys.h
         ../Drivers/SPI/spi_driver.c ../Drivers/SPI/spi_driver.h
         ../Drivers/driver_defs.h
-        ../debug.c ../debug.h
+        ../debug_bsp.c ../debug_bsp.h
         interrupts.c
         interrupts_as.S
         board_defs.h
@@ -19,5 +19,8 @@ add_library(BSP OBJECT
         ../music.h
         sst26.c sst26.h
         ../printf.c ../printf.h ../printf_config.h
-        ../virtual_term.c ../virtual_term.h)
+        ../virtual_term.c ../virtual_term.h
+        net_config.h
+        os_port_config.h)
 target_link_libraries(BSP PUBLIC HAL)
+target_link_libraries(BSP PUBLIC CycloneTCP)

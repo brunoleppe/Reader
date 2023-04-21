@@ -9,7 +9,7 @@
 #include "lcd.h"
 #include "linux_keys.h"
 #include "Drivers/SPI/spi_driver.h"
-#include "debug.h"
+#include "debug_bsp.h"
 
 typedef struct{
     DriverHandle handle;

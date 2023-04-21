@@ -6,7 +6,7 @@ add_library(BSP OBJECT
         ../linux_keys.h
         ../Drivers/SPI/spi_driver.c ../Drivers/SPI/spi_driver.h
         ../Drivers/driver_defs.h
-        ../debug.c ../debug.h
+        ../debug_bsp.c ../debug_bsp.h
         interrupts.c
         interrupts_as.S
         board_defs.h

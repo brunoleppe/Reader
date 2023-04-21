@@ -89,30 +89,17 @@ UART1_RX_IRQ:
     nop
     portRESTORE_CONTEXT
     .end UART1_RX_IRQ
-//    .global SPI2_RX_IRQ
-//    .extern SPI_rx_interrupt_handler
-//    .set nomips16
-//    .set noreorder
-//    .set noat
-//    .ent SPI2_RX_IRQ
-//SPI2_RX_IRQ:
-//    portSAVE_CONTEXT
-//    li a0, SPI_CHANNEL_2
-//    jal SPI_rx_interrupt_handler
-//    nop
-//    portRESTORE_CONTEXT
-//    .end SPI2_RX_IRQ
-//
-//    .global SPI2_TX_IRQ
-//    .extern SPI_tx_interrupt_handler
-//    .set nomips16
-//    .set noreorder
-//    .set noat
-//    .ent SPI2_TX_IRQ
-//SPI2_TX_IRQ:
-//    portSAVE_CONTEXT
-//    li a0, SPI_CHANNEL_2
-//    jal SPI_tx_interrupt_handler
-//    nop
-//    portRESTORE_CONTEXT
-//    .end SPI2_TX_IRQ
+
+    .global ETHERNET_IRQ
+    .extern ETHERNET_handler_bsp
+    .set nomips16
+    .set noreorder
+    .set noat
+    .ent ETHERNET_IRQ
+ETHERNET_IRQ:
+    portSAVE_CONTEXT
+    la    s6,  ETHERNET_handler_bsp
+    jalr  s6
+    nop
+    portRESTORE_CONTEXT
+    .end   ETHERNET_IRQ

@@ -20,6 +20,9 @@ extern "C"{
 
 _Noreturn void keypad_task(void *params);
 void keypad_set_mode(uint32_t mode);
+void keypad_calibrate( void );
+void keypad_calibrate_key(int key);
+void keypad_get_key_signal(int key);
 
 #ifdef __cplusplus
 }
