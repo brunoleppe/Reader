@@ -70,7 +70,7 @@ int     QTouch_initialize(int spiDriverIndex, GPIO_PinMap cs, GPIO_PinMap rst, G
     qt.spiObj = SpiDriver_get_object(qt.handle);
 
     SpiDriverSetup setup = {
-            .csPin = cs,
+            .csPin = GPIO_PIN_INVALID,
             .spiMode = SPI_MODE_3,
             .baudRate = 1000000,
             .sample = SPI_SAMPLE_END
@@ -81,12 +81,6 @@ int     QTouch_initialize(int spiDriverIndex, GPIO_PinMap cs, GPIO_PinMap rst, G
     vTaskDelay(10);
     GPIO_pin_write(qt.rst, GPIO_HIGH);
     vTaskDelay(300);
-//
-//    uint8_t buff[] = {140, 1, 0xFE};
-//    QTouch_transfer(buff,NULL,3);
-//    uint8_t buffer[] = {182, 7, 0, 0 ,0 ,0 ,0 ,0, 0};
-//    QTouch_transfer(buffer, NULL, 9);
-
 
     QTouch_calibrate_all();
     vTaskDelay(1000);
@@ -172,13 +166,18 @@ uint16_t sixteen_bit_crc(uint16_t crc, uint8_t data)
 void QTouch_transfer()
 {
     uint8_t receivedData;
-    while(qt.transfer.size--){
-        receivedData = SPI_byte_transfer(qt.spiObj->driverObject->spiChannel, *qt.transfer.txBuffer);
-        HAL_delay_us(40);
-        while(!GPIO_pin_read(qt.drdy));
-        if(qt.transfer.rxBuffer != NULL)
-            *qt.transfer.rxBuffer++ = receivedData;
-        qt.transfer.txBuffer++;
+    if(SpiDriver_mutex_take(qt.handle, portMAX_DELAY)) {
+        GPIO_pin_write(qt.cs, GPIO_LOW);
+        while(qt.transfer.size--){
+            SpiDriver_byte_transfer(qt.handle, *qt.transfer.txBuffer, &receivedData);
+            HAL_delay_us(40);
+            while(!GPIO_pin_read(qt.drdy));
+            if(qt.transfer.rxBuffer != NULL)
+                *qt.transfer.rxBuffer++ = receivedData;
+            qt.transfer.txBuffer++;
+        }
+        GPIO_pin_write(qt.cs, GPIO_HIGH);
+        SpiDriver_mutex_release(qt.handle);
     }
 }
 
@@ -187,5 +186,5 @@ static void QTouch_write(uint8_t *txBuffer, uint8_t *rxBuffer, size_t size)
     qt.transfer.txBuffer = txBuffer;
     qt.transfer.rxBuffer = rxBuffer;
     qt.transfer.size = size;
-    SpiDriver_transfer_custom(qt.handle, QTouch_transfer);
+    QTouch_transfer();
 }

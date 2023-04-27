@@ -531,10 +531,10 @@ void    LCD_print       ( void )
 {
 
     GPIO_pin_write(lcd.dc_pin, GPIO_HIGH);
-//    GPIO_pin_write(lcd.cs_pin, GPIO_LOW);
-//    SpiDriver_write_dma(lcd.handle, lcd.lcd_buffer, LCD_BUFFER_SIZE);
-    SpiDriver_transfer(lcd.handle, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
-
+    if(SpiDriver_mutex_take(lcd.handle, portMAX_DELAY)) {
+        SpiDriver_transfer(lcd.handle, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
+        SpiDriver_mutex_release(lcd.handle);
+    }
 }
 
 static unsigned char* LCD_get_char(unsigned char c, const LCD_Font *font){

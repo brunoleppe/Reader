@@ -72,17 +72,20 @@ static int QTouch_key_map(enum QT_KEY k)
 
 static void QTouch_transfer(uint8_t *txBuffer, uint8_t *rxBuffer, size_t size)
 {
-    GPIO_pin_write(qt.cs, GPIO_LOW);
-    uint8_t receivedData;
-    while(size--){
-//        receivedData = SPI_byte_transfer(qt.spi, *txBuffer);
-        SpiDriver_byte_transfer(qt.handle, *txBuffer, &receivedData);
-        HAL_delay_us(160);
-        if(rxBuffer != NULL)
-            *rxBuffer++ = receivedData;
-        txBuffer++;
+    if(SpiDriver_mutex_take(qt.handle, portMAX_DELAY)) {
+        GPIO_pin_write(qt.cs, GPIO_LOW);
+        uint8_t receivedData;
+        while (size--) {
+            //        receivedData = SPI_byte_transfer(qt.spi, *txBuffer);
+            SpiDriver_byte_transfer(qt.handle, *txBuffer, &receivedData);
+            HAL_delay_us(160);
+            if (rxBuffer != NULL)
+                *rxBuffer++ = receivedData;
+            txBuffer++;
+        }
+        GPIO_pin_write(qt.cs, GPIO_HIGH);
+        SpiDriver_mutex_release(qt.handle);
     }
-    GPIO_pin_write(qt.cs, GPIO_HIGH);
 }
 
 

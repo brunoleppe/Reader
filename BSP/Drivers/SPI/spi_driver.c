@@ -117,9 +117,6 @@ size_t SpiDriver_transfer(DriverHandle handle, void *txBuffer, void *rxBuffer, s
         return 0;
     SpiDriverObject *dObj = client->driverObject;
 
-    if(xSemaphoreTake(dObj->hardwareMutex, portMAX_DELAY) == pdFALSE)
-        return 0;
-
     if(dObj->activeClient != client || client->setupChanged)
     {
         SPI_setup(dObj->spiChannel, client->setup.sample | client->setup.spiMode, client->setup.baudRate);
@@ -135,8 +132,6 @@ size_t SpiDriver_transfer(DriverHandle handle, void *txBuffer, void *rxBuffer, s
     if(client->csPin != GPIO_PIN_INVALID)
         GPIO_pin_write(client->csPin, GPIO_HIGH);
 
-    xSemaphoreGive(dObj->hardwareMutex);
-
     return result;
 }
 bool SpiDriver_byte_transfer(DriverHandle handle, uint8_t data, uint8_t *outData)
@@ -147,9 +142,6 @@ bool SpiDriver_byte_transfer(DriverHandle handle, uint8_t data, uint8_t *outData
 
 
     SpiDriverObject *dObj = client->driverObject;
-
-    if(xSemaphoreTake(dObj->hardwareMutex, portMAX_DELAY) == pdFALSE)
-        return false;
 
     if(dObj->activeClient != client || client->setupChanged)
     {
@@ -166,8 +158,6 @@ bool SpiDriver_byte_transfer(DriverHandle handle, uint8_t data, uint8_t *outData
     if(client->csPin != GPIO_PIN_INVALID)
         GPIO_pin_write(client->csPin, GPIO_LOW);
 
-    xSemaphoreGive(dObj->hardwareMutex);
-
     return true;
 }
 bool SpiDriver_write_dma(DriverHandle handle, void *txBuffer, size_t size)
@@ -176,9 +166,6 @@ bool SpiDriver_write_dma(DriverHandle handle, void *txBuffer, size_t size)
     if(client == NULL)
         return 0;
     SpiDriverObject *dObj = client->driverObject;
-
-    if(xSemaphoreTake(dObj->hardwareMutex, portMAX_DELAY) == pdFALSE)
-        return 0;
 
     if(dObj->activeClient != client || client->setupChanged)
     {
@@ -194,8 +181,6 @@ bool SpiDriver_write_dma(DriverHandle handle, void *txBuffer, size_t size)
         result = true;
     }
 
-    xSemaphoreGive(dObj->hardwareMutex);
-
     return result;
 }
 
@@ -205,9 +190,6 @@ bool SpiDriver_read_dma(DriverHandle handle, void *rxBuffer, size_t size)
     if(client == NULL)
         return 0;
     SpiDriverObject *dObj = client->driverObject;
-
-    if(xSemaphoreTake(dObj->hardwareMutex, portMAX_DELAY) == pdFALSE)
-        return 0;
 
     if(dObj->activeClient != client || client->setupChanged)
     {
@@ -224,9 +206,6 @@ bool SpiDriver_read_dma(DriverHandle handle, void *rxBuffer, size_t size)
     if (result && xSemaphoreTake(dObj->transferSemaphore, portMAX_DELAY) == pdTRUE){
         result = true;
     }
-
-    xSemaphoreGive(dObj->hardwareMutex);
-
     return result;
 }
 
@@ -236,9 +215,6 @@ bool SpiDriver_write_read(DriverHandle handle, void *txBuffer, size_t txSize, vo
     if(client == NULL)
         return 0;
     SpiDriverObject *dObj = client->driverObject;
-
-    if(xSemaphoreTake(dObj->hardwareMutex, portMAX_DELAY) == pdFALSE)
-        return 0;
 
     if(dObj->activeClient != client || client->setupChanged)
     {
@@ -255,9 +231,6 @@ bool SpiDriver_write_read(DriverHandle handle, void *txBuffer, size_t txSize, vo
 
     if(client->csPin != GPIO_PIN_INVALID)
         GPIO_pin_write(client->csPin, GPIO_HIGH);
-
-    xSemaphoreGive(dObj->hardwareMutex);
-
     return result;
 }
 
@@ -267,11 +240,7 @@ bool SpiDriver_transfer_custom(DriverHandle handle, void (*custom)(void))
     if(client == NULL)
         return false;
 
-
     SpiDriverObject *dObj = client->driverObject;
-
-    if(xSemaphoreTake(dObj->hardwareMutex, portMAX_DELAY) == pdFALSE)
-        return false;
 
     if(dObj->activeClient != client || client->setupChanged)
     {
@@ -287,9 +256,6 @@ bool SpiDriver_transfer_custom(DriverHandle handle, void (*custom)(void))
 
     if(client->csPin != GPIO_PIN_INVALID)
         GPIO_pin_write(client->csPin, GPIO_HIGH);
-
-    xSemaphoreGive(dObj->hardwareMutex);
-
     return true;
 }
 

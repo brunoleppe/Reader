@@ -70,7 +70,7 @@
 #include "drivers/mac/pic32mz_eth_driver.h"
 #include "drivers/phy/ksz8041_driver.h"
 #include "drivers/switch/lan9303_driver.h"
-
+#include "Socket/reader_socket.h"
 
 
 typedef struct{
@@ -290,6 +290,7 @@ void BSP_task_initialize(void)
     xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed2,1,NULL);
     xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
     xTaskCreate(keypad_task, "qt_task", 2048, NULL, 1, NULL);
+    xTaskCreate(reader_socket_task, "socket", 1024, NULL, 2, NULL);
 }
 
 void BSP_system_initialize()
