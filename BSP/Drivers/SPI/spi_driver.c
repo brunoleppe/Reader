@@ -335,14 +335,12 @@ static SpiClientObject*  SPI_Driver_handle_validate(uintptr_t handle)
     return client;
 }
 
-bool SpiDriver_mutex_take(DriverHandle handle)
+bool SpiDriver_mutex_take(DriverHandle handle, uint32_t blockTime)
 {
     SpiClientObject *client = SPI_Driver_handle_validate(handle);
     if(client == NULL)
         return false;
-    SpiDriverObject *dObj = client->driverObject;
-
-    if(xSemaphoreTake(dObj->hardwareMutex, portMAX_DELAY) == pdFALSE)
+    if(xSemaphoreTake(client->driverObject->hardwareMutex, blockTime) == pdFALSE)
         return false;
     return true;
 }
@@ -351,7 +349,6 @@ bool SpiDriver_mutex_release(DriverHandle handle)
     SpiClientObject *client = SPI_Driver_handle_validate(handle);
     if(client == NULL)
         return false;
-    SpiDriverObject *dObj = client->driverObject;
-    xSemaphoreGive(dObj->hardwareMutex);
+    xSemaphoreGive(client->driverObject->hardwareMutex);
     return true;
 }

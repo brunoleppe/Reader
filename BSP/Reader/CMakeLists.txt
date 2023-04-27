@@ -11,14 +11,14 @@ add_library(BSP OBJECT
         interrupts_as.S
         board_defs.h
         spi_driver_config.h
-        keypad.c ../keypad.h
-        qt1110.h qt1110.c
+        Keypad/keypad.c ../keypad.h
+        QTouch/qt1110.h QTouch/qt1110.c
         FreeRTOSConfig.h
         hal_config.h
         ../input.h
 #        bitmap.c bitmap.h
         ../music.h
-        sst26.c sst26.h
+        FlashMem/sst26.c FlashMem/sst26.h
         ../printf.c ../printf.h ../printf_config.h
         ../bitmap.c ../bitmap.h ../virtual_term.c ../virtual_term.h)
 target_link_libraries(BSP PUBLIC HAL)

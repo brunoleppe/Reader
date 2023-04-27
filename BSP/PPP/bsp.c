@@ -49,7 +49,7 @@
 #pragma config USERID =     0xffff
 #pragma config FUSBIDIO =   ON
 #pragma config FMIIEN =     OFF
-#pragma config FETHIO =     OFF
+#pragma config FETHIO =     ON
 #pragma config FCANIO =     OFF
 //</editor-fold>
 
@@ -109,6 +109,18 @@ void BSP_gpio_initialize(void )
     GPIO_pin_write(LED_M_ROW2_PIN, GPIO_LOW);
     GPIO_pin_write(LED_M_ROW3_PIN, GPIO_LOW);
     GPIO_pin_write(LED_M_ROW4_PIN, GPIO_LOW);
+
+
+    GPIO_pin_initialize(ETXEN_PIN, GPIO_INPUT);
+    GPIO_pin_initialize(ETXD0_PIN, GPIO_INPUT);
+    GPIO_pin_initialize(ETXD1_PIN, GPIO_INPUT);
+    GPIO_pin_initialize(EMDC_PIN, GPIO_INPUT);
+    GPIO_pin_initialize(EMDIO_PIN, GPIO_INPUT);
+    GPIO_pin_initialize(ERXD1_PIN, GPIO_INPUT);
+    GPIO_pin_initialize(ERXD0_PIN, GPIO_INPUT);
+    GPIO_pin_initialize(ECRSDV_PIN, GPIO_INPUT);
+    GPIO_pin_initialize(EREFCLK_PIN, GPIO_INPUT);
+    GPIO_pin_initialize(ERXERR_PIN, GPIO_INPUT);
 
     SPI_initialize(SPI_CHANNEL, SPI_MASTER | SPI_SDI_DISABLE | SPI_MODE_3, 20000000);
 

@@ -76,8 +76,6 @@
 
 _Noreturn static void lcd_task(void *params);
 
-_Noreturn static void blink(void *params);
-
 static SpiClientObject spiDriverInstance0_clientArray[SPI_DRIVER_INSTANCE_0_CLIENTS];
 static SpiDriverInit   spiDriverInstance0_init = {
         .nClientsMax = SPI_DRIVER_INSTANCE_0_CLIENTS,
@@ -90,9 +88,6 @@ static SpiDriverInit   spiDriverInstance0_init = {
 void BSP_system_initialize(void)
 {
     EVIC_disable_interrupts();
-    SYS_initialize();
-
-//    BSP_interrupts_initialize();
 }
 void BSP_gpio_initialize(void )
 {
@@ -231,7 +226,6 @@ void BSP_task_initialize(void)
 {
     xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 2, NULL);
     xTaskCreate(keypad_task, "keypad", 1024, NULL, 3, NULL);
-//    xTaskCreate(blink, "blink", 1024, NULL, 2, NULL);
 }
 
 void lcd_task(void *params)
@@ -241,14 +235,6 @@ void lcd_task(void *params)
     while(true){
         LCD_print();
         vTaskDelay(17);
-    }
-}
-
-static void blink(void *params)
-{
-    while(true){
-        led_matrix_led_toggle(0,0);
-        vTaskDelay(500);
     }
 }
 

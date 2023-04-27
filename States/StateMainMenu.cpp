@@ -4,7 +4,7 @@
 
 #include "StateMainMenu.h"
 #include "lcd.h"
-#include "sst26.h"
+//#include "sst26.h"
 #include "printf.h"
 
 #include "vector"
@@ -21,7 +21,7 @@ void StateMainMenu::on_enter() {
 
 
     unsigned int b;
-    b = sst26_read_id()->jedecWord;
+//    b = sst26_read_id()->jedecWord;
     (void)b;
 
 //    bitmap = new uint8_t[15360];

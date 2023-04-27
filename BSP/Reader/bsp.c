@@ -64,7 +64,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "keypad.h"
-#include "sst26.h"
+#include "Reader/FlashMem/sst26.h"
 
 #include "core/net.h"
 #include "drivers/mac/pic32mz_eth_driver.h"
@@ -217,7 +217,6 @@ void BSP_gpio_initialize(void )
 
 void BSP_drivers_initialize( void )
 {
-
 
     int r = SpiDriver_initialize(0, &spiDriverInstance0_init);
     DEBUG_PRINT("r = %d\n\r", r);

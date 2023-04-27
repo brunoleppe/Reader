@@ -77,6 +77,6 @@ bool SpiDriver_read_dma(DriverHandle handle, void *rxBuffer, size_t size);
 bool SpiDriver_write_read(DriverHandle handle, void *txBuffer, size_t txSize, void *rxBuffer, size_t rxSize);
 bool SpiDriver_transfer_custom(DriverHandle handle, void (*custom)(void));
 SpiClientObject* SpiDriver_get_object(DriverHandle handle);
-bool SpiDriver_mutex_take(DriverHandle handle);
+bool SpiDriver_mutex_take(DriverHandle handle, uint32_t blockTime);
 bool SpiDriver_mutex_release(DriverHandle handle);
 #endif //READER_SPI_DRIVER_H

@@ -10,7 +10,7 @@
 #include "timers.h"
 
 #include "BSP/bsp.h"
-#include "qt1110.h"
+#include "Reader/QTouch/qt1110.h"
 
 #include <stdio.h>
 #include <string.h>

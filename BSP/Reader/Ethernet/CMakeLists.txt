@@ -1,3 +1,7 @@
+include_directories(.)
+include_directories(common)
+include_directories(cyclone_tcp/)
+
 add_library(CycloneTCP OBJECT
         common/compiler_port.h
         common/cpu_endian.c
