@@ -15,6 +15,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "tcp_port.h"
+
 static uint8_t *bitmap;
 
 void StateMainMenu::on_enter() {
@@ -42,6 +44,19 @@ void StateMainMenu::on_input(InputEvent &evt) {
     if(evt.code == KEY_BACKSPACE && evt.value == INPUT_EVENT_CLICKED){
         machine->get_back();
     }
+    if(evt.code == KEY_UP && evt.value == INPUT_EVENT_CLICKED){
+        if(tcp_port_is_connected()){
+            char *buffer = "up";
+            tcp_port_send(reinterpret_cast<uint8_t *>(buffer), 2);
+        }
+    }
+    if(evt.code == KEY_DOWN && evt.value == INPUT_EVENT_CLICKED){
+        if(tcp_port_is_connected()){
+            char *buffer = "down";
+            tcp_port_send(reinterpret_cast<uint8_t *>(buffer), 4);
+        }
+    }
+
 }
 
 void StateMainMenu::on_exit() {

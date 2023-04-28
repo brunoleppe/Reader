@@ -19,5 +19,6 @@ add_library(BSP OBJECT
         ../music.h
         sst26.c sst26.h
         ../printf.c ../printf.h ../printf_config.h
-        ../virtual_term.c ../virtual_term.h)
+        ../virtual_term.c ../virtual_term.h
+        ../tcp_port.c ../tcp_port.h)
 target_link_libraries(BSP PUBLIC HAL)

@@ -136,6 +136,8 @@ size_t SpiDriver_transfer(DriverHandle handle, void *txBuffer, void *rxBuffer, s
 }
 bool SpiDriver_byte_transfer(DriverHandle handle, uint8_t data, uint8_t *outData)
 {
+    uint8_t receivedData;
+
     SpiClientObject *client = SPI_Driver_handle_validate(handle);
     if(client == NULL)
         return false;
@@ -153,7 +155,9 @@ bool SpiDriver_byte_transfer(DriverHandle handle, uint8_t data, uint8_t *outData
     if(client->csPin != GPIO_PIN_INVALID)
         GPIO_pin_write(client->csPin, GPIO_LOW);
 
-    *outData = SPI_byte_transfer(dObj->spiChannel, data);
+    receivedData = SPI_byte_transfer(dObj->spiChannel, data);
+    if(outData != NULL)
+        *outData = receivedData;
 
     if(client->csPin != GPIO_PIN_INVALID)
         GPIO_pin_write(client->csPin, GPIO_LOW);
@@ -232,31 +236,6 @@ bool SpiDriver_write_read(DriverHandle handle, void *txBuffer, size_t txSize, vo
     if(client->csPin != GPIO_PIN_INVALID)
         GPIO_pin_write(client->csPin, GPIO_HIGH);
     return result;
-}
-
-bool SpiDriver_transfer_custom(DriverHandle handle, void (*custom)(void))
-{
-    SpiClientObject *client = SPI_Driver_handle_validate(handle);
-    if(client == NULL)
-        return false;
-
-    SpiDriverObject *dObj = client->driverObject;
-
-    if(dObj->activeClient != client || client->setupChanged)
-    {
-        SPI_setup(dObj->spiChannel, client->setup.sample | client->setup.spiMode, client->setup.baudRate);
-        client->setupChanged = false;
-    }
-
-    dObj->activeClient = client;
-    if(client->csPin != GPIO_PIN_INVALID)
-        GPIO_pin_write(client->csPin, GPIO_LOW);
-
-    custom();
-
-    if(client->csPin != GPIO_PIN_INVALID)
-        GPIO_pin_write(client->csPin, GPIO_HIGH);
-    return true;
 }
 
 SpiClientObject* SpiDriver_get_object(DriverHandle handle)

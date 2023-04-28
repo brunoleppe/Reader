@@ -21,6 +21,8 @@ add_library(BSP OBJECT
         ../printf.c ../printf.h ../printf_config.h
         ../virtual_term.c ../virtual_term.h
         net_config.h
-        os_port_config.h)
+        os_port_config.h
+        ../tcp_port.c ../tcp_port.h
+        )
 target_link_libraries(BSP PUBLIC HAL)
 target_link_libraries(BSP PUBLIC CycloneTCP)

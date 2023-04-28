@@ -24,11 +24,8 @@ extern "C"{
 #endif
 
 void debug_init(UART_Channel channel);
-
 void debug_write(void *buffer, size_t len);
-
 void debug_write_string(char *s);
-
 void debug_printf(const char *fmt, ...);
 
 #ifdef __cplusplus
