@@ -55,7 +55,7 @@ int DMA_channel_init(DMA_Channel channel, int configFlags)
         DMA_DESCRIPTOR(channel)->dchint.set = _DCH0INT_CHBCIE_MASK;
     }
     if((configFlags & DMA_CHANNEL_CHAINED) == DMA_CHANNEL_CHAINED){
-        DMA_DESCRIPTOR(channel)->dchcon.set = _DCH1CON_CHCHNS_MASK;
+        DMA_DESCRIPTOR(channel)->dchcon.set = _DCH1CON_CHCHN_MASK;
     }
     if((configFlags & DMA_CHANNEL_CHAIN_LOWER) == DMA_CHANNEL_CHAIN_LOWER){
         DMA_DESCRIPTOR(channel)->dchcon.set = _DCH1CON_CHCHNS_MASK;
