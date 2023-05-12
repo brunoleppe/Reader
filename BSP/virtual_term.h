@@ -13,6 +13,11 @@ char get_char(int key_code);
 char get_char_to_upper(int key_code);
 char get_char_to_lower(int key_code);
 
+int is_alpha(int code);
+int is_numeric(int code);
+int is_symbol(int code);
+int is_control(int code);
+
 #ifdef __cplusplus
 }
 #endif

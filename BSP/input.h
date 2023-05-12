@@ -7,6 +7,18 @@
 
 #include <stdbool.h>
 
+enum ControlType {
+    CONTROL_TYPE_INVALID = 0,
+    CONTROL_TYPE_ENTER,
+    CONTROL_TYPE_RETURN,
+    CONTROL_TYPE_CANCEL,
+    CONTROL_TYPE_OPTION,
+    CONTROL_TYPE_UP,
+    CONTROL_TYPE_DOWN,
+    CONTROL_TYPE_PUMP,
+    CONTROL_TYPE_SPACE,
+};
+
 enum INPUT_EVENTS{
     INPUT_EVENT_PRESSED = 1,
     INPUT_EVENT_RELEASED = 0,
@@ -23,6 +35,9 @@ typedef struct{
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
+
 
 bool input_report_key(int code, int value);
 

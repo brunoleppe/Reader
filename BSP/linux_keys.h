@@ -136,7 +136,7 @@
 #define KEY_DOTTED_U            127
 
 #define KEY_UNDERSCORE          128
-#define KEY_ASPERAND            127
+#define KEY_ASPERAND            129
 
 
 #endif //LINUX_KEYS_H

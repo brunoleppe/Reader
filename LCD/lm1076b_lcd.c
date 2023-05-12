@@ -29,28 +29,25 @@ struct LCD{
     uint32_t spiChannel;
     uint32_t dmaChannel;
     uint8_t *lcd_buffer;
+    uint8_t *render_buffer;
     int lcd_size;
     GPIO_PinMap cs_pin;
     GPIO_PinMap bla_pin;
     GPIO_PinMap dc_pin;
     GPIO_PinMap rst_pin;
     uintptr_t   handle;
+
 };
-typedef struct{
-    uint8_t     bytes;      ///< Cantidad de bytes por caracter.
-    uint8_t     bpr;        ///< Cantidad de bytes por fila. Un pixel es un bit.
-    int         cols;
-    int         rows;
-    uint8_t     *font;      ///< Puntero a la tabla de caracteres.
-    uint8_t     *special;   ///< Puntero a la tabla de caracteres especiales.
-}LCD_Font;
+
 /**********************************************************************
 * Module Variable Definitions
 **********************************************************************/
 static uint8_t __attribute__((coherent, aligned(16))) lcd_buffer[LCD_BUFFER_SIZE];
+static uint8_t __attribute__((coherent, aligned(16))) render_buffer[LCD_BUFFER_SIZE];
 static struct LCD lcd = {
     .lcd_size = LCD_BUFFER_SIZE,
-    .lcd_buffer = lcd_buffer
+    .lcd_buffer = lcd_buffer,
+    .render_buffer = render_buffer
 };
 // <editor-fold defaultstate="collapsed" desc="fonts">
 // <editor-fold defaultstate="collapsed" desc="Normal">
@@ -402,7 +399,7 @@ static const LCD_Font *fonts[]={
 * Function Prototypes
 **********************************************************************/
 static unsigned char* LCD_get_char(unsigned char c, const LCD_Font *font);
-static LCD_COLOR LCD_color_inverse(LCD_COLOR color);
+
 /**********************************************************************
 * Function Definitions
 **********************************************************************/
@@ -414,11 +411,15 @@ int LCD_init (uint32_t spiChannel, uint32_t dma, GPIO_PinMap cs, GPIO_PinMap bla
     lcd.cs_pin = cs;
     lcd.dc_pin = dc;
     lcd.rst_pin = rst;
+    return 0;
+}
 
+void    LCD_configure   ()
+{
     static uint8_t config_buffer[36]={
-        0x2a,0x27,0xc2,0xa1,0xd0,0xd5,0xc8,0x10,0xeb,0xa6,0xa4,0x81,0x35,0xd8,0xf1,
-        0x7f,0xf2,0x00,0xf3,0x7f,0x85,0xaf,0xf4,0,0xf5,0,0xf6,79,0xf7,127,0xf8,0x00,
-        0x10,0x60,0x70,0x00
+            0x2a,0x27,0xc2,0xa1,0xd0,0xd5,0xc8,0x10,0xeb,0xa6,0xa4,0x81,0x35,0xd8,0xf1,
+            0x7f,0xf2,0x00,0xf3,0x7f,0x85,0xaf,0xf4,0,0xf5,0,0xf6,79,0xf7,127,0xf8,0x00,
+            0x10,0x60,0x70,0x00
     };
 
     GPIO_pin_write(lcd.rst_pin, GPIO_LOW);
@@ -432,7 +433,7 @@ int LCD_init (uint32_t spiChannel, uint32_t dma, GPIO_PinMap cs, GPIO_PinMap bla
 
     lcd.handle = SpiDriver_open(lcd.spiChannel);
     SpiDriverSetup setup = {
-            .csPin = cs,
+            .csPin = lcd.cs_pin,
             .baudRate = 20000000,
             .spiMode = SPI_MODE_3,
     };
@@ -443,8 +444,8 @@ int LCD_init (uint32_t spiChannel, uint32_t dma, GPIO_PinMap cs, GPIO_PinMap bla
 
 
     vTaskDelay(10);
-    return 0;
 }
+
 void    LCD_draw_point  (int x, int y, LCD_COLOR color)
 {
     uint8_t parity = (x&1);
@@ -475,9 +476,9 @@ void    LCD_draw_vline  (int x, int y, int length, LCD_COLOR color)
 void    LCD_draw_rect   (int x, int y, int height, int width, LCD_COLOR color)
 {
     LCD_draw_hline(x, y, width, color);
-    LCD_draw_hline(x, y+height, width, color);
+    LCD_draw_hline(x, y+height-1, width, color);
     LCD_draw_vline(x, y, height, color);
-    LCD_draw_vline(x+width, y, height, color);
+    LCD_draw_vline(x+width-1, y, height, color);
 }
 void    LCD_draw_fill   (int x, int y, int height, int width, LCD_COLOR color)
 {
@@ -508,9 +509,9 @@ void    LCD_draw_string (int x, int y, const char *str, LCD_Fonts f, LCD_COLOR c
 {
     const LCD_Font *font = fonts[f];
     uint8_t i,len = strlen(str);
-    LCD_COLOR negative = LCD_color_inverse(color);
+//    LCD_COLOR negative = LCD_color_inverse(color);
     uint8_t space = 1;
-    LCD_draw_fill(x, y, font->rows, len*(space+font->cols), negative);
+//    LCD_draw_fill(x, y, font->rows, len*(space+font->cols), negative);
     for(i=0;i<len;i++){
         LCD_draw_char(x, y,str[i], f, color);
         x+=space+font->cols;
@@ -530,9 +531,11 @@ void    LCD_clear       ()
 void    LCD_print       ( void )
 {
 
+    memcpy(lcd.render_buffer, lcd.lcd_buffer, LCD_BUFFER_SIZE);
+
     GPIO_pin_write(lcd.dc_pin, GPIO_HIGH);
     if(SpiDriver_mutex_take(lcd.handle, portMAX_DELAY)) {
-        SpiDriver_transfer(lcd.handle, lcd.lcd_buffer, NULL, LCD_BUFFER_SIZE);
+        SpiDriver_transfer(lcd.handle, lcd.render_buffer, NULL, LCD_BUFFER_SIZE);
         SpiDriver_mutex_release(lcd.handle);
     }
 }
@@ -567,7 +570,11 @@ static unsigned char* LCD_get_char(unsigned char c, const LCD_Font *font){
     }
 }
 
-LCD_COLOR LCD_color_inverse(LCD_COLOR color)
+LCD_COLOR LCD_invert_color(LCD_COLOR color)
 {
     return LCD_COLOR_BLACK^color;
+}
+const LCD_Font* LCD_get_font(LCD_Fonts font)
+{
+    return fonts[font];
 }

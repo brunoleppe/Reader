@@ -113,7 +113,7 @@ error_t ksz8041Init(NetInterface *interface)
 
 void ksz8041Tick(NetInterface *interface)
 {
-    uint16_t value;
+//    uint16_t value;
     bool_t linkState;
 
     //No external interrupt line driver?

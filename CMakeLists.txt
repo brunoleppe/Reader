@@ -26,10 +26,15 @@ set(SOURCES
 #        main.c
         main.cpp
         DynamicAlloc/dynamic_alloc.cpp
-        States/State.cpp States/State.h ui.cpp ui.h
-        States/StateMainMenu.h States/StateMainMenu.cpp
-        States/StateIdle.cpp States/StateIdle.h States/StateDeviceEnter.cpp States/StateDeviceEnter.h)
 
+        MVC_Test/Figures/Box.cpp
+        MVC_Test/Figures/Figure.cpp
+        MVC_Test/Figures/ItemBox.cpp
+        MVC_Test/Figures/Label.cpp
+        MVC_Test/Figures/make_unique.h
+        MVC_Test/Figures/MenuWindow.cpp
+        MVC_Test/Figures/TextBox.cpp
+        MVC_Test/Input/input.cpp MVC_Test/MVC/Controller.cpp MVC_Test/MVC/Model.cpp MVC_Test/MVC/Views/View.cpp MVC_Test/MVC/Views/ViewService.cpp MVC_Test/MVC/States/StateMainMenu.cpp MVC_Test/MVC/States/StateOptionMenu.cpp MVC_Test/MVC/States/StateOptionMenu.h MVC_Test/DataTypes/Item.cpp MVC_Test/DataTypes/Item.h MVC_Test/DataTypes/Observer.h)
 project(Reader CXX C ASM)
 
 # FreeRTOS Directories
@@ -38,6 +43,7 @@ include_directories(HAL/)
 include_directories(BSP/)
 include_directories(LCD/)
 include_directories(States/)
+include_directories(MVC_Test/)
 
 IF(READERV2 OR READERV1)
     include_directories(FreeRTOS/Source/portable/MPLAB/PIC32MZ)

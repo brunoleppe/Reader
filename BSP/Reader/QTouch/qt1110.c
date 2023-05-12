@@ -67,6 +67,7 @@ static int QTouch_key_map(enum QT_KEY k)
         case QT_KEY_UP:         return 5;
         case QT_KEY_READER:     return 6;
         case QT_KEY_INVALID:    return 7;
+        default:                return 0;
     }
 }
 
@@ -110,7 +111,8 @@ int     QTouch_initialize(SPI_Channel channel, GPIO_PinMap cs, GPIO_PinMap rst, 
             .sample = SPI_SAMPLE_END
     };
 
-    int r = SpiDriver_setup(qt.handle, &setup);
+//    int r =
+            SpiDriver_setup(qt.handle, &setup);
     DEBUG_PRINT("setup = %x\n\r", r);
     DEBUG_PRINT("----QTOUCH----\n\r");
     GPIO_pin_write(qt.rst, GPIO_LOW);

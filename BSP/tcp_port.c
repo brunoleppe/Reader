@@ -3,6 +3,7 @@
 #include "core/socket.h"
 #include "FreeRTOS.h"
 #include "semphr.h"
+#include "input.h"
 
 typedef struct TcpSocket{
     Socket *socket;
@@ -31,7 +32,13 @@ _Noreturn void tcp_port_task(void *params)
                 error_t err = socketReceive(remote, obj.rxBuffer, 128, &len, 0);
                 if(err == NO_ERROR) {
 //                    socketSend(remote, "Recibido: ", 10, NULL, 0);
-                    socketSend(remote, obj.rxBuffer, len, NULL, 0);
+//                    socketSend(remote, obj.rxBuffer, len, NULL, 0);
+
+                    if(rxBuffer[1] == 1){
+                        input_report_key(rxBuffer[3], rxBuffer[4]);
+                    }
+
+
                 }
                 else if(err == ERROR_END_OF_STREAM) {
                     obj.connected = false;

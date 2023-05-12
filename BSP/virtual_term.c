@@ -4,6 +4,7 @@
 
 #include "virtual_term.h"
 #include "linux_keys.h"
+#include "input.h"
 
 static const char buffer[] = {
         [KEY_1]                 = '1',
@@ -53,13 +54,13 @@ static const char buffer[] = {
         [KEY_SLASH]             = '/',
         [KEY_KPASTERISK]        = '*',
         [KEY_SPACE]             = ' ',
-        [KEY_TILDE_A]           = (char)'Á',
-        [KEY_TILDE_E]           = (char)'É',
-        [KEY_TILDE_I]           = (char)'Í',
-        [KEY_TILDE_O]           = (char)'Ó',
-        [KEY_TILDE_U]           = (char)'Ú',
-        [KEY_TILDE_N]           = (char)'Ñ',
-        [KEY_DOTTED_U]          = (char)'Ü',
+        [KEY_TILDE_A]           = (char) L'Á',
+        [KEY_TILDE_E]           = (char)(L'É'),
+        [KEY_TILDE_I]           = (char)(L'Í'),
+        [KEY_TILDE_O]           = (char)(L'Ó'),
+        [KEY_TILDE_U]           = (char)(L'Ú'),
+        [KEY_TILDE_N]           = (char)(L'Ñ'),
+        [KEY_DOTTED_U]          = (char)(L'Ü'),
         [KEY_UNDERSCORE]        = '_',
         [KEY_ASPERAND]          = '@',
 };
@@ -76,10 +77,34 @@ char get_char_to_upper(int key_code){
 
 char get_char_to_lower(int key_code){
     char c = (char)buffer[key_code];
-    if(c >= 'A' && c <= 'Z')
-        c += 'a' - 'A';
-    else if((int)c > 127)
-        c += 32;
-
+    if((c >= 'A' && c <= 'Z' )|| c > 127)
+        c += 32; //'a' - 'A' = 32
     return c;
+}
+
+
+int is_alpha(int code)
+{
+    return 0;
+}
+int is_numeric(int code)
+{
+    return 0;
+}
+int is_symbol(int code)
+{
+    return 0;
+}
+int is_control(int code)
+{
+    switch(code){
+        case KEY_RESERVED: return CONTROL_TYPE_INVALID;
+        case KEY_F1: return CONTROL_TYPE_OPTION;
+        case KEY_BACKSPACE: return CONTROL_TYPE_RETURN;
+        case KEY_ENTER: return CONTROL_TYPE_ENTER;
+        case KEY_DOWN: return CONTROL_TYPE_DOWN;
+        case KEY_UP: return CONTROL_TYPE_UP;
+        case KEY_F2: return CONTROL_TYPE_PUMP;
+    }
+    return CONTROL_TYPE_INVALID;
 }

@@ -5,6 +5,7 @@
 #include "debug_bsp.h"
 #include "HAL/system.h"
 #include "printf.h"
+#include "string.h"
 
 static UART_Channel  channel_;
 static uint8_t buffer[256];

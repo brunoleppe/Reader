@@ -17,7 +17,7 @@
 
 #include "tcp_port.h"
 
-static uint8_t *bitmap;
+//static uint8_t *bitmap;
 
 void StateMainMenu::on_enter() {
 

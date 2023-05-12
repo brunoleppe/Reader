@@ -1095,7 +1095,7 @@ error_t lan9303DeleteStaticFdbEntry(NetInterface *interface,
 error_t lan9303GetStaticFdbEntry(NetInterface *interface, uint_t index,
                                  SwitchFdbEntry *entry)
 {
-    uint32_t value;
+    uint32_t value = 0;
 
     //Loop through the ALR table
     while(index < LAN9303_ALR_TABLE_SIZE)
@@ -1239,7 +1239,7 @@ void lan9303FlushStaticFdbTable(NetInterface *interface)
 error_t lan9303GetDynamicFdbEntry(NetInterface *interface, uint_t index,
                                   SwitchFdbEntry *entry)
 {
-    uint32_t value;
+    uint32_t value = 0;
 
     //Loop through the ALR table
     while(index < LAN9303_ALR_TABLE_SIZE)

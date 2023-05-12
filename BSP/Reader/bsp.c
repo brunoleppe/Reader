@@ -218,15 +218,18 @@ void BSP_gpio_initialize(void )
 void BSP_drivers_initialize( void )
 {
 
-    int r = SpiDriver_initialize(0, &spiDriverInstance0_init);
+//    int r =
+            SpiDriver_initialize(0, &spiDriverInstance0_init);
     DEBUG_PRINT("r = %d\n\r", r);
-    r = SpiDriver_initialize(1, &spiDriverInstance1_init);
+//    r =
+            SpiDriver_initialize(1, &spiDriverInstance1_init);
     DEBUG_PRINT("r = %d\n\r", r);
     SpiDriver_initialize(2, &spiDriverInstance2_init);
 
 
 
     sst26_initialize(2, FLASH_SS);
+    LCD_init(1, LCD_TX_DMA_CHANNEL, LCD_SS, LCD_BLA, LCD_DC, LCD_RST);
 
 
     MacAddr macAddr;
@@ -288,9 +291,11 @@ void BSP_task_initialize(void)
 {
     xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed1,1,NULL);
     xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed2,1,NULL);
-    xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
+//    xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
     xTaskCreate(keypad_task, "qt_task", 2048, NULL, 1, NULL);
     xTaskCreate(tcp_port_task, "socket", 1024, NULL, 2, NULL);
+
+
 }
 
 void BSP_system_initialize()
@@ -336,17 +341,11 @@ _Noreturn void blink(void *params)
 
 _Noreturn void lcd_task(void *params)
 {
-    (void)params;
-    LCD_init(1, LCD_TX_DMA_CHANNEL, LCD_SS, LCD_BLA, LCD_DC, LCD_RST);
-
-//    LCD_draw_bitmap(0,0,bitmap,sizeof(bitmap));
-//    char *s = "Hola Mundo";
-//    LCD_draw_string(0,1,(char*)s,LCD_FONT_MEDIUM,LCD_COLOR_BLACK);
-//    vTaskDelay(portMAX_DELAY);
-    while(true){
-        LCD_print();
-        vTaskDelay(17);
-    }
+//    (void)params;
+//    while(true){
+//        LCD_print();
+//        vTaskDelay(17);
+//    }
 }
 
 

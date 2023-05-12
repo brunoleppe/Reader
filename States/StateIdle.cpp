@@ -31,26 +31,26 @@ void StateIdle::on_input(InputEvent &evt) {
 
     if(evt.value == INPUT_EVENT_PRESSED){
         char c = get_char(evt.code);
-        sprintf_(buffer,"%c",c);
+//        sprintf_(buffer,"%c",c);
         LCD_draw_string(0,40,buffer,LCD_FONT_SMALL, LCD_COLOR_BLACK);
-//        if(c >= ' '){
-//            buffer[counter] = c;
-//            LCD_draw_string(0,40,buffer,LCD_FONT_SMALL, LCD_COLOR_BLACK);
-//        }
-//        else if(evt.code == KEY_BACKSPACE){
-//            buffer[counter] = ' ';
-//            LCD_draw_string(0,40,buffer,LCD_FONT_SMALL, LCD_COLOR_BLACK);
-//            if(counter > 0)
-//                counter--;
-//        }
+        if(c >= ' '){
+            buffer[counter] = c;
+            LCD_draw_string(0,40,buffer,LCD_FONT_SMALL, LCD_COLOR_BLACK);
+        }
+        else if(evt.code == KEY_BACKSPACE){
+            buffer[counter] = ' ';
+            LCD_draw_string(0,40,buffer,LCD_FONT_SMALL, LCD_COLOR_BLACK);
+            if(counter > 0)
+                counter--;
+        }
     }
-//    else if(evt.value == INPUT_EVENT_CLICKED){
-//        char c = get_char(evt.code);
-//        if(c >= ' ') {
-//            if (++counter == size)
-//                counter = 0;
-//        }
-//    }
+    else if(evt.value == INPUT_EVENT_CLICKED){
+        char c = get_char(evt.code);
+        if(c >= ' ') {
+            if (++counter == size)
+                counter = 0;
+        }
+    }
 
 
     if(evt.code == KEY_ESC && evt.value == INPUT_EVENT_CLICKED){

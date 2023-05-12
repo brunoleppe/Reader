@@ -1,5 +1,4 @@
-#include <assert.h>
-#include <features.h>
+
 //
 // Created by bleppe on 28/03/23.
 //
@@ -15,6 +14,12 @@
 
 #include "sst26.h"
 #include <xc.h>
+
+
+#include "core/net.h"
+#include "drivers/mac/pic32mz_eth_driver.h"
+#include "drivers/phy/ksz8041_driver.h"
+#include "tcp_port.h"
 // <editor-fold desc="Configuration Bits">
 /*** DEVCFG0 ***/
 #pragma config DEBUG =      OFF
@@ -157,6 +162,38 @@ void BSP_drivers_initialize( void )
 
     sst26_initialize(FLASH_SPI_DRIVER_INDEX, FLASH_SS_PIN);
 
+    MacAddr macAddr;
+    NetInterface *interface;
+    Ipv4Addr ipv4Addr;
+
+    netInit();
+    interface = &netInterface[0];
+    netSetInterfaceName(interface, "eth0");
+    netSetHostname(interface, "TEST");
+    macStringToAddr("00-00-00-00-00-00", &macAddr);
+    netSetMacAddr(interface, &macAddr);
+    netSetDriver(interface, &pic32mzEthDriver);
+    netSetPhyDriver(interface, &ksz8041PhyDriver);
+
+//    netSetSwitchDriver(interface, &lan9303SwitchDriver);
+//    netSetSwitchPort(interface,LAN9303_PORT1);
+
+    netConfigInterface(interface);
+
+    ipv4StringToAddr("10.1.1.244", &ipv4Addr);
+    ipv4SetHostAddr(interface, ipv4Addr);
+
+    ipv4StringToAddr("255.255.255.0", &ipv4Addr);
+    ipv4SetSubnetMask(interface, ipv4Addr);
+
+    ipv4StringToAddr("10.1.1.1", &ipv4Addr);
+    ipv4SetDefaultGateway(interface, ipv4Addr);
+
+    //Set primary and secondary DNS servers
+    ipv4StringToAddr("0.0.0.0", &ipv4Addr);
+    ipv4SetDnsServer(interface, 0, ipv4Addr);
+    ipv4StringToAddr("0.0.0.0", &ipv4Addr);
+    ipv4SetDnsServer(interface, 1, ipv4Addr);
 }
 void BSP_task_initialize(void)
 {
