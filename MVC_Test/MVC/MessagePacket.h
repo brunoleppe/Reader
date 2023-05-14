@@ -22,7 +22,9 @@ public:
     MessageType messageType;
     const char *title;
     std::vector<const char*> options;
-    std::vector<Item*> items;
+//    std::vector<Item*> items;
+    ItemList itemList;
+
 
     explicit MessagePacket() : messageType(MESSAGE_TYPE_MENU), title("") {}
 };

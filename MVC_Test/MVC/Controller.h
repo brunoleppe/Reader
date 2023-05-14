@@ -14,6 +14,8 @@
 
 #include "FreeRTOS.h"
 #include "queue.h"
+#else
+#include <queue>
 #endif
 
 class Controller : public InputEventObserver{
@@ -24,13 +26,21 @@ public:
     void Stop();
 
     void update() override;
-    static void controller_task(void *data);
+    static
+#if defined(PIC32) || defined(__PIC32) || defined(__PIC32__)
+    void
+#else
+    int
+#endif
+    controller_task(void *data);
 
 private:
     ModelStateService *model;
     ViewService *view;
 #if defined(PIC32) || defined(__PIC32) || defined(__PIC32__)
     QueueHandle_t queue;
+#else
+    std::queue<InputEvent> queue;
 #endif
 
     bool running;

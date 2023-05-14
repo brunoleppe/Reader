@@ -22,5 +22,5 @@ add_library(BSP OBJECT
         ../printf.c ../printf.h ../printf_config.h
         os_port_config.h
         net_config.h
-        ../bitmap.c ../bitmap.h ../virtual_term.c ../virtual_term.h ../tcp_port.c ../tcp_port.h FlashMem/sst26_alt.c)
+        ../bitmap.c ../bitmap.h ../virtual_term.c ../virtual_term.h ../tcp_port.c ../tcp_port.h)
 target_link_libraries(BSP PUBLIC HAL)

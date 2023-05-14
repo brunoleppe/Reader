@@ -16,7 +16,7 @@ StateMainMenu::StateMainMenu()
     };
     data.title = "Main Menu";
     for(int i=0;i<(int)(sizeof(items)/sizeof(items[0]));i++){
-        data.items.push_back(new ListItem(i,items[i]));
+        data.itemList.items.push_back(new MenuItem(i, items[i]));
     }
 }
 
@@ -27,7 +27,7 @@ bool StateMainMenu::on_event(ControllerInputEvent &evt) {
         return true;
     }
     else if(evt.event == INPUT_EVENT_CLICKED && evt.type == INPUT_EVENT_TYPE_CONTROL && evt.code == CONTROL_TYPE_RETURN) {
-        data.items.push_back(new ListItem((int)data.items.size(),"test"));
+        data.itemList.items.push_back(new MenuItem((int)data.itemList.items.size(), "test"));
         return true;
     }
     return false;

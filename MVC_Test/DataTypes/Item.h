@@ -7,6 +7,8 @@
 
 
 #include <string>
+#include <list>
+#include <vector>
 
 class Item{
 protected:
@@ -30,11 +32,29 @@ public:
     }
 };
 
-class ListItem : public Item{
+class ItemList{
+private:
+    int currentIndex;
+public:
+    std::vector<Item*> items;
+
+    ItemList();
+    Item* get_current();
+    void move_up();
+    void move_down();
+    void add(Item *item);
+    void remove(Item *item);
+    void clear();
+    size_t size();
+    Item* operator[](int);
+
+};
+
+class MenuItem : public Item{
 private:
     std::string s;
 public:
-    ListItem(int index, const char* s) : Item(index), s(s){}
+    MenuItem(int index, const char* s) : Item(index), s(s){}
     const char* get_cstring();
 };
 

@@ -4,16 +4,10 @@
 
 #include "ItemBox.h"
 
-ItemBox::~ItemBox() {
-    if(items == nullptr)
-        return;
-
-    for(auto i : *items)
-        delete i;
-}
+ItemBox::~ItemBox() = default;
 
 void ItemBox::add(Item *i) {
-    items->push_back(i);
+    itemList->items.push_back(i);
 }
 
 ItemBox::ItemBox(int x, int y, int width, int height, uint8_t back, uint8_t fore) :
@@ -21,23 +15,17 @@ ItemBox::ItemBox(int x, int y, int width, int height, uint8_t back, uint8_t fore
 {}
 
 void ItemBox::clear() {
-    if(items == nullptr)
-        return;
-
-    while(!items->empty()){
-        items->pop_back();
-    }
-
+    itemList->items.clear();
 }
 
 void ListItemBox::draw() {
-    if(items == nullptr)
+    if(itemList == nullptr)
         return;
 
     int startPos = y;
-    int limit = (int)items->size() > maxItemsInView ? maxItemsInView : (int)items->size();
+    int limit = (int)itemList->items.size() > maxItemsInView ? maxItemsInView : (int)itemList->items.size();
     for( int i=0; i<limit; i++){
-        ListItem *item = (ListItem*)(*items)[i];
+        MenuItem *item = (MenuItem*)(itemList)->items[i];
         uint8_t fcolor = foreColor;
         uint8_t bcolor = backColor;
         if(item->get_focus()) {
@@ -54,39 +42,30 @@ ListItemBox::ListItemBox(int x, int y, int width, int height, uint8_t back, uint
         ItemBox(x, y, width, height, back, fore)
 {
     maxItemsInView = h/20;
-    count = 0;
-    startIndex = 0;
-
 }
 
-void ListItemBox::add(std::vector<Item*>& _items) {
-    items = &_items;
-    count = _items.size();
+void ListItemBox::add(ItemList& _items) {
+    itemList = &_items;
 }
 
-void ListItemBox::focus(int i) {
-    if(items == nullptr)
+void ListItemBox::focus(int _index) {
+    if(itemList == nullptr)
         return;
-    if(i < (int)items->size()){
-        for(auto item : *items){
-            if(item->get_index() == i){
-                item->set_focus(true);
-            }
-            else{
-                item->set_focus(false);
-            }
+    for(int i=0; i < itemList->items.size(); i++){
+        if(i == _index){
+            itemList->items[i]->set_focus(true);
+            continue;
         }
+        itemList->items[i]->set_focus(false);
     }
 }
 
 void ListItemBox::focus_next() {
-    if(++startIndex > items->size()-1)
-        startIndex = 0;
-    focus(startIndex);
+    itemList->move_up();
+    focus(itemList->get_current()->get_index());
 }
 
 void ListItemBox::focus_prev() {
-    if(--startIndex < 0)
-        startIndex = items->size()-1;
-    focus(startIndex);
+    itemList->move_down();
+    focus(itemList->get_current()->get_index());
 }

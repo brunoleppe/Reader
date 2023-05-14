@@ -12,8 +12,13 @@
 #include "DataTypes/Item.h"
 #include "MVC/ControllerInputEvent.h"
 #include "DataTypes/Observer.h"
+#if defined(PIC32) || defined(__PIC32) || defined(__PIC32__)
 #include "virtual_term.h"
 #include "linux_keys.h"
+#else
+#include "Input/virtual_term.h"
+#endif
+
 
 class View {
 public:
@@ -66,10 +71,8 @@ public:
     void set_title(const char *str){
         window.set_title(str);
     }
-    void set_items(std::vector<Item*>& items){
-        window.add_item(items);
-
-
+    void set_items(ItemList& items){
+        window.add_items(items);
     }
 
     void clean() override {
@@ -87,7 +90,11 @@ public:
         }
         else if(evt == INPUT_EVENT_CLICKED){
             InputEvent  i = {
+#if defined(PIC32) || defined(__PIC32) || defined(__PIC32__)
                     .code = KEY_ENTER,
+#else
+                    .code = SDL_SCANCODE_RETURN,
+#endif
                     .value = evt,
             };
             subject->set_data(i);

@@ -23,8 +23,8 @@ MenuWindow::~MenuWindow() {
 
 }
 
-void MenuWindow::add_item(std::vector<Item*>& _items) {
-    listBox.add(_items);
+void MenuWindow::add_items(ItemList &items) {
+    listBox.add(items);
 }
 
 void MenuWindow::clear_items() {
