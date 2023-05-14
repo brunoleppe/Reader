@@ -74,8 +74,6 @@
 #include <xc.h>
 
 
-_Noreturn static void lcd_task(void *params);
-
 static SpiClientObject spiDriverInstance0_clientArray[SPI_DRIVER_INSTANCE_0_CLIENTS];
 static SpiDriverInit   spiDriverInstance0_init = {
         .nClientsMax = SPI_DRIVER_INSTANCE_0_CLIENTS,
@@ -190,6 +188,8 @@ void BSP_drivers_initialize( void )
     SpiDriver_initialize(SPI_DRIVER_INSTANCE_0, &spiDriverInstance0_init);
 
     sst26_initialize(FLASH_SPI_DRIVER_INDEX, FLASH_SS_PIN);
+    LCD_init(LCD_SPI_DRIVER_INDEX, LCD_TX_DMA_CHANNEL, LCD_SS_PIN, LCD_BLA_PIN, LCD_DC_PIN, LCD_RST_PIN);
+
 
     MacAddr macAddr;
     NetInterface *interface;
@@ -224,18 +224,7 @@ void BSP_drivers_initialize( void )
 }
 void BSP_task_initialize(void)
 {
-    xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 2, NULL);
     xTaskCreate(keypad_task, "keypad", 1024, NULL, 3, NULL);
-}
-
-void lcd_task(void *params)
-{
-    (void)params;
-    LCD_init(LCD_SPI_DRIVER_INDEX, LCD_TX_DMA_CHANNEL, LCD_SS_PIN, LCD_BLA_PIN, LCD_DC_PIN, LCD_RST_PIN);
-    while(true){
-        LCD_print();
-        vTaskDelay(17);
-    }
 }
 
 void ETHERNET_interrupt_handler(void)

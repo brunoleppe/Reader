@@ -411,6 +411,15 @@ int LCD_init (uint32_t spiChannel, uint32_t dma, GPIO_PinMap cs, GPIO_PinMap bla
     lcd.cs_pin = cs;
     lcd.dc_pin = dc;
     lcd.rst_pin = rst;
+    lcd.handle = SpiDriver_open(lcd.spiChannel);
+    SpiDriverSetup setup = {
+            .csPin = lcd.cs_pin,
+            .baudRate = 20000000,
+            .spiMode = SPI_MODE_3,
+    };
+
+    int r = SpiDriver_setup(lcd.handle, &setup);
+    (void)r;
     return 0;
 }
 
@@ -430,19 +439,7 @@ void    LCD_configure   ()
     vTaskDelay(10);
 
     GPIO_pin_write(lcd.dc_pin, GPIO_LOW);
-
-    lcd.handle = SpiDriver_open(lcd.spiChannel);
-    SpiDriverSetup setup = {
-            .csPin = lcd.cs_pin,
-            .baudRate = 20000000,
-            .spiMode = SPI_MODE_3,
-    };
-
-    int r = SpiDriver_setup(lcd.handle, &setup);
-    (void)r;
     SpiDriver_transfer(lcd.handle, config_buffer, NULL, sizeof(config_buffer));
-
-
     vTaskDelay(10);
 }
 

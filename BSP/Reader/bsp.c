@@ -69,7 +69,6 @@
 #include "core/net.h"
 #include "drivers/mac/pic32mz_eth_driver.h"
 #include "drivers/phy/ksz8041_driver.h"
-#include "drivers/switch/lan9303_driver.h"
 #include "tcp_port.h"
 
 
@@ -92,24 +91,24 @@ static GPIO_CALLBACK_OBJECT pinCallbackObj[] = {
         {.pin = QT_CHANGE, 0, 0}
 };
 
-static SpiClientObject spiDriverInstance0_clientArray[SPI_DRIVER_INSTANCE_0_CLIENTS];
+static SpiClientObject spiDriverInstance0_clientArray[QT_SPI_DRIVER_INDEX_CLIENTS];
 static SpiDriverInit   spiDriverInstance0_init = {
-    .nClientsMax = SPI_DRIVER_INSTANCE_0_CLIENTS,
+    .nClientsMax = QT_SPI_DRIVER_INDEX_CLIENTS,
     .spiChannel = QT_SPI_CHANNEL,
     .clientArray = spiDriverInstance0_clientArray,
 };
 
-static SpiClientObject spiDriverInstance1_clientArray[SPI_DRIVER_INSTANCE_1_CLIENTS];
+static SpiClientObject spiDriverInstance1_clientArray[LCD_SPI_DRIVER_INDEX_CLIENTS];
 static SpiDriverInit   spiDriverInstance1_init = {
-        .nClientsMax = SPI_DRIVER_INSTANCE_1_CLIENTS,
+        .nClientsMax = LCD_SPI_DRIVER_INDEX_CLIENTS,
         .spiChannel = LCD_SPI_CHANNEL,
         .clientArray = spiDriverInstance1_clientArray,
         .txDmaChannel = LCD_TX_DMA_CHANNEL,
 };
 
-static SpiClientObject spiDriverInstance2_clientArray[SPI_DRIVER_INSTANCE_2_CLIENTS];
+static SpiClientObject spiDriverInstance2_clientArray[FLASH_SPI_DRIVER_INDEX_CLIENTS];
 static SpiDriverInit   spiDriverInstance2_init = {
-        .nClientsMax = SPI_DRIVER_INSTANCE_2_CLIENTS,
+        .nClientsMax = FLASH_SPI_DRIVER_INDEX_CLIENTS,
         .spiChannel = FLASH_SPI_CHANNEL,
         .clientArray = spiDriverInstance2_clientArray,
         .txDmaChannel = FLASH_TX_DMA_CHANNEL,
@@ -117,8 +116,6 @@ static SpiDriverInit   spiDriverInstance2_init = {
 };
 
 static void blink(void *params);
-
-_Noreturn static void lcd_task(void *params);
 
 void BSP_gpio_initialize(void )
 {
@@ -228,8 +225,8 @@ void BSP_drivers_initialize( void )
 
 
 
-    sst26_initialize(2, FLASH_SS);
-    LCD_init(1, LCD_TX_DMA_CHANNEL, LCD_SS, LCD_BLA, LCD_DC, LCD_RST);
+    sst26_initialize(FLASH_SPI_DRIVER_INDEX, FLASH_SS);
+    LCD_init(LCD_SPI_DRIVER_INDEX, LCD_TX_DMA_CHANNEL, LCD_SS, LCD_BLA, LCD_DC, LCD_RST);
 
 
     MacAddr macAddr;
@@ -245,9 +242,6 @@ void BSP_drivers_initialize( void )
     netSetDriver(interface, &pic32mzEthDriver);
     netSetPhyDriver(interface, &ksz8041PhyDriver);
 
-//    netSetSwitchDriver(interface, &lan9303SwitchDriver);
-//    netSetSwitchPort(interface,LAN9303_PORT1);
-
     netConfigInterface(interface);
 
     ipv4StringToAddr("10.1.1.244", &ipv4Addr);
@@ -259,7 +253,6 @@ void BSP_drivers_initialize( void )
     ipv4StringToAddr("10.1.1.1", &ipv4Addr);
     ipv4SetDefaultGateway(interface, ipv4Addr);
 
-    //Set primary and secondary DNS servers
     ipv4StringToAddr("0.0.0.0", &ipv4Addr);
     ipv4SetDnsServer(interface, 0, ipv4Addr);
     ipv4StringToAddr("0.0.0.0", &ipv4Addr);
@@ -291,7 +284,6 @@ void BSP_task_initialize(void)
 {
     xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed1,1,NULL);
     xTaskCreate(blink,"blink_task",256,(void*)&pinParamsLed2,1,NULL);
-//    xTaskCreate(lcd_task, "lcd_task", 2048, NULL, 3, NULL);
     xTaskCreate(keypad_task, "qt_task", 2048, NULL, 1, NULL);
     xTaskCreate(tcp_port_task, "socket", 1024, NULL, 2, NULL);
 
@@ -305,8 +297,6 @@ void BSP_system_initialize()
     PRECONbits.PREFEN = 3;
     PRECONbits.PFMWS = 3;
     CFGCONbits.ECCCON = 3;
-
-
 //    BSP_interrupts_initialize();
 }
 
@@ -338,16 +328,6 @@ _Noreturn void blink(void *params)
         vTaskDelay(p->delay_ms);
     }
 }
-
-_Noreturn void lcd_task(void *params)
-{
-//    (void)params;
-//    while(true){
-//        LCD_print();
-//        vTaskDelay(17);
-//    }
-}
-
 
 void ETHERNET_handler_bsp(void)
 {
