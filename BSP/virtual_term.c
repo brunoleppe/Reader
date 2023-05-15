@@ -105,6 +105,7 @@ int is_control(int code)
         case KEY_DOWN: return CONTROL_TYPE_DOWN;
         case KEY_UP: return CONTROL_TYPE_UP;
         case KEY_F2: return CONTROL_TYPE_PUMP;
+        case KEY_F3: return CONTROL_TYPE_TICK;
     }
     return CONTROL_TYPE_INVALID;
 }

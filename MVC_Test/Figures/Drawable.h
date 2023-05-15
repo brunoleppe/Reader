@@ -24,10 +24,20 @@ struct Position{
 class Drawable {
 public:
     virtual void draw() = 0;
-    virtual void set_position(int x, int y) = 0;
-    virtual Position get_position() = 0;
-    virtual Size get_size() = 0;
-    virtual void invert_colors() = 0;
+    virtual void set_position(int _x, int _y){
+        this->x = _x;
+        this->y = _y;
+    }
+    Position get_position(){
+        return {x,y};
+    }
+    Size get_size(){
+        return {w,h};
+    }
+    virtual void invert_colors(){
+        backColor = LCD_invert_color(static_cast<LCD_COLOR>(backColor));
+        foreColor = LCD_invert_color(static_cast<LCD_COLOR>(foreColor));
+    };
     virtual ~Drawable() = default;
 
 

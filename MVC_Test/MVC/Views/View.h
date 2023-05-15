@@ -30,11 +30,18 @@ public:
     virtual void on_symbol_key(INPUT_EVENTS evt) {};
     virtual void on_control_key(INPUT_EVENTS evt, ControlType c){};
 
-    virtual void set_items(ItemList& items){}
-    virtual void set_title(const char *str){}
-    virtual void set_options(std::vector<const char*>& options){}
+    void set_items(ItemList& items){
+        list = &items;
+    }
+    void set_title(const char *str){
+        title = str;
+    }
+    void set_options(std::vector<const char*>& _options){
+        options = &_options;
+    }
 
-    void set_message(MessagePacket *msg);
+    virtual void update() = 0;
+
 
     void set_subject(Subject<InputEvent> *s){
         subject = s;
@@ -57,6 +64,9 @@ public:
 protected:
     MessagePacket *msg;
     Subject<InputEvent> *subject;
+    const char* title;
+    ItemList *list;
+    std::vector<const char*> *options;
 };
 
 

@@ -11,13 +11,14 @@
 
 class LogoView : public View {
 public:
+    LogoView();
+
     void draw() override;
-    void set_items(ItemList &items) override;
+//    void set_items(ItemList &items) override;
     void on_control_key(INPUT_EVENTS evt, ControlType c) override;
 
-
+void update() override;
     LogoItem* item;
-
     static LogoView instance;
 };
 

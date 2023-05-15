@@ -24,14 +24,6 @@ public:
             d->set_position(x_,y_);
     }
 
-    Position get_position() override {
-        return {x,y};
-    }
-
-    Size get_size() override {
-        return {w,h};
-    }
-
     void invert_colors() override {
         for(auto& d : drawables)
             d->invert_colors();

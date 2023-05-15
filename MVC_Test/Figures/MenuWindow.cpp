@@ -59,6 +59,9 @@ void MenuWindow::select_item(int i) {
 }
 
 void MenuWindow::select_item() {
+    if(listBox.items->size() == 0){
+        return;
+    }
     for(auto item : listBox.items->items){
         item->set_selected(false);
     }

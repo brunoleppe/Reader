@@ -3,7 +3,7 @@
 //
 
 #include "StateMainMenu.h"
-#include "StateOptionMenu.h"
+//#include "StateOptionMenu.h"
 #include "MVC/ControllerInputEvent.h"
 #include "input.h"
 #include "DataTypes/Item.h"
@@ -29,7 +29,7 @@ bool StateMainMenu::on_event(ControllerInputEvent &evt) {
             printf("Item: %s, %d\n", item->get_cstring(), item->get_index());
 #endif
         }
-        context->transition(&StateOptionMenu::instance);
+//        context->transition(&StateOptionMenu::instance);
         return true;
     }
     else if(evt.event == INPUT_EVENT_CLICKED && evt.code == CONTROL_TYPE_RETURN) {

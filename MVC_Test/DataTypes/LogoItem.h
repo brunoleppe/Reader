@@ -11,10 +11,12 @@
 
 class LogoItem : public Item {
 public:
+
+    LogoItem(int index, int x, int y, int width, int height, uint8_t *bitmap);
+
+    int x;
+    int y;
     int width;
-
-    LogoItem(int index, int width, int height, uint8_t *bitmap);
-
     int height;
     uint8_t* bitmap;
 };

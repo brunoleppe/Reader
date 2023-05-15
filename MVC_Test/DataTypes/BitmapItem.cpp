@@ -5,4 +5,5 @@
 #include "BitmapItem.h"
 
 
-BitmapItem::BitmapItem(int index, uint8_t *bitmap, int width, int height) : Item(index) ,bmp(bitmap,width,height) {}
+BitmapItem::BitmapItem(int index, uint8_t *bitmap, int x, int y, int width, int height)
+        : Item(index), bitmap(bitmap), x(x), y(y), width(width), height(height) {}

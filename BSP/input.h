@@ -17,6 +17,7 @@ enum ControlType {
     CONTROL_TYPE_DOWN,
     CONTROL_TYPE_PUMP,
     CONTROL_TYPE_SPACE,
+    CONTROL_TYPE_TICK,
 };
 
 enum INPUT_EVENTS{

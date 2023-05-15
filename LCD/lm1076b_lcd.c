@@ -514,10 +514,14 @@ void    LCD_draw_string (int x, int y, const char *str, LCD_Fonts f, LCD_COLOR c
         x+=space+font->cols;
     }
 }
-void    LCD_draw_bitmap (int x, int y, const uint8_t *bitmap, size_t bitmap_size)
+void   LCD_draw_bitmap(int x, int y, int width, int height, const uint8_t *bitmap)
 {
-
-    memcpy(lcd.lcd_buffer, bitmap, bitmap_size);
+    width = width >> 1;
+    x = x>>1;
+    for(int i=0; i<height; i++){
+        memcpy(lcd.lcd_buffer+120*(i+y)+x ,bitmap+width*i,width);
+    }
+//    memcpy(lcd.lcd_buffer, bitmap, bitmap_size);
 
 }
 void    LCD_clear       ()

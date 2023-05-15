@@ -10,8 +10,12 @@
 
 class BitmapItem : public Item{
 public:
-    Bitmap bmp;
-    explicit BitmapItem(int index, uint8_t *bitmap, int width, int height);
+    uint8_t *bitmap = nullptr;
+    int x;
+    int y;
+    int width;
+    int height;
+    explicit BitmapItem(int index, uint8_t *bitmap, int x, int y, int width, int height);
 };
 
 

@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 3.24.2)
 #Compiler
 set(CMAKE_C_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-gcc")
 set(CMAKE_CXX_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-g++")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-unwind-tables -fno-rtti -Wno-write-strings -fpermissive -fdata-sections -ffunction-sections")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -flto -fno-exceptions -fno-unwind-tables -fno-rtti -Wno-write-strings -fpermissive -fdata-sections -ffunction-sections")
 #Device Family Pack
 #set(DFP /opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-EF_DFP/1.3.58)
 
@@ -34,7 +34,7 @@ set(SOURCES
         MVC_Test/Figures/make_unique.h
         MVC_Test/Figures/MenuWindow.cpp
         MVC_Test/Figures/TextBox.cpp
-        MVC_Test/Input/input.cpp MVC_Test/MVC/Controller.cpp MVC_Test/MVC/Model.cpp MVC_Test/MVC/Views/View.cpp MVC_Test/MVC/Views/ViewService.cpp MVC_Test/MVC/States/StateMainMenu.cpp MVC_Test/MVC/States/StateOptionMenu.cpp MVC_Test/MVC/States/StateOptionMenu.h MVC_Test/DataTypes/Item.cpp MVC_Test/DataTypes/Item.h MVC_Test/DataTypes/Observer.h MVC_Test/DataTypes/Bitmap.cpp MVC_Test/DataTypes/BitmapItem.cpp MVC_Test/DataTypes/ItemList.cpp MVC_Test/DataTypes/LabelItem.cpp MVC_Test/DataTypes/LogoItem.cpp MVC_Test/MVC/Views/LogoView.cpp MVC_Test/MVC/Views/MenuView.cpp MVC_Test/MVC/States/StateLogoScreen.cpp)
+        MVC_Test/Input/input.cpp MVC_Test/MVC/Controller.cpp MVC_Test/MVC/Model.cpp MVC_Test/MVC/Views/View.cpp MVC_Test/MVC/Views/ViewService.cpp MVC_Test/MVC/States/StateMainMenu.cpp MVC_Test/DataTypes/Item.cpp MVC_Test/DataTypes/Item.h MVC_Test/DataTypes/Observer.h MVC_Test/DataTypes/Bitmap.cpp MVC_Test/DataTypes/BitmapItem.cpp MVC_Test/DataTypes/ItemList.cpp MVC_Test/DataTypes/LabelItem.cpp MVC_Test/DataTypes/LogoItem.cpp MVC_Test/MVC/Views/LogoView.cpp MVC_Test/MVC/Views/MenuView.cpp MVC_Test/MVC/States/StateLogo.cpp MVC_Test/MVC/States/StateLogo.h)
 project(Reader CXX C ASM)
 
 # FreeRTOS Directories

@@ -13,13 +13,13 @@ void MenuView::draw() {
     window.draw();
 }
 
-void MenuView::set_title(const char *str) {
-    window.set_title(str);
-}
-
-void MenuView::set_items(ItemList &items) {
-    window.add_items(items);
-}
+//void MenuView::set_title(const char *str) {
+//    window.set_title(str);
+//}
+//
+//void MenuView::set_items(ItemList &items) {
+//    window.add_items(items);
+//}
 
 void MenuView::on_alpha_key(INPUT_EVENTS evt, char alpha) {
     (void)evt;
@@ -72,6 +72,11 @@ void MenuView::on_control_key(INPUT_EVENTS evt, ControlType c) {
     else {
         subject->notify();
     }
+}
+
+void MenuView::update() {
+    window.set_title(title);
+    window.add_items(*list);
 }
 
 MenuView MenuView::instance;

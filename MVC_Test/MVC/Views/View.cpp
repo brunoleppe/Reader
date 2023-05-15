@@ -4,7 +4,3 @@
 
 #include "View.h"
 
-
-void View::set_message(MessagePacket *_msg) {
-    msg = _msg;
-}
