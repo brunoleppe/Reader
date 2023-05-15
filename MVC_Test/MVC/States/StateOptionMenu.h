@@ -13,8 +13,11 @@ public:
     StateOptionMenu();
     static StateOptionMenu instance;
     bool on_event(ControllerInputEvent &evt) override;
+    void on_exit() override;
+    void on_enter() override;
 private:
 };
+
 
 
 #endif //LCDTEST_STATEOPTIONMENU_H

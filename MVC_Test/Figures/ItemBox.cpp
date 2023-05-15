@@ -3,11 +3,12 @@
 //
 
 #include "ItemBox.h"
+#include "DataTypes/LabelItem.h"
 
 ItemBox::~ItemBox() = default;
 
 void ItemBox::add(Item *i) {
-    itemList->items.push_back(i);
+    items->add(i);
 }
 
 ItemBox::ItemBox(int x, int y, int width, int height, uint8_t back, uint8_t fore) :
@@ -15,17 +16,17 @@ ItemBox::ItemBox(int x, int y, int width, int height, uint8_t back, uint8_t fore
 {}
 
 void ItemBox::clear() {
-    itemList->items.clear();
+    items->clear();
 }
 
 void ListItemBox::draw() {
-    if(itemList == nullptr)
+    if(items == nullptr)
         return;
 
     int startPos = y;
-    int limit = (int)itemList->items.size() > maxItemsInView ? maxItemsInView : (int)itemList->items.size();
+    int limit = (int)items->size() > maxItemsInView ? maxItemsInView : (int)items->size();
     for( int i=0; i<limit; i++){
-        MenuItem *item = (MenuItem*)(itemList)->items[i];
+        LabelItem *item = (LabelItem*)(*items)[i];
         uint8_t fcolor = foreColor;
         uint8_t bcolor = backColor;
         if(item->get_focus()) {
@@ -42,30 +43,35 @@ ListItemBox::ListItemBox(int x, int y, int width, int height, uint8_t back, uint
         ItemBox(x, y, width, height, back, fore)
 {
     maxItemsInView = h/20;
+    count = 0;
+    startIndex = 0;
+
 }
 
 void ListItemBox::add(ItemList& _items) {
-    itemList = &_items;
+    items = &_items;
+    count = (int)_items.size();
 }
 
 void ListItemBox::focus(int _index) {
-    if(itemList == nullptr)
+    if(items == nullptr)
         return;
-    for(int i=0; i < itemList->items.size(); i++){
-        if(i == _index){
-            itemList->items[i]->set_focus(true);
+    for(auto item : items->items){
+        if(item->get_index() == _index){
+            item->set_focus(true);
+            items->set_current(_index);
             continue;
         }
-        itemList->items[i]->set_focus(false);
+        item->set_focus(false);
     }
 }
 
 void ListItemBox::focus_next() {
-    itemList->move_up();
-    focus(itemList->get_current()->get_index());
+    items->move_up();
+    focus(items->get_current()->get_index());
 }
 
 void ListItemBox::focus_prev() {
-    itemList->move_down();
-    focus(itemList->get_current()->get_index());
+    items->move_down();
+    focus(items->get_current()->get_index());
 }

@@ -19,8 +19,8 @@ protected:
     bool selected;
     bool focused;
 public:
-    int get_index();
-    bool get_selected();
+    int get_index() const;
+    bool get_selected() const;
     void set_selected(bool s){
         selected = s;
     }
@@ -30,32 +30,9 @@ public:
     bool get_focus(){
         return focused;
     }
+
+    virtual ~Item();
 };
 
-class ItemList{
-private:
-    int currentIndex;
-public:
-    std::vector<Item*> items;
-
-    ItemList();
-    Item* get_current();
-    void move_up();
-    void move_down();
-    void add(Item *item);
-    void remove(Item *item);
-    void clear();
-    size_t size();
-    Item* operator[](int);
-
-};
-
-class MenuItem : public Item{
-private:
-    std::string s;
-public:
-    MenuItem(int index, const char* s) : Item(index), s(s){}
-    const char* get_cstring();
-};
 
 #endif //LCDTEST_ITEM_H

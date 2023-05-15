@@ -5,7 +5,6 @@
 #ifndef LCDTEST_MODEL_H
 #define LCDTEST_MODEL_H
 
-#include <queue>
 #include <vector>
 #include <string>
 #include "MessagePacket.h"
@@ -16,6 +15,7 @@ class Model : public State{
 protected:
     explicit Model(){}
     MessagePacket data;
+
 public:
     MessagePacket* get_data(){
         return &data;

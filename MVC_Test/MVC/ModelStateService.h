@@ -8,7 +8,9 @@
 #include "Model.h"
 
 class ModelStateService : public StateMachine {
+
 public:
+
     bool on_event(ControllerInputEvent& evt){
         return ((Model *) state)->on_event(evt);
     }

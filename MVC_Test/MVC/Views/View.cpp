@@ -4,7 +4,6 @@
 
 #include "View.h"
 
-MenuView MenuView::instance;
 
 void View::set_message(MessagePacket *_msg) {
     msg = _msg;

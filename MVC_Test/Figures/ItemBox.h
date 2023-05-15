@@ -9,11 +9,12 @@
 #include <string>
 #include "Figure.h"
 #include "DataTypes/Item.h"
+#include "DataTypes/ItemList.h"
 
 class ItemBox : public Figure{
 protected:
-    ItemList *itemList = nullptr;
 public:
+    ItemList *items = nullptr;
     ItemBox(int x, int y, int width, int height, uint8_t back, uint8_t fore);
     ~ItemBox() override;
     void add(Item* i);

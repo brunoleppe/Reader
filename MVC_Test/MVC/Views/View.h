@@ -25,12 +25,14 @@ public:
     virtual void draw() = 0;
     virtual ~View() = default;
 
-    virtual void on_alpha_key(INPUT_EVENTS evt, char alpha) = 0;
-    virtual void on_numeric_key(INPUT_EVENTS evt, char num) = 0;
-    virtual void on_symbol_key(INPUT_EVENTS evt) = 0;
-    virtual void on_control_key(INPUT_EVENTS evt, ControlType c)=0;
+    virtual void on_alpha_key(INPUT_EVENTS evt, char alpha) {};
+    virtual void on_numeric_key(INPUT_EVENTS evt, char num) {};
+    virtual void on_symbol_key(INPUT_EVENTS evt) {};
+    virtual void on_control_key(INPUT_EVENTS evt, ControlType c){};
 
-    virtual void clean() = 0;
+    virtual void set_items(ItemList& items){}
+    virtual void set_title(const char *str){}
+    virtual void set_options(std::vector<const char*>& options){}
 
     void set_message(MessagePacket *msg);
 
@@ -55,79 +57,6 @@ public:
 protected:
     MessagePacket *msg;
     Subject<InputEvent> *subject;
-};
-
-class MenuView : public View{
-public:
-    MenuView() : window("")
-    {
-
-    }
-
-    void draw() override {
-        window.draw();
-    }
-
-    void set_title(const char *str){
-        window.set_title(str);
-    }
-    void set_items(ItemList& items){
-        window.add_items(items);
-    }
-
-    void clean() override {
-        window.clear_items();
-    }
-
-    void on_alpha_key(INPUT_EVENTS evt, char alpha) override {
-        (void)evt;
-
-    }
-
-    void on_numeric_key(INPUT_EVENTS evt, char num) override {
-        if(evt == INPUT_EVENT_PRESSED) {
-            window.focus(num - '0');
-        }
-        else if(evt == INPUT_EVENT_CLICKED){
-            InputEvent  i = {
-#if defined(PIC32) || defined(__PIC32) || defined(__PIC32__)
-                    .code = KEY_ENTER,
-#else
-                    .code = SDL_SCANCODE_RETURN,
-#endif
-                    .value = evt,
-            };
-            subject->set_data(i);
-            subject->notify();
-        }
-        draw();
-
-    }
-
-    void on_symbol_key(INPUT_EVENTS evt) override {
-        (void)evt;
-    }
-
-    void on_control_key(INPUT_EVENTS evt, ControlType c) override {
-        if(c == CONTROL_TYPE_DOWN && evt == INPUT_EVENT_PRESSED){
-            window.focus_next();
-            draw();
-            return;
-        }
-        else if(c == CONTROL_TYPE_UP && evt == INPUT_EVENT_PRESSED){
-            window.focus_prev();
-            draw();
-            return;
-        }
-        else {
-            subject->notify();
-        }
-    }
-
-
-    static MenuView instance;
-private:
-    MenuWindow window;
 };
 
 

@@ -40,8 +40,10 @@ public:
     void set_message(MessagePacket *m);
     void set_event(InputEvent& evt);
     void attach(InputEventObserver* observer);
-#if defined(PIC32) || defined(__PIC32) || defined(__PIC32__)
-#else
+
+
+
+#if !defined(PIC32) && !defined(__PIC32) && !defined(__PIC32__)
     void start();
     void stop();
 #endif

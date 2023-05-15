@@ -15,7 +15,7 @@
 #include "FreeRTOS.h"
 #include "queue.h"
 #else
-#include <queue>
+#include "SDL_Queue.h"
 #endif
 
 class Controller : public InputEventObserver{
@@ -40,7 +40,7 @@ private:
 #if defined(PIC32) || defined(__PIC32) || defined(__PIC32__)
     QueueHandle_t queue;
 #else
-    std::queue<InputEvent> queue;
+    SDL_Queue<InputEvent> queue;
 #endif
 
     bool running;

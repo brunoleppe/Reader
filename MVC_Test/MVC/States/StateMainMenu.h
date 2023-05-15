@@ -13,6 +13,9 @@ class StateMainMenu : public Model{
 public:
     StateMainMenu();
     bool on_event(ControllerInputEvent &evt) override;
+    void on_enter() override;
+    void on_exit() override;
+
     static StateMainMenu instance;
 };
 

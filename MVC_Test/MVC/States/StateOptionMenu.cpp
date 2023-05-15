@@ -5,13 +5,12 @@
 #include "StateOptionMenu.h"
 #include "MVC/ControllerInputEvent.h"
 #include "input.h"
+#include "DataTypes/LabelItem.h"
 
 StateOptionMenu::StateOptionMenu()
 {
     data.title = "Option Menu";
-    data.itemList.items.push_back(new MenuItem(0, "Hola1"));
-    data.itemList.items.push_back(new MenuItem(1, "Hola2"));
-    data.itemList.items.push_back(new MenuItem(2, "Hola3"));
+
 }
 
 bool StateOptionMenu::on_event(ControllerInputEvent &evt) {
@@ -22,6 +21,16 @@ bool StateOptionMenu::on_event(ControllerInputEvent &evt) {
     }
     return false;
 
+}
+
+void StateOptionMenu::on_exit() {
+    data.items.clear();
+}
+
+void StateOptionMenu::on_enter() {
+    data.items.add(new LabelItem(0, "Hola1"));
+    data.items.add(new LabelItem(1, "Hola2"));
+    data.items.add(new LabelItem(2, "Hola3"));
 }
 
 StateOptionMenu StateOptionMenu::instance;

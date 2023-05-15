@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include "DataTypes/Item.h"
+#include "DataTypes/ItemList.h"
 
 enum MessageType{
     MESSAGE_TYPE_LOGO,
@@ -23,7 +24,7 @@ public:
     const char *title;
     std::vector<const char*> options;
 //    std::vector<Item*> items;
-    ItemList itemList;
+    ItemList items;
 
 
     explicit MessagePacket() : messageType(MESSAGE_TYPE_MENU), title("") {}
