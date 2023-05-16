@@ -26,15 +26,8 @@ set(SOURCES
 #        main.c
         main.cpp
         DynamicAlloc/dynamic_alloc.cpp
+        )
 
-        MVC_Test/Figures/Box.cpp
-        MVC_Test/Figures/Figure.cpp
-        MVC_Test/Figures/ItemBox.cpp
-        MVC_Test/Figures/Label.cpp
-        MVC_Test/Figures/make_unique.h
-        MVC_Test/Figures/MenuWindow.cpp
-        MVC_Test/Figures/TextBox.cpp
-        MVC_Test/Input/input.cpp MVC_Test/MVC/Controller.cpp MVC_Test/MVC/Model.cpp MVC_Test/MVC/Views/View.cpp MVC_Test/MVC/Views/ViewService.cpp MVC_Test/MVC/States/StateMainMenu.cpp MVC_Test/DataTypes/Item.cpp MVC_Test/DataTypes/Item.h MVC_Test/DataTypes/Observer.h MVC_Test/DataTypes/Bitmap.cpp MVC_Test/DataTypes/BitmapItem.cpp MVC_Test/DataTypes/ItemList.cpp MVC_Test/DataTypes/LabelItem.cpp MVC_Test/DataTypes/LogoItem.cpp MVC_Test/MVC/Views/LogoView.cpp MVC_Test/MVC/Views/MenuView.cpp MVC_Test/MVC/States/StateLogo.cpp MVC_Test/MVC/States/StateLogo.h)
 project(Reader CXX C ASM)
 
 # FreeRTOS Directories
@@ -43,7 +36,7 @@ include_directories(HAL/)
 include_directories(BSP/)
 include_directories(LCD/)
 include_directories(States/)
-include_directories(MVC_Test/)
+include_directories(Test_MVC/)
 
 IF(READERV2 OR READERV1)
     include_directories(FreeRTOS/Source/portable/MPLAB/PIC32MZ)
@@ -74,6 +67,7 @@ include_directories(.)
 
 add_subdirectory(FreeRTOS)
 add_subdirectory(LCD)
+add_subdirectory(Test_MVC)
 
 IF(READERV2 OR READERV1)
     add_subdirectory(HAL/PIC32MZEFM100)
@@ -98,6 +92,7 @@ target_link_libraries(${PROJECT_NAME}.elf   HAL)
 target_link_libraries(${PROJECT_NAME}.elf   LCD)
 target_link_libraries(${PROJECT_NAME}.elf   BSP)
 target_link_libraries(${PROJECT_NAME}.elf   CycloneTCP)
+target_link_libraries(${PROJECT_NAME}.elf   MVC)
 
 #Assembly options
 set(CMAKE_ASM_FLAGS "${CFLAGS} -Wa,--defsym=__MPLAB_BUILD=1,--gdwarf-2")
