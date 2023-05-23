@@ -13,10 +13,10 @@
     TestStateMachine machine;
     input_register(&machine);
 
-    while(true){
+//    while(true){
         /*Start FreeRTOS scheduler*/
         vTaskStartScheduler();
-    }
+//    }
 
 //    return EXIT_FAILURE;
 }

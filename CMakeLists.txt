@@ -5,13 +5,19 @@
 #user defines if any
 
 cmake_minimum_required(VERSION 3.24.2)
+# Create an option called ENABLE_FEATURE
+option(ENABLE_FEATURE "Enable a feature" ON)
+option(READERV2 "Version 2 del lector de escritorio" ON)
+option(ARCH "Ariquitectura MZ o MX" MZ)
+option(DFP "Ruta a DFP de MPLAB" /opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-EF_DFP/1.3.58)
 
 #set(CMAKE_VERBOSE_MAKEFILE True)
 
 #Compiler
 set(CMAKE_C_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-gcc")
 set(CMAKE_CXX_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-g++")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fno-exceptions -fno-unwind-tables -fno-rtti -Wno-write-strings -fpermissive -fdata-sections -ffunction-sections")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fno-exceptions -fno-unwind-tables -fno-rtti -Wno-write-strings -fpermissive -fdata-sections -ffunction-sections -mdfp=${DFP}")
 #Device Family Pack
 #set(DFP /opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-EF_DFP/1.3.58)
 
@@ -21,6 +27,25 @@ set(USER_FLAGS -Wall)
 set(USER_DEFINITIONS )
 set(HEAP 0)
 
+
+#Assembly options
+set(CMAKE_ASM_FLAGS "${CFLAGS} -Wa,--defsym=__MPLAB_BUILD=1,--gdwarf-2")
+#Compiler flags and options
+set(MPROCESSOR -mprocessor=${PIC})
+set(MOPTIMIZATION -O${OPTIMIZATION})
+set(DEFINES ${USER_DEFINITIONS})
+set(SYM_HEAP --defsym=_min_heap_size=${HEAP})
+set(SYM_BUILD --defsym=__MPLAB_BUILD=1)
+set(LINKER_OPTS --gc-sections,--no-code-in-dinit,--no-dinit-in-serial-mem)
+set(LINKER_MAP -Map=${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.map)
+set(MEMORY_FILE --memorysummary,${CMAKE_CURRENT_BINARY_DIR}/memoryfile.xml)
+set(LINKER_SCRIPT --script=${CMAKE_SOURCE_DIR}/Linker/p32MZ1024EFM100.ld)
+set(XC32_LINK_FLAGS
+        #        ${SYM_HEAP},${LINKER_SCRIPT},${SYM_BUILD},${LINKER_OPTS},${LINKER_MAP},${MEMORY_FILE}
+        ${SYM_HEAP},${SYM_BUILD},${LINKER_OPTS},${LINKER_MAP},${MEMORY_FILE}
+        )
+
+add_compile_options(${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} )
 
 set(SOURCES
 #        main.c
@@ -84,6 +109,10 @@ ELSEIF (PPP_EXT)
 
 ENDIF()
 
+
+
+
+
 add_executable(${PROJECT_NAME}.elf ${SOURCES})
 
 
@@ -94,30 +123,12 @@ target_link_libraries(${PROJECT_NAME}.elf   BSP)
 target_link_libraries(${PROJECT_NAME}.elf   CycloneTCP)
 target_link_libraries(${PROJECT_NAME}.elf   MVC)
 
-#Assembly options
-set(CMAKE_ASM_FLAGS "${CFLAGS} -Wa,--defsym=__MPLAB_BUILD=1,--gdwarf-2")
-#Compiler flags and options
-set(MPROCESSOR -mprocessor=${PIC})
-set(MOPTIMIZATION -O${OPTIMIZATION})
-set(DEFINES ${USER_DEFINITIONS})
-set(SYM_HEAP --defsym=_min_heap_size=${HEAP})
-set(SYM_BUILD --defsym=__MPLAB_BUILD=1)
-set(LINKER_OPTS --gc-sections,--no-code-in-dinit,--no-dinit-in-serial-mem)
-set(LINKER_MAP -Map=${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.map)
-set(MEMORY_FILE --memorysummary,${CMAKE_CURRENT_BINARY_DIR}/memoryfile.xml)
-set(LINKER_SCRIPT --script=${CMAKE_SOURCE_DIR}/Linker/p32MZ1024EFM100.ld)
-set(XC32_LINK_FLAGS
-#        ${SYM_HEAP},${LINKER_SCRIPT},${SYM_BUILD},${LINKER_OPTS},${LINKER_MAP},${MEMORY_FILE}
-        ${SYM_HEAP},${SYM_BUILD},${LINKER_OPTS},${LINKER_MAP},${MEMORY_FILE}
-        )
 
 
-option(READERV2 "Version 2 del lector de escritorio" OFF)
+
 IF(READERV2)
-    add_compile_definitions(__READER_V2__)
     set(DEFINES ${DEFINES} __READER_V2__)
 ELSE()
-    add_compile_definitions(__READER_V1__)
     set(DEFINES ${DEFINES} __READER_V1__)
 ENDIF(READERV2)
 
@@ -136,27 +147,8 @@ add_custom_target(${PROJECT_NAME}_hex ALL
         DEPENDS ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex
         )
 
-set_target_properties(BSP PROPERTIES LINKER_LANGUAGE C)
-target_compile_definitions(BSP PUBLIC XPRJ_default=default ${DEFINES})
-target_compile_options(BSP PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP})
 
-set_target_properties(HAL PROPERTIES LINKER_LANGUAGE C)
-target_compile_definitions(HAL PUBLIC XPRJ_default=default ${DEFINES})
-target_compile_options(HAL PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP})
+add_compile_definitions(XPRJ_default=default ${DEFINES})
 
-set_target_properties(LCD PROPERTIES LINKER_LANGUAGE C)
-target_compile_definitions(LCD PUBLIC XPRJ_default=default ${DEFINES})
-target_compile_options(LCD PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP} )
-
-set_target_properties(FreeRTOS PROPERTIES LINKER_LANGUAGE C)
-target_compile_definitions(FreeRTOS PUBLIC XPRJ_default=default ${DEFINES})
-target_compile_options(FreeRTOS PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP})
-
-set_target_properties(CycloneTCP PROPERTIES LINKER_LANGUAGE C)
-target_compile_definitions(CycloneTCP PUBLIC XPRJ_default=default ${DEFINES})
-target_compile_options(CycloneTCP PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP})
-
-target_compile_options(${PROJECT_NAME}.elf PUBLIC ${USER_FLAGS} ${MPROCESSOR} ${MOPTIMIZATION} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP})
-target_compile_definitions(${PROJECT_NAME}.elf PUBLIC XPRJ_default=default ${DEFINES})
 target_link_options(${PROJECT_NAME}.elf PUBLIC ${MPROCESSOR} ${MOPTIMIZATION} )
 target_link_libraries(${PROJECT_NAME}.elf "-Wl,${XC32_LINK_FLAGS}")
