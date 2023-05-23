@@ -8,7 +8,7 @@
 
 #include "Figure.h"
 #include "lcd.h"
-#include <string>
+#include "DataTypes/string.h"
 
 enum TextAlignment{
     Text_Center,
@@ -24,7 +24,7 @@ public:
     void set_text(const char *string);
 private:
     LCD_Fonts font;
-    std::string s;
+    bru::string s;
 public:
 
 };

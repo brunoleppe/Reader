@@ -23,6 +23,6 @@ add_library(BSP OBJECT
         net_config.h
         os_port_config.h
         ../tcp_port.c ../tcp_port.h
-        )
+        ../version.h)
 target_link_libraries(BSP PUBLIC HAL)
 target_link_libraries(BSP PUBLIC CycloneTCP)

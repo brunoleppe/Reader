@@ -6,7 +6,6 @@
 #define LCDTEST_FIGURE_H
 
 #include <cstdint>
-#include <list>
 #include "Drawable.h"
 
 class Composite;

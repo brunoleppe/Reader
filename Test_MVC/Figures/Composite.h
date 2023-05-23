@@ -5,8 +5,8 @@
 #ifndef LCDTEST_COMPOSITE_H
 #define LCDTEST_COMPOSITE_H
 
-#include <vector>
 #include "Figure.h"
+#include "DataTypes/vector.h"
 
 class Composite : public Drawable{
 public:
@@ -30,7 +30,7 @@ public:
     }
 
 protected:
-    std::vector<Drawable*> drawables;
+    bru::vector<Drawable*> drawables;
     Composite() : Drawable(0,0,0,0,LCD_COLOR_WHITE, LCD_COLOR_BLACK)
     {
     }

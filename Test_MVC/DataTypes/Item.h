@@ -6,10 +6,6 @@
 #define LCDTEST_ITEM_H
 
 
-#include <string>
-#include <list>
-#include <vector>
-
 class Item{
 protected:
     Item(int index) : selected(false), focused(selected){

@@ -1,5 +1,5 @@
 //
-// Created by bruno on 14/05/23.
+// Created by bruno on 21/05/23.
 //
 
 #ifndef LCDTEST_LOGOVIEW_H
@@ -7,19 +7,24 @@
 
 
 #include "View.h"
-#include "Test_MVC/DataTypes/LogoItem.h"
+#include "DataTypes/Bitmap.h"
+#include "MVC/ViewModels/LogoViewModel.h"
+#include "debug_bsp.h"
 
-class LogoView : public View {
+class LogoView : public View{
+private:
+    Bitmap* bmp;
 public:
-    LogoView();
+    explicit LogoView(LogoViewModel *viewModel) : View(viewModel), bmp() {}
 
-    void draw() override;
-//    void set_items(ItemList &items) override;
-    void on_control_key(INPUT_EVENTS evt, ControlType c) override;
+    bool set_input(ControllerInputEvent &evt) override{
+        return false;
+    }
 
-void update() override;
-    LogoItem* item;
-    static LogoView instance;
+    void draw() override{
+        bmp = ((LogoViewModel*)vm)->get_bitmap();
+        LCD_draw_bitmap(0,0,bmp->width,bmp->height,bmp->bitmap);
+    }
 };
 
 

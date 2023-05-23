@@ -7,7 +7,7 @@
 
 
 #include "DataTypes/Observer.h"
-#include "MVC/ControllerInputEvent.h"
+#include "Test_MVC/DataTypes/ControllerInputEvent.h"
 #include "virtual_term.h"
 
 class InputController : public Subject {

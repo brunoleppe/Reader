@@ -9,7 +9,7 @@ Label::Label(int x, int y, uint8_t back, uint8_t fore, const char *str, LCD_Font
     : Figure(x, y, back, fore), font(font), s(str)
 {
     h = LCD_get_font(font)->rows;
-    w = s.length() * (LCD_get_font(font)->cols + 1);
+    w = s.size() * (LCD_get_font(font)->cols + 1);
 }
 
 void Label::draw() {
@@ -21,10 +21,10 @@ void Label::crop_to_width(int width) {
     int erase = width/(LCD_get_font(font)->cols + 1);
 
     s.erase(erase);
-    this->w = s.length() * (LCD_get_font(font)->cols + 1);
+    this->w = s.size() * (LCD_get_font(font)->cols + 1);
 }
 
 void Label::set_text(const char *str) {
     s.assign(str);
-    w = s.length() * (LCD_get_font(font)->cols + 1);
+    w = s.size() * (LCD_get_font(font)->cols + 1);
 }

@@ -6,8 +6,8 @@
 #define LCDTEST_OBSERVER_H
 
 
-#include <list>
 #include "input.h"
+#include "list.h"
 
 // Forward declaration of the Subject class
 
@@ -23,7 +23,7 @@ public:
 class Subject {
 protected:
     void* data;
-    std::list<Observer*> observers;
+    bru::list<Observer*> observers;
 
 public:
 

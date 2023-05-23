@@ -7,10 +7,11 @@
 
 
 #include "Item.h"
+#include "string.h"
 
 class LabelItem : public Item{
 private:
-    std::string s;
+    bru::string s;
 public:
     LabelItem(int index, const char* s);
     const char* get_cstring();

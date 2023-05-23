@@ -13,7 +13,6 @@ public:
     int width;
     int height;
 
-    Bitmap(uint8_t *bitmap, int width, int height);
 };
 
 

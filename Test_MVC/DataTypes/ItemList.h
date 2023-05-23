@@ -6,14 +6,15 @@
 #define LCDTEST_ITEMLIST_H
 
 
-#include <vector>
+#include <cstddef>
 #include "Item.h"
+#include "vector.h"
 
 class ItemList{
 private:
     int currentIndex;
 public:
-    std::vector<Item*> items;
+    bru::vector<Item*> items;
 
     ItemList();
     Item* get_current();

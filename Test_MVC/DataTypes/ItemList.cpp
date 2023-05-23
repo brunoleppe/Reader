@@ -31,12 +31,13 @@ void ItemList::add(Item *item) {
 }
 
 void ItemList::remove(Item *item) {
-    int index = item->get_index();
-    if(index > 0 && index < items.size()){
-        Item* i = items[index];
-        if(i==item)
-            items.erase(items.begin()+index);
-    }
+//    int index = item->get_index();
+//    if(index > 0 && index < items.size()){
+//        Item* i = items[index];
+//        if(i==item)
+//            items.erase(items.begin()+index);
+//    }
+    //TODO: implementar metodo
 }
 
 void ItemList::clear() {
@@ -47,7 +48,7 @@ void ItemList::clear() {
 }
 
 size_t ItemList::size() const {
-    return items.size();
+    return (size_t)items.size();
 }
 
 Item *ItemList::operator[](int i) {

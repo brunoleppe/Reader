@@ -14,8 +14,7 @@ enum InputEventType {
     INPUT_EVENT_TYPE_CONTROL,
 };
 
-class ControllerInputEvent {
-public:
+struct ControllerInputEvent {
     InputEventType type;
     int code;
     INPUT_EVENTS event;

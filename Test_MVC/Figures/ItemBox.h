@@ -5,8 +5,6 @@
 #ifndef LCDTEST_ITEMBOX_H
 #define LCDTEST_ITEMBOX_H
 
-#include <vector>
-#include <string>
 #include "Figure.h"
 #include "Test_MVC/DataTypes/Item.h"
 #include "Test_MVC/DataTypes/ItemList.h"

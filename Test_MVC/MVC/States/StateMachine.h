@@ -5,6 +5,16 @@
 #ifndef LCDTEST_STATEMACHINE_H
 #define LCDTEST_STATEMACHINE_H
 
+
+enum StateType{
+    STATE_TYPE_BASE,
+    STATE_TYPE_LOGO,
+    STATE_TYPE_MENU,
+    STATE_TYPE_INPUT,
+    STATE_TYPE_DATA,
+    STATE_TYPE_NETCONFIG,
+};
+
 enum StateEventSignal{
     EVENT_SIGNAL_ENTER,
     EVENT_SIGNAL_EXIT,
@@ -36,16 +46,18 @@ class StateMachine;
 
 class State{
 protected:
-protected:
     State() {}
     StateMachine *context = {};
     friend class StateMachine;
+    StateType type = STATE_TYPE_BASE;
 public:
     virtual Status on_event(StateEvent *evt) {
         return STATUS_IGNORED;
     }
     virtual ~State() = default;
-
+    StateType get_type(){
+        return type;
+    }
 };
 
 class StateMachine{
