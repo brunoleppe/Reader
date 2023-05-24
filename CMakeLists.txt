@@ -14,8 +14,8 @@ option(DFP "Ruta a DFP de MPLAB" /opt/microchip/mplabx/v6.00/packs/Microchip/PIC
 #set(CMAKE_VERBOSE_MAKEFILE True)
 
 #Compiler
-set(CMAKE_C_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-gcc")
-set(CMAKE_CXX_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-g++")
+#set(CMAKE_C_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-gcc")
+#set(CMAKE_CXX_COMPILER "/opt/microchip/xc32/v4.21/bin/xc32-g++")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdata-sections -ffunction-sections -no-legacy-libc -mdfp=${DFP}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fno-exceptions -fno-unwind-tables -fno-rtti -Wno-write-strings -fpermissive -fdata-sections -ffunction-sections -mdfp=${DFP}")
 #Device Family Pack
@@ -106,12 +106,7 @@ ELSEIF (PPP_EXT)
     add_subdirectory(BSP/PPP_EXT)
     add_subdirectory(HAL/PIC32MZEFM100)
     add_subdirectory(BSP/PPP_EXT/Ethernet)
-
 ENDIF()
-
-
-
-
 
 add_executable(${PROJECT_NAME}.elf ${SOURCES})
 
@@ -152,3 +147,5 @@ add_compile_definitions(XPRJ_default=default ${DEFINES})
 
 target_link_options(${PROJECT_NAME}.elf PUBLIC ${MPROCESSOR} ${MOPTIMIZATION} )
 target_link_libraries(${PROJECT_NAME}.elf "-Wl,${XC32_LINK_FLAGS}")
+
+
