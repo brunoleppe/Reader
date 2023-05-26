@@ -1,7 +1,9 @@
 /**
  * @file spi.h
  * @author Bruno Leppe (bruno.leppe.dev\@gmail.com)
- * @brief SPI peripheral definitions.
+ * @brief SPI Module.
+ * This file contains the definitions and function prototypes for the SPI peripheral, which provides
+ * functionality for SPI communication.
  * @version 0.1
  * @date 2022-09-29
  *
