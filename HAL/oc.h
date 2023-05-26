@@ -55,7 +55,7 @@
 /**
  * @brief Defines the OC mode flags.
  */
-#define OC_MDOE_PWM_FAULT_ENABLED           (0x0007)
+#define OC_MODE_PWM_FAULT_ENABLED           (0x0007)
 #define OC_MODE_PWM                         (0x0006)
 #define OC_MODE_32                          (0x0020)
 #define OC_MODE_USE_TMR3                    (0x0008)
