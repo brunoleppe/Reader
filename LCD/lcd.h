@@ -13,44 +13,170 @@
 /**********************************************************************
 * Typedefs
 **********************************************************************/
-typedef enum{
+/**
+ * @brief Enumeration for different font sizes.
+ */
+typedef enum {
     LCD_FONT_EXTRA_SMALL = 0,
     LCD_FONT_SMALL,
     LCD_FONT_MEDIUM,
-}LCD_Fonts;
+} LCD_Fonts;
 
-typedef struct{
-    uint8_t     bytes;      ///< Cantidad de bytes por caracter.
-    uint8_t     bpr;        ///< Cantidad de bytes por fila. Un pixel es un bit.
-    int         cols;
-    int         rows;
-    uint8_t     *font;      ///< Puntero a la tabla de caracteres.
-    uint8_t     *special;   ///< Puntero a la tabla de caracteres especiales.
-}LCD_Font;
+/**
+ * @brief Structure representing the font information.
+ */
+typedef struct {
+    uint8_t     bytes;      ///< Number of bytes per character.
+    uint8_t     bpr;        ///< Number of bytes per row. Each pixel is a bit.
+    int         cols;       ///< Number of columns.
+    int         rows;       ///< Number of rows.
+    uint8_t     *font;      ///< Pointer to the character table.
+    uint8_t     *special;   ///< Pointer to the special character table.
+} LCD_Font;
+
+/**
+ * @brief Enumeration for different LCD colors.
+ */
+typedef enum {
+    LCD_COLOR_BLACK = 0xF,   ///< Black color.
+    LCD_COLOR_GRAY  = 7,     ///< Gray color.
+    LCD_COLOR_WHITE = 0,     ///< White color.
+} LCD_COLOR;
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
-typedef enum{
-    LCD_COLOR_BLACK = 0xF,
-    LCD_COLOR_GRAY  = 7,
-    LCD_COLOR_WHITE = 0,
-}LCD_COLOR;
 #ifdef __cplusplus
 extern "C"{
 #endif
-int     LCD_init        (uint32_t spiChannel, uint32_t dmaChannel, GPIO_PinMap cs, GPIO_PinMap bla, GPIO_PinMap dc, GPIO_PinMap rst);
-void    LCD_configure   ();
-void    LCD_draw_point  (int x, int y, LCD_COLOR color);
-void    LCD_draw_hline  (int x, int y, int length, LCD_COLOR color);
-void    LCD_draw_vline  (int x, int y, int length, LCD_COLOR color);
-void    LCD_draw_rect   (int x, int y, int height, int width, LCD_COLOR color);
-void    LCD_draw_fill   (int x, int y, int height, int width, LCD_COLOR color);
-void    LCD_draw_char   (int x, int y, char c, LCD_Fonts font, LCD_COLOR color);
-void    LCD_draw_string (int x, int y, const char *str, LCD_Fonts font, LCD_COLOR color);
-void    LCD_draw_bitmap (int x, int y, int width, int height, const uint8_t *bitmap);
-void    LCD_clear       ();
-void    LCD_print       ( void );
+/**
+ * @brief Initializes the LCD screen.
+ *
+ * @param spiChannel  SPI channel number.
+ * @param dmaChannel  DMA channel number. Not used.
+ * @param cs          Chip select pin.
+ * @param bla         Backlight pin.
+ * @param dc          Data/command pin.
+ * @param rst         Reset pin.
+ *
+ * @return 0 on success, non-zero on failure.
+ */
+int LCD_init(uint32_t spiChannel, uint32_t dmaChannel, GPIO_PinMap cs, GPIO_PinMap bla, GPIO_PinMap dc, GPIO_PinMap rst);
+
+/**
+ * @brief Configures the LCD screen.
+ */
+void LCD_configure();
+
+/**
+ * @brief Draws a point on the LCD screen.
+ *
+ * @param x      X-coordinate of the point.
+ * @param y      Y-coordinate of the point.
+ * @param color  Color of the point.
+ */
+void LCD_draw_point(int x, int y, LCD_COLOR color);
+
+/**
+ * @brief Draws a horizontal line on the LCD screen.
+ *
+ * @param x       X-coordinate of the starting point.
+ * @param y       Y-coordinate of the starting point.
+ * @param length  Length of the line.
+ * @param color   Color of the line.
+ */
+void LCD_draw_hline(int x, int y, int length, LCD_COLOR color);
+
+/**
+ * @brief Draws a vertical line on the LCD screen.
+ *
+ * @param x       X-coordinate of the starting point.
+ * @param y       Y-coordinate of the starting point.
+ * @param length  Length of the line.
+ * @param color   Color of the line.
+ */
+void LCD_draw_vline(int x, int y, int length, LCD_COLOR color);
+
+/**
+ * @brief Draws a rectangle on the LCD screen.
+ *
+ * @param x       X-coordinate of the top-left corner.
+ * @param y       Y-coordinate of the top-left corner.
+ * @param height  Height of the rectangle.
+ * @param width   Width of the rectangle.
+ * @param color   Color of the rectangle.
+ */
+void LCD_draw_rect(int x, int y, int height, int width, LCD_COLOR color);
+
+/**
+ * @brief Draws a filled rectangle on the LCD screen.
+ *
+ * @param x       X-coordinate of the top-left corner.
+ * @param y       Y-coordinate of the top-left corner.
+ * @param height  Height of the rectangle.
+ * @param width   Width of the rectangle.
+ * @param color   Color of the rectangle.
+ */
+void LCD_draw_fill(int x, int y, int height, int width, LCD_COLOR color);
+
+/**
+ * @brief Draws a character on the LCD screen.
+ *
+ * @param x      X-coordinate of the top-left corner of the character.
+ * @param y      Y-coordinate of the top-left corner of the character.
+ * @param c      Character to draw.
+ * @param font   Font size.
+ * @param color  Color of the character.
+ */
+void LCD_draw_char(int x, int y, char c, LCD_Fonts font, LCD_COLOR color);
+
+/**
+ * @brief Draws a string on the LCD screen.
+ *
+ * @param x       X-coordinate of the top-left corner of the string.
+ * @param y       Y-coordinate of the top-left corner of the string.
+ * @param str     String to draw.
+ * @param font    Font size.
+ * @param color   Color of the string.
+ */
+void LCD_draw_string(int x, int y, const char *str, LCD_Fonts font, LCD_COLOR color);
+
+/**
+ * @brief Draws a bitmap on the LCD screen.
+ *
+ * @param x        X-coordinate of the top-left corner of the bitmap.
+ * @param y        Y-coordinate of the top-left corner of the bitmap.
+ * @param width    Width of the bitmap.
+ * @param height   Height of the bitmap.
+ * @param bitmap   Pointer to the bitmap data.
+ */
+void LCD_draw_bitmap(int x, int y, int width, int height, const uint8_t *bitmap);
+
+/**
+ * @brief Clears the LCD screen.
+ */
+void LCD_clear();
+
+/**
+ * @brief Prints the LCD screen.
+ */
+void LCD_print();
+
+/**
+ * @brief Retrieves the font information for the specified font size.
+ *
+ * @param font  Font size.
+ *
+ * @return Pointer to the LCD_Font structure for the specified font size.
+ */
 const LCD_Font* LCD_get_font(LCD_Fonts font);
+
+/**
+ * @brief Inverts the specified color.
+ *
+ * @param color  Color to invert.
+ *
+ * @return Inverted color.
+ */
 LCD_COLOR LCD_invert_color(LCD_COLOR color);
 #ifdef __cplusplus
 }

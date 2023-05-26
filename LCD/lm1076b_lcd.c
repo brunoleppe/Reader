@@ -25,30 +25,25 @@
 /**********************************************************************
 * Module Typedefs
 **********************************************************************/
-struct LCD{
-    uint32_t spiChannel;
-    uint32_t dmaChannel;
-    uint8_t *lcd_buffer;
-    uint8_t *render_buffer;
-    int lcd_size;
-    GPIO_PinMap cs_pin;
-    GPIO_PinMap bla_pin;
-    GPIO_PinMap dc_pin;
-    GPIO_PinMap rst_pin;
-    uintptr_t   handle;
-
+/**
+ * @brief Structure representing the LCD module.
+ */
+struct LCD {
+    uint32_t spiChannel;     ///< SPI channel number.
+    uint32_t dmaChannel;     ///< DMA channel number.
+    uint8_t *lcd_buffer;     ///< Pointer to the LCD buffer.
+    uint8_t *render_buffer;  ///< Pointer to the render buffer.
+    int lcd_size;            ///< Size of the LCD buffer.
+    GPIO_PinMap cs_pin;      ///< Chip select pin.
+    GPIO_PinMap bla_pin;     ///< Backlight pin.
+    GPIO_PinMap dc_pin;      ///< Data/command pin.
+    GPIO_PinMap rst_pin;     ///< Reset pin.
+    uintptr_t handle;        ///< Handle.
 };
 
 /**********************************************************************
 * Module Variable Definitions
 **********************************************************************/
-static uint8_t __attribute__((coherent, aligned(16))) lcd_buffer[LCD_BUFFER_SIZE];
-static uint8_t __attribute__((coherent, aligned(16))) render_buffer[LCD_BUFFER_SIZE];
-static struct LCD lcd = {
-    .lcd_size = LCD_BUFFER_SIZE,
-    .lcd_buffer = lcd_buffer,
-    .render_buffer = render_buffer
-};
 // <editor-fold defaultstate="collapsed" desc="fonts">
 // <editor-fold defaultstate="collapsed" desc="Normal">
 static const unsigned char font_normal[] 	= {
@@ -390,14 +385,30 @@ const LCD_Font ultra_small={
     .special = NULL,
 };
 // </editor-fold>
-static const LCD_Font *fonts[]={
-        [LCD_FONT_EXTRA_SMALL]  = &ultra_small,
-        [LCD_FONT_SMALL]        = &small,
-        [LCD_FONT_MEDIUM]       = &medium
+static uint8_t __attribute__((coherent, aligned(16))) lcd_buffer[LCD_BUFFER_SIZE];   ///< LCD buffer. PIC32 coherent for DMA.
+static uint8_t __attribute__((coherent, aligned(16))) render_buffer[LCD_BUFFER_SIZE];   ///< Render buffer. PIC32 coherent for DMA.
+static struct LCD lcd = {
+        .lcd_size = LCD_BUFFER_SIZE,
+        .lcd_buffer = lcd_buffer,
+        .render_buffer = render_buffer
+};
+
+static const LCD_Font *fonts[] = {
+        [LCD_FONT_EXTRA_SMALL]  = &ultra_small,   ///< Ultra-small font.
+        [LCD_FONT_SMALL]        = &small,         ///< Small font.
+        [LCD_FONT_MEDIUM]       = &medium         ///< Medium font.
 };
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
+/**
+ * @brief Retrieves the character data for a specific character and font.
+ *
+ * @param c     Character to retrieve data for.
+ * @param font  Pointer to the font structure.
+ *
+ * @return Pointer to the character data.
+ */
 static unsigned char* LCD_get_char(unsigned char c, const LCD_Font *font);
 
 /**********************************************************************
@@ -450,11 +461,6 @@ void    LCD_draw_point  (int x, int y, LCD_COLOR color)
     uint8_t *p = lcd.lcd_buffer + (x>>1) + 120*y;
     *p &= mask;
     *p |= color << (4*(parity^1));
-
-//    if(color == LCD_COLOR_BLACK)
-//        *p |= 0xF << (((x&1)^1) * 4);
-//    else
-//        *p &= 0xff ^ (0xE << (((x&1)^1) * 4));
 }
 void    LCD_draw_hline  (int x, int y, int length, LCD_COLOR color)
 {
