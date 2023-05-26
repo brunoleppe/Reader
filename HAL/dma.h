@@ -1,6 +1,30 @@
-//
-// Created by bleppe on 30/01/23.
-//
+/**
+ * @file dma.h
+ * @author Bruno Leppe (bruno.leppe.dev\@gmail.com)
+ * @brief DMA Interface.
+ * @version 0.1
+ * @date 2022-10-05
+ *
+ * @copyright (c) 2023
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #ifndef DMA_H
 #define DMA_H
@@ -35,43 +59,97 @@
 /**********************************************************************
 * Typedefs
 **********************************************************************/
-#if defined (__LANGUAGE_C__) || defined (__LANGUAGE_C_PLUS_PLUS)
 
+/**
+ * @brief Data type representing a DMA channel.
+ */
 typedef uint32_t DMA_Channel;
 
-typedef struct{
-    uint8_t                 abortIrq;
-    uint8_t                 startIrq;
-    uint16_t                srcSize;
-    uint16_t                dstSize;
-    uint16_t                cellSize;
-    uint32_t                srcAddress;
-    uint32_t                dstAddress;
-}DMA_CHANNEL_Config;
-typedef enum{
-    DMA_IRQ_CAUSE_TRANSFER_COMPLETE,
-    DMA_IRQ_CAUSE_ABORT,
-    DMA_IRQ_CAUSE_ERROR
-}DMA_IRQ_CAUSE;
+/**
+ * @brief Structure representing the configuration for a DMA channel.
+ */
+typedef struct {
+    uint8_t abortIrq;        ///< Abort interrupt flag.
+    uint8_t startIrq;        ///< Start interrupt flag.
+    uint16_t srcSize;        ///< Source transfer size.
+    uint16_t dstSize;        ///< Destination transfer size.
+    uint16_t cellSize;       ///< Cell transfer size.
+    uint32_t srcAddress;     ///< Source address.
+    uint32_t dstAddress;     ///< Destination address.
+} DMA_CHANNEL_Config;
 
-typedef void (*DMA_Callback)(DMA_Channel, DMA_IRQ_CAUSE, uintptr_t);
+/**
+ * @brief Enumeration representing the cause of a DMA interrupt.
+ */
+typedef enum {
+    DMA_IRQ_CAUSE_TRANSFER_COMPLETE,  ///< Transfer complete interrupt cause.
+    DMA_IRQ_CAUSE_ABORT,              ///< Abort interrupt cause.
+    DMA_IRQ_CAUSE_ERROR               ///< Error interrupt cause.
+} DMA_IRQ_CAUSE;
+
+/**
+ * @brief Function pointer type for DMA callback functions.
+ *
+ * @param channel   DMA channel.
+ * @param cause     Cause of the DMA interrupt.
+ * @param context   User-defined context.
+ */
+typedef void (*DMA_Callback)(DMA_Channel channel, DMA_IRQ_CAUSE cause, uintptr_t context);
 
 /**********************************************************************
 * Function Prototypes
 **********************************************************************/
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
+/**
+ * @brief Initializes the DMA module.
+ *
+ * @return 0 on success.
+ */
 int DMA_init();
+
+/**
+ * @brief Initializes a DMA channel.
+ *
+ * @param channel       DMA channel to initialize.
+ * @param configFlags   Configuration flags for the DMA channel.
+ *
+ * @return 0 on success.
+ */
 int DMA_channel_init(DMA_Channel channel, int configFlags);
+
+/**
+ * @brief Configures a DMA channel.
+ *
+ * @param channel   DMA channel to configure.
+ * @param config    Pointer to the DMA channel configuration.
+ *
+ * @return 0 on success.
+ */
 int DMA_channel_config(DMA_Channel channel, DMA_CHANNEL_Config *config);
+
+/**
+ * @brief Initiates a transfer on a DMA channel.
+ *
+ * @param channel   DMA channel to initiate the transfer on.
+ *
+ * @return 0 on success.
+ */
 int DMA_channel_transfer(DMA_Channel channel);
+
+/**
+ * @brief Registers a callback function for a DMA channel.
+ *
+ * @param channel   DMA channel to register the callback for.
+ * @param callback  Callback function to register.
+ * @param context   User-defined context for the callback.
+ */
 void DMA_callback_register(DMA_Channel channel, DMA_Callback callback, uintptr_t context);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
-#endif //DMA_H
+#endif /* DMA_H */

@@ -1,11 +1,6 @@
 #include <xc.h>
 #include "ISR_Support.h"
-#include "../bsp.h"
-#include "../../HAL/gpio.h"
-#include "../../HAL/timer.h"
-#include "../../HAL/spi.h"
-#include "../../HAL/dma.h"
-#include "../../HAL/uart.h"
+
 
 //    .global DMA0_IRQ
 //    .extern DMA_0_HANDLER

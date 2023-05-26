@@ -1,13 +1,32 @@
 /**
  * @file gpio.h
- * @author Bruno Leppe (bleppe@solintece.com)
+ * @author Bruno Leppe (bruno.leppe.dev\@gmail.com)
  * @brief GPIO Interface.
+ * This file contains the interface for GPIO (General Purpose Input/Output) operations.
  * @version 0.1
  * @date 2022-10-05
  *
- * @copyright Copyright (c) 2022
+  * @copyright (c) 2023
  *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
+
 #ifndef GPIO_H
 #define GPIO_H
 
@@ -79,22 +98,56 @@
 /**********************************************************************
 * Typedefs
 **********************************************************************/
-#if defined (__LANGUAGE_C__) || defined (__LANGUAGE_C_PLUS_PLUS)
+/**
+ * @brief Represents the state of a GPIO pin.
+ */
 typedef bool GPIO_STATE;
+
+/**
+ * @brief Represents the state of a GPIO interrupt request (IRQ).
+ */
 typedef bool GPIO_IRQ_STATE;
 
+/**
+ * @brief Represents a GPIO pin number.
+ */
 typedef uint32_t GPIO_Pin;
+
+/**
+ * @brief Represents a GPIO port number.
+ */
 typedef uint32_t GPIO_Port;
+
+/**
+ * @brief Represents a mapping of a pin to a GPIO function.
+ */
 typedef uint32_t GPIO_PinMap;
 
+/**
+ * @brief Represents an alternate function of a GPIO pin.
+ */
 typedef uint32_t GPIO_ALTERNATE_FUNCTION;
-typedef void (*GPIO_Callback)(GPIO_PinMap, uintptr_t context);
 
-typedef struct{
-    GPIO_PinMap pin;
-    GPIO_Callback  callback;
-    uintptr_t context;
-}GPIO_CALLBACK_OBJECT;
+/**
+ * @brief Represents a callback function for a GPIO pin.
+ *
+ * This callback function is invoked when a specific GPIO pin triggers an interrupt.
+ *
+ * @param pin The pin that triggered the interrupt.
+ * @param context A user-defined context value associated with the callback.
+ */
+typedef void (*GPIO_Callback)(GPIO_PinMap pin, uintptr_t context);
+
+/**
+ * @brief Represents a GPIO callback object.
+ *
+ * This object associates a GPIO pin with a callback function and a user-defined context.
+ */
+typedef struct {
+    GPIO_PinMap pin;       /**< The pin associated with the callback. */
+    GPIO_Callback callback; /**< The callback function. */
+    uintptr_t context;     /**< A user-defined context value. */
+} GPIO_CALLBACK_OBJECT;
 
 /**********************************************************************
 * Function Prototypes
@@ -102,27 +155,99 @@ typedef struct{
 #ifdef __cplusplus
 extern "C"{
 #endif
-    
-void        GPIO_pin_initialize             (GPIO_PinMap pin, int flags);
-void        GPIO_pin_deinitialize           (GPIO_PinMap pin);
-bool        GPIO_pin_read                   (GPIO_PinMap pin);
-void        GPIO_pin_write                  (GPIO_PinMap pin, bool value);
-void        GPIO_pin_toggle                 (GPIO_PinMap pin);
-void        GPIO_pin_interrupt_set          (GPIO_PinMap pin, bool state);
 
-void        GPIO_port_write                 (GPIO_Port port, uint32_t value, uint32_t mask);
-uint32_t    GPIO_port_read                  (GPIO_Port port, uint32_t mask);
-void        GPIO_port_toggle                (GPIO_Port port, uint32_t mask);
+/**
+ * @brief Initializes a GPIO pin with the specified configuration flags.
+ *
+ * @param pin The pin to be initialized.
+ * @param flags The configuration flags for the pin.
+ */
+void GPIO_pin_initialize(GPIO_PinMap pin, int flags);
 
-void        GPIO_pin_interrupt_callback     (GPIO_PinMap pin);
-void        GPIO_interrupt_handler          (GPIO_Port port);
+/**
+ * @brief Deinitializes a GPIO pin.
+ *
+ * @param pin The pin to be deinitialized.
+ */
+void GPIO_pin_deinitialize(GPIO_PinMap pin);
 
+/**
+ * @brief Reads the state of a GPIO pin.
+ *
+ * @param pin The pin to read.
+ * @return The state of the pin (true if high, false if low).
+ */
+bool GPIO_pin_read(GPIO_PinMap pin);
+
+/**
+ * @brief Writes a value to a GPIO pin.
+ *
+ * @param pin The pin to write to.
+ * @param value The value to write (true for high, false for low).
+ */
+void GPIO_pin_write(GPIO_PinMap pin, bool value);
+
+/**
+ * @brief Toggles the state of a GPIO pin.
+ *
+ * @param pin The pin to toggle.
+ */
+void GPIO_pin_toggle(GPIO_PinMap pin);
+
+/**
+ * @brief Sets the interrupt state for a GPIO pin.
+ *
+ * @param pin The pin to set the interrupt state for.
+ * @param state The interrupt state (true for enabled, false for disabled).
+ */
+void GPIO_pin_interrupt_set(GPIO_PinMap pin, bool state);
+
+/**
+ * @brief Writes a value to a GPIO port.
+ *
+ * @param port The port to write to.
+ * @param value The value to write.
+ * @param mask The mask specifying which pins to write.
+ */
+void GPIO_port_write(GPIO_Port port, uint32_t value, uint32_t mask);
+
+/**
+ * @brief Reads the value of a GPIO port.
+ *
+ * @param port The port to read from.
+ * @param mask The mask specifying which pins to read.
+ * @return The value read from the port.
+ */
+uint32_t GPIO_port_read(GPIO_Port port, uint32_t mask);
+
+/**
+ * @brief Toggles the state of multiple pins in a GPIO port.
+ *
+ * @param port The port to toggle pins in.
+ * @param mask The mask specifying which pins to toggle.
+ */
+void GPIO_port_toggle(GPIO_Port port, uint32_t mask);
+
+/**
+ * @brief Callback function for GPIO pin interrupts.
+ *
+ * This function is called when a GPIO pin interrupt is triggered.
+ *
+ * @param pin The pin for which the interrupt occurred.
+ */
+void GPIO_pin_interrupt_callback(GPIO_PinMap pin);
+
+/**
+ * @brief Interrupt handler for GPIO ports.
+ *
+ * This function is the interrupt handler for GPIO ports and is called when any of the GPIO pins in the port trigger an interrupt.
+ *
+ * @param port The port for which the interrupt occurred.
+ */
+void GPIO_interrupt_handler(GPIO_Port port);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif
-
 
 #endif

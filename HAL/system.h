@@ -1,6 +1,30 @@
-//
-// Created by bruno on 25/01/23.
-//
+/**
+ * @file system.h
+ * @author Bruno Leppe (bruno.leppe.dev\@gmail.com)
+ * @brief SPI peripheral definitions.
+ * @version 0.1
+ * @date 2022-09-29
+ *
+ * @copyright (c) 2023
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #ifndef READER_SYSTEM_H
 #define READER_SYSTEM_H
@@ -27,7 +51,6 @@
 /**********************************************************************
 * Typedefs
 **********************************************************************/
-#if defined (__LANGUAGE_C__) || defined (__LANGUAGE_C_PLUS_PLUS)
 
 
 /**********************************************************************
@@ -38,17 +61,94 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
-void        SYS_initialize();
-void        SYS_Unlock(uint32_t flags);
-void        SYS_Lock();
-void        SYS_peripheral_clock_config(uint32_t clockChannel, uint32_t flags);
-uint32_t    SYS_peripheral_clock_frequency_get(uint32_t clockChannel);
-void        SYS_soft_reset(uint32_t rconVal);
+
+/**
+ * @brief Unlocks the I/O pins.
+ *
+ * This function unlocks the I/O pins, allowing them to be configured.
+ */
+void SYS_UnlockIO(void);
+
+/**
+ * @brief Locks the I/O pins.
+ *
+ * This function locks the I/O pins, preventing further configuration.
+ */
+void SYS_LockIO(void);
+
+/**
+ * @brief Unlocks a specific peripheral.
+ *
+ * This function unlocks a specific peripheral, allowing its configuration.
+ *
+ * @param peripheral The peripheral to unlock.
+ */
+void SYS_UnlockPeripheral(uint8_t peripheral);
+
+/**
+ * @brief Locks a specific peripheral.
+ *
+ * This function locks a specific peripheral, preventing further configuration.
+ *
+ * @param peripheral The peripheral to lock.
+ */
+void SYS_LockPeripheral(uint8_t peripheral);
+
+/**
+ * @brief Initializes the system.
+ *
+ * This function initializes the system, setting up any necessary configurations.
+ */
+void SYS_initialize(void);
+
+/**
+ * @brief Unlocks specified system flags.
+ *
+ * This function unlocks specified system flags, allowing their modification.
+ *
+ * @param flags The flags to unlock.
+ */
+void SYS_Unlock(uint32_t flags);
+
+/**
+ * @brief Locks the system.
+ *
+ * This function locks the system, preventing further modification of system flags.
+ */
+void SYS_Lock(void);
+
+/**
+ * @brief Configures the clock for a specific peripheral.
+ *
+ * This function configures the clock for a specific peripheral.
+ *
+ * @param clockChannel The clock channel of the peripheral.
+ * @param flags The configuration flags for the clock.
+ */
+void SYS_peripheral_clock_config(uint32_t clockChannel, uint32_t flags);
+
+/**
+ * @brief Retrieves the frequency of the clock for a specific peripheral.
+ *
+ * This function retrieves the frequency of the clock for a specific peripheral.
+ *
+ * @param clockChannel The clock channel of the peripheral.
+ * @return The frequency of the clock for the specified peripheral.
+ */
+uint32_t SYS_peripheral_clock_frequency_get(uint32_t clockChannel);
+
+/**
+ * @brief Performs a software reset with the specified RCON value.
+ *
+ * This function performs a software reset with the specified RCON value.
+ *
+ * @param rconVal The RCON value for the software reset.
+ */
+void SYS_soft_reset(uint32_t rconVal);
 
 #ifdef __cplusplus
 }
 #endif //__cplusplus
-#endif // defined (__LANGUAGE_C__) || defined (__LANGUAGE_C_PLUS_PLUS)
 
 #define SYS_PBCLK_ENABLED                   (0)
 #define SYS_PBCLK_DISABLED                  (0x0100)

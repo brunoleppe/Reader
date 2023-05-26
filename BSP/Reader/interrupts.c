@@ -9,6 +9,7 @@
 void UART_rx_interrupt_handler(uint32_t channel);
 void UART_fault_interrupt_handler(uint32_t channel);
 void DMA_interrupt_handler(uint32_t channel);
+void ETHERNET_handler_bsp( void );
 
 void __ISR(_CHANGE_NOTICE_E_VECTOR, ipl0AUTO) PORTE_Change_Notice_IRQ( void );
 void __ISR(_DMA0_VECTOR, ipl2AUTO) DMA0_IRQ( void );
@@ -43,4 +44,6 @@ void UART1_RX_HANDLER( void )
 {
     UART_rx_interrupt_handler(UART_CHANNEL_1);
 }
-
+void ETHERNET_HANDLER( void ){
+    ETHERNET_handler_bsp();
+}
