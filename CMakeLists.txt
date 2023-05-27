@@ -149,3 +149,11 @@ target_link_options(${PROJECT_NAME}.elf PUBLIC ${MPROCESSOR} ${MOPTIMIZATION} )
 target_link_libraries(${PROJECT_NAME}.elf "-Wl,${XC32_LINK_FLAGS}")
 
 
+add_custom_target(ipecmd
+        COMMAND /opt/microchip/mplabx/v6.00/mplab_platform/mplab_ipe/ipecmd.sh -P${PIC} -TPPK3 -F${PROJECT_NAME}.hex -M -OL
+        DEPENDS ${PROJECT_NAME}.hex
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Running ipecmd with PIC=${PIC}"
+        )
+
+
